@@ -338,6 +338,96 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 | **15 nov, 07:25** · `65f7ac2` | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`edd97d2` en TCD, `d7b905a` en MCD), los dos repos en `origin/main`—, `node_modules` en cero y la `main` local de los dos atrás con el `HEAD` suelto. Las cuatro despertadas anteriores auditaron la batería de TCD contra sí misma; esta preguntó por **el otro cuerpo de afirmaciones que la batería ni mira: las 133 `prueba-*.ts`**, que el bloque 10 juzga SOLO por el código de salida. **Una de las 133 no tenía ninguno**: `prueba-cadena.ts` imprimía `✗` por escenario y terminaba en 0. Probado con el defecto puesto: cinco de sus seis escenarios decían «La cadena está sana» a un cliente que no cobra, y la batería daba las 133 en verde y «el ZIP puede salir» (abajo) |
 | **14 nov, 19:30** · `d5ead99` | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`dc8dc42` en TCD, `a76e8e7` en MCD)—, `node_modules` en cero en los dos y la trampa del `HEAD` suelto con la **`main` local de TCD 31 commits atrás** (un `git checkout main` a secas la hubiera dejado ahí: se arregló antes de medir). Esta despertada tomó el último candidato de este frente —**el recorrido por AST de la ausencia**— y la premisa se cayó otra vez: de las 46 ausencias de mecanismo que hay de verdad, **tres seguían en un recolector**, y las dos lentes que las usan estaban **ciegas hoy**, probado sacando el mecanismo del código. Y de paso, la lente del catch mudo conocía **una sola manera de escribir «mudo»**: las dos que están mudas de verdad en main se escriben distinto y nunca se vieron (abajo) |
 
+### El 15 de noviembre a las 11:30: la piel pintada ya era la buena; debajo seguía la otra
+
+Turno **T2 de los siete** del plan de la piel (abajo, «LA PIEL Y LOS TRES
+HILOS»). El plan lo escribía como un repintado: «una sola paleta: se va la capa
+oscura y se van las 206 reglas que la tapaban». **Medido antes de tocar, la
+premisa se cayó por los dos lados.**
+
+**Lo que no era cierto.** Las 206 no eran 206 reglas: son 206 apariciones del
+prefijo `[data-theme="light"]`, y de las 76 que tienen selector de clase, **15
+estaban muertas** —tapaban clases que ya no existen en el código—. Y las
+«cinco mil ediciones de color» del plan tampoco: de los 378 colores escritos a
+mano en `.tsx`, **24 son clases** (`bg-[#0F0F0F]`, `hover:bg-[#161512]`) y el
+resto vive en `style` en línea, donde ninguna regla de la capa clara llega
+nunca.
+
+**Lo que sí era cierto, y peor.** La capa oscura no era una herencia dormida:
+**estaba a un clic.** El Admin tenía un interruptor de tema (Oscuro / Claro)
+que guarda la elección en el navegador; con él en oscuro, la capa clara deja de
+aplicar y la app entera vuelve a los tokens de fábrica. La piel que se veía era
+la de encima.
+
+**Y tres cosas que ninguna lente veía:**
+
+| lo encontrado | por qué no lo veía nadie |
+|---|---|
+| **Diez usos del naranja prohibido** (#E8962E) dentro de `src/index.css`, escritos en el otro alfabeto: `rgba(232, 150, 46, X)` — resplandores, barra de desplazamiento y la sombra del botón primario | la lente que dice «en todo el repo» miraba `todo`, que son los `.ts` y `.tsx`: el `.css` nunca entró. Y solo conocía el hexadecimal |
+| **`hover:bg-[#161512]`**: la ficha de Campañas se pintaba de casi negro al pasar el dedo | el medidor mide la pantalla QUIETA. Un estado que solo existe con el dedo encima no lo ve ninguna de sus 22 lentes |
+| **Dos paletas más debajo**: el gris azulado de un tema claro anterior (#E4E7EC, rgba(248,250,252)) y la tinta vieja (#2A2118) contra la de la home (#23201D) | nadie medía que los valores salieran de un solo lugar |
+
+**Lo que no era un defecto, y por poco se «arregla».** Dos vistas enteras se
+ven oscuras hoy: el certificado y la foto del día 90. Son **piezas impresas**
+—un diploma que se comparte por captura—, con su contraste medido y escrito al
+lado (3,7:1 el oro de la app sobre ese fondo, 5,4:1 el suyo). No se tocaron: se
+les dio nombre. Sus tres colores pasaron a ser tokens (`--color-pieza`,
+`--color-pieza-oro`, `--color-pieza-papel`), que es lo que permite prohibir el
+color a mano en todas las demás sin tocar éstas.
+
+**Lo que se hizo:**
+
+- **se fue la compuerta.** `[data-theme="light"]` pasó a `:root` en las 206
+  apariciones —misma especificidad, mismo orden, misma pintura— y después se
+  fue el atributo del `.html` y de los nueve visores, el interruptor del Admin
+  y `src/lib/theme.ts`;
+- **un solo valor por token.** Las 19 propiedades que estaban declaradas dos
+  veces —el papel, la tarjeta, la tinta, el oro, las sombras, los siete tokens
+  de la matriz— quedaron con el valor de la piel, declarado una vez. `@theme`
+  dejó de tener la paleta oscura: `--color-ink` es el papel y `--color-cream`
+  es la tinta;
+- **se fueron 44 reglas** (las 15 muertas, las 12 que traducían clases con el
+  color adentro y 17 selectores sueltos), y con ellas las 24 clases que
+  escribían su color a mano, que pasaron a tokens;
+- **el naranja prohibido salió del `.css`**, y con él los grises azulados y la
+  tinta vieja: todo sale ahora de los valores de la home;
+- **el quinto estado de la matriz tiene token.** «La pelota la tiene el
+  cliente» era un naranja a mano porque no había token; al pasarlo a oro se
+  comía la diferencia con «la tenemos nosotros» —dos estados del mismo color
+  son un estado— y la prueba lo cazó. Ahora es `--color-espera`, el río de la
+  colección;
+- **el oro de texto bajó un escalón donde apoya sobre oro.** Al adoptar el
+  #7A5F33 de la home, las pestañas elegidas quedaron en **4,4:1** y AA pide
+  4,5: 23 vistas en rojo. Se declara una vez, con su medida, para el par
+  `bg-gold/* + text-gold`: #74551C, 5,2:1 sobre esa misma ficha;
+- **`tcd-spec/10-DISENO.md` reescrito** con la piel nueva: los tokens, los dos
+  oros y su escalón, las tres letras con su papel, la excepción de la pieza
+  impresa, y por qué el nombre de un token ya no dice su valor.
+
+**Las cuatro lentes nuevas o endurecidas, probadas contra su propio fallo** en
+`scripts/probar-que-la-piel-es-una-sola.py` (16 casos, los 16 en verde): la
+compuerta de tema puesta de vuelta en el `.css` y en el `.html`, la paleta de
+fábrica devuelta a `@theme`, la tarjeta en su respaldo negro, el naranja
+prohibido escrito en `rgba()` dentro del `.css` —que es como estaba de verdad—
+y cuatro formas de clase con el color adentro. El veredicto se saca de
+`auditoria.py` entre marcas, no se copia.
+
+**Y cinco lentes que medían la forma vieja** se reapuntaron a la regla:
+`prueba-activacion` (medía el hex del naranja y no «cinco colores distintos»),
+`prueba-el-nombre-y-las-cifras`, `prueba-la-cuenta-con-datos`,
+`prueba-la-piel-de-la-conversacion` y `prueba-la-franja-del-reloj` —ésta pidió
+el crema «detrás de la compuerta» y, al no haberla, encontró el `--bg-root:
+#0F0E0D` de fábrica que seguía declarado arriba—. Y
+`probar-el-comentario-de-cada-lenguaje` avisó de su propia desactualización, que
+es lo que tiene que hacer: su muestra era el atributo que acababa de irse.
+
+**Medido antes y después, pantalla por pantalla:** las 93 vistas del medidor en
+**0 faltas** antes y después; las capturas, comparadas píxel a píxel, cambian en
+85 de 98 y ninguna pasa del 1,8 % de la pantalla con un salto máximo de 39 sobre
+255 — el tamaño exacto de mover el oro, la tinta y los dos grises, y ningún
+cambio de forma. Batería entera en verde: `tsc`, `build`, las **133** pruebas y
+**899 miradas**, cero faltas de diseño en el cliente y en el Admin.
+
 ### El 15 de noviembre a las 07:25: la prueba que no podía ponerse roja
 
 Cuatro despertadas seguidas auditaron **la batería contra sí misma**: la
@@ -2976,6 +3066,12 @@ redondo. Va con capturas de celular. Es el mismo camino que funcionó en los
 libros: la lección 27 antes de las 33. En el mismo turno, la pestaña
 **Comunidad**, que es lo urgente del martes.
 
+**T2 · La piel en toda la app.** — **CERRADO el 15 de noviembre** (abajo, en
+«El 15 de noviembre a las 11:30»). Lo que el plan daba por un repintado de
+cincuenta y tres pantallas era otra cosa: la piel pintada ya era la buena y lo
+que había debajo era la cañería. Se midió antes de tocar.
+
+El plan decía:
 **T2 · La piel en toda la app.** Una sola paleta: se va la capa oscura y se van
 las 206 reglas que la tapaban. Se reescribe `tcd-spec/10-DISENO.md` con la piel
 nueva y se reapuntan las lentes de `medir-app.py` —el contraste se mide contra

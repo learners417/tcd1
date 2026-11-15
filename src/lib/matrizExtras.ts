@@ -170,7 +170,7 @@ export const ESTADO_LABEL: Record<EstadoCelda, string> = {
 /** El color de cada estado. Uno por estado y el mismo en todas las pantallas. */
 export const ESTADO_COLOR: Record<EstadoCelda, { fondo: string; borde: string; texto: string }> = {
   pendiente: { fondo: 'bg-danger/[0.10]', borde: 'border-danger/45', texto: 'text-danger' },
-  cliente:   { fondo: 'bg-[#E8862E]/[0.12]', borde: 'border-[#E8862E]/50', texto: 'text-[#F0A65C]' },
+  cliente:   { fondo: 'bg-espera/[0.12]', borde: 'border-espera/50', texto: 'text-espera' },
   nosotros:  { fondo: 'bg-gold/[0.12]', borde: 'border-gold/50', texto: 'text-goldhi' },
   listo:     { fondo: 'bg-success/[0.10]', borde: 'border-success/45', texto: 'text-success' },
   na:        { fondo: '', borde: 'border-cream/10', texto: 'text-cream/30' },

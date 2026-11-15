@@ -69,44 +69,77 @@ apareciendo juntos. Todo lo demás son transiciones de estado de 120 ms o menos.
 
 ## 2 · Tokens
 
-Los de la app actual, más lo semántico que faltaba.
+**Una sola piel.** Hasta el 15 de noviembre de 2026 la app tenía dos: la paleta
+oscura de fábrica en los tokens y, encima, 206 reglas con `[data-theme="light"]`
+que la tapaban una por una. Lo que se veía era la segunda, y bastaba una regla
+nueva sin ese prefijo —o el interruptor de tema del Admin— para que asomara la
+primera. Ya no hay compuerta de tema en ningún lado: los tokens de abajo SON la
+piel, declarados una sola vez en `src/index.css`.
+
+Los valores salen de la home (tuclinica.digital, `src/paisaje.css` del repo
+`learners417/landings`) y de las tapas de los libros. Manda la home: la app, los
+libros y el video se alinean a ella (claude/ARQUITECTURA-COLECCION.md §10).
 
 ```css
 :root{
-  /* superficie */
-  --bg:        #FAF5EA;   /* fondo */
-  --card:      #FFFDF7;   /* tarjeta */
-  --card2:     #F5EFE1;   /* chip, tarjeta secundaria */
+  /* superficie — el papel de la banda con la ficha de nieve encima */
+  --bg-root:     #F1EBE0;   /* la página */
+  --bg-card:     #FAF8F4;   /* la tarjeta, lo que se apoya encima */
+  --bg-surface2: #E9E1D3;   /* el chip, la tarjeta de segundo plano */
 
   /* líneas */
-  --line:      #EBE1CF;
-  --line2:     #DFD3BC;
+  --line:  rgba(35, 32, 29, 0.14);
+  --line2: rgba(35, 32, 29, 0.24);
 
   /* tinta */
-  --ink:       #2A2118;   /* texto principal */
-  --ink2:      #6E6252;   /* texto secundario */
-  --ink3:      #9A8C78;   /* meta, etiquetas */
+  --text-cream: #23201D;   /* el texto. El nombre quedó del tema oscuro */
+  --ink2:       #5A534C;   /* texto secundario */
+  --ink3:       #6B635A;   /* meta, etiquetas */
 
   /* oro */
-  --oro:       #B0822E;
-  --oro-d:     #8E6824;
-  --oro-soft:  #F3EAD6;
+  --oro:    #A8875A;   /* la LÍNEA de 1 px, el borde, el ícono */
+  --oro-d:  #7A5F33;   /* el TEXTO: versalitas y numerales */
+  --oro-t2: #74551C;   /* y el texto cuando apoya sobre relleno de oro */
 
-  /* semántico — lo que faltaba */
-  --tilde:     #4A7C59;   /* aprobado, tildado, entregado */
-  --tacha:     #A33A2A;   /* tachado, retirado, freno */
-  --ventana:   #7A6FA3;   /* grado en ventana, esperando */
+  /* semántico */
+  --tilde:   #2F5638;   /* aprobado, tildado, entregado */
+  --tacha:   #9C3626;   /* tachado, retirado, freno */
+  --ventana: #7A6FA3;   /* grado en ventana, esperando */
+  --color-espera: #1F6E6E;  /* la pelota la tiene el cliente */
 
-  /* tipografía */
-  --fd: 'Fraunces', Georgia, serif;      /* solo títulos */
-  --fb: 'Sora', system-ui, sans-serif;   /* todo lo demás */
+  /* el botón primario: el azul lago de la home, no el oro */
+  --tinta-boton: #2B4E68;  --papel-boton: #FFFFFF;
 
-  /* forma */
-  --r:  20px;   /* botón, tarjeta chica */
-  --r2: 26px;   /* tarjeta principal */
-  --r3: 99px;   /* chip, tira */
+  /* un color por libro, el de su tapa */
+  --paisaje-lago:    #2B4E68;
+  --paisaje-montana: #904932;
+  --paisaje-viento:  #B48B3F;   /* para texto chico sobre crema: #7F5B19 */
+  --paisaje-rio:     #46979E;   /* para texto chico sobre crema: #1F6E6E */
+  --paisaje-bosque:  #294637;
+  --paisaje-sanadores: #3F5450;
+
+  /* la pieza impresa: la única paleta que no sigue al papel (§2.3) */
+  --color-pieza:       #141210;
+  --color-pieza-oro:   #B0822E;
+  --color-pieza-papel: #EAE4D9;
+
+  /* letras: tres, con un papel cada una */
+  --font-body:    'Manrope Variable';            /* lo que se MIRA y se toca */
+  --font-lectura: 'Literata Variable';           /* lo que se LEE */
+  --font-cita:    'Cormorant Garamond Variable'; /* lo que se CITA, en itálica */
+
+  /* forma: tres esquinas y no nueve */
+  --r:  12px;    /* la ficha */
+  --r2: 24px;    /* la tarjeta */
+  --r3: 999px;   /* el botón y el punto */
 }
 ```
+
+**El nombre de un token no es su valor.** `--text-cream`, `text-cream`, `bg-ink`
+y `bg-panel` se escribieron cuando la app era negra y hoy significan lo
+contrario de lo que dicen: `text-cream` es la TINTA y `bg-ink` es el PAPEL. Son
+4.500 lugares del código; renombrarlos es un turno aparte. Mientras tanto vale
+la regla de siempre: **el color sale de un token, nunca escrito a mano.**
 
 ### El grano
 
@@ -116,40 +149,68 @@ grano da superficie sin dar decoración, y eso baja la fatiga de mirar.
 
 ### El oro
 
-Un solo oro, `#B0822E`, sobre crema. **Nunca degradé, nunca brillo, nunca
-sombra dorada.** Se usa en: la barra de progreso, el botón primario, los íconos
-del tab activo, las líneas de un píxel y los numerales.
+Dos valores y un escalón, que son los mismos de la home y de los libros:
+
+| Dónde | Valor | Medido |
+|---|---|---|
+| La línea de 1 px, el borde, el ícono | `--oro` #A8875A | — |
+| El texto en oro sobre el papel | `--oro-d` #7A5F33 | 5,6:1 |
+| El texto en oro sobre una ficha de oro (10–15%) | `--oro-t2` #74551C | 5,2:1 |
+
+El escalón existe por una razón medida: sobre la ficha de oro de la pestaña
+elegida, `--oro-d` cae a 4,4:1 y AA pide 4,5. Se declara UNA vez en la hoja de
+estilos, para el par `bg-gold/* + text-gold`, en lugar de tocarlo a mano en las
+cincuenta fichas donde aparece.
+
+**Nunca degradé, nunca brillo, nunca sombra dorada. Y nunca de relleno:** el
+botón primario es el azul lago de la home, redondo y de 58 px de alto.
 
 Sobre fondo oscuro el oro mate se apaga y se ve sucio. **Por eso esta app es
-clara y no tiene modo oscuro.** Es una decisión, no una falta.
+clara y no tiene modo oscuro.** Es una decisión, no una falta — y desde el 15 de
+noviembre es también lo que dice el código: no queda ni un token oscuro debajo,
+ni un interruptor que los despierte.
+
+### La excepción: la pieza impresa
+
+El certificado y la foto del día 90 no son pantallas: son piezas oscuras con
+letra de oro, como un diploma, pensadas para sacarles captura y compartirlas.
+Esas dos **no siguen al papel** y tienen sus tres tokens propios
+(`--color-pieza*`). Medido: dentro de una de ellas, el oro de la app da 3,7:1 y
+el de la pieza 5,4:1 sobre el mismo fondo.
 
 ---
 
 ## 3 · Tipografía
 
-Dos familias, roles separados y sin excepción.
+Tres familias, un papel cada una, sin excepción (ARQUITECTURA §10):
 
 | Rol | Familia | Tamaño | Peso | Dónde |
 |---|---|---|---|---|
-| Título de sesión | Fraunces | 33 / 28 | 400 | Tarjeta de hoy, encabezados |
-| Título de sección | Fraunces | 26 / 22 | 400 | Camino, Entrenadores, Campañas |
-| Cuerpo | Sora | 17,5 | 400 | Descripciones, pasos |
-| Cuerpo fuerte | Sora | 17,5 | 600 | Lo que no se puede saltear |
-| Botón | Sora | 18 | 700 | Primario |
-| Chip y meta | Sora | 15 | 400 | Duración, qué sella |
-| Kicker | Sora | 14 | 700 | HOY, versalita, `letter-spacing: .2em` |
-| Etiqueta de tab | Sora | 14 | 400 / 700 | Barra inferior |
+| Título de sesión | Manrope | 33 / 28 | 700 | Tarjeta de hoy, encabezados |
+| Título de sección | Manrope | 26 / 22 | 700 | Camino, Entrenadores, Campañas |
+| Cuerpo | Literata | 17,5 | 400 | Descripciones, pasos |
+| Cuerpo fuerte | Literata | 17,5 | 600 | Lo que no se puede saltear |
+| Botón | Manrope | 18 | 700 | Primario |
+| Chip y meta | Manrope | 15 | 400 | Duración, qué sella |
+| Kicker | Manrope | 15 | 700 | HOY, versalita, `letter-spacing: .2em` |
+| Etiqueta de tab | Manrope | 15 | 400 / 700 | Barra inferior |
+| Cita | Cormorant Garamond itálica | 20 o más | 400 | Epígrafes y frases de página entera |
 
-**Fraunces nunca escribe una frase larga.** Es de títulos. Un párrafo en serif
-display se lee peor, y acá leer peor es abandonar.
+**Manrope no tiene itálica.** La que dibuja el navegador es falsa y se ve
+barata: por eso los títulos van derechos y la cursiva vive en `.cita`, que nunca
+baja de 20 px.
 
-**El único blanco de la app es el del texto adentro del botón oro.** Blanco sobre
-crema da 1,09:1 y no se lee. Y `--oro` no se usa para texto corrido: da 3,2:1.
-Para texto en oro va `--oro-d`, que da 4,9:1.
+**Literata escribe lo que se lee; Manrope, lo que se mira.** Un párrafo largo en
+la letra de interfaz se lee peor, y acá leer peor es abandonar.
 
-**El piso son 15 píxeles.** La única excepción es la etiqueta del tab, a 14, y
-solo porque va acompañada de un ícono. **Si algo no entra en 15, el problema es
-el texto, no el tamaño.**
+**El único blanco de la app es el del texto adentro del botón primario.** Blanco
+sobre crema da 1,09:1 y no se lee. Y `--oro` no se usa para texto corrido: para
+eso está `--oro-d`.
+
+**El piso son 15 píxeles**, y lo que dice qué hacer no baja de 17. En este repo
+`text-xs` son 15 y `text-sm` son 17: la escala de Tailwind está redefinida en
+`index.css`, y quien lea el nombre de la clase sin pasar por ahí va a "arreglar"
+algo que está bien.
 
 Ancho de línea: máximo 62 caracteres. En 430 px eso se da solo.
 
@@ -202,14 +263,14 @@ muy suave.
 ┌──────────────────────────────┐
 │ HOY                          │  kicker, oro, versalita
 │                              │
-│ Tu Matriz ABC                │  Fraunces 33
-│ El lenguaje exacto de tus    │  Sora 17,5 ink2
+│ Tu Matriz ABC                │  Manrope 33
+│ El lenguaje exacto de tus    │  Literata 17,5 ink2
 │ consultantes, en sus palabras│
 │                              │
 │ [⏱ 30 minutos] [✓ Sales con  │  chips
 │  tu matriz sellada]          │
 │                              │
-│ [      Empezar      →    ]   │  botón oro, 20px de alto interior
+│ [      Empezar      →    ]   │  botón azul lago, 58px de alto
 └──────────────────────────────┘
 ```
 
@@ -222,12 +283,12 @@ empezar es lo que sostiene la tarea.
 Aparece al tocar Empezar. **Reemplaza a la tarjeta, no se agrega debajo.**
 
 ```
-  ①  Elegí el lugar físico              ✓
-  ②  Elegí la hora fija                 ✓
-  ③  Sacá la foto con el cuaderno       ○  ← acá está
-  ④  Escribí por qué empezaste          ·
-  ⑤  Firmá el pacto                     ·
-  ⑥  Publicá el pacto                   ·
+  ①  Elige el lugar físico              ✓
+  ②  Elige la hora fija                 ✓
+  ③  Saca la foto con el cuaderno       ○  ← aquí está
+  ④  Escribe por qué empezaste          ·
+  ⑤  Firma el pacto                     ·
+  ⑥  Publica el pacto                   ·
 ```
 
 - El paso actual en `--ink`, los hechos en `--ink3` con tilde verde, los que

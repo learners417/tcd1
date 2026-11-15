@@ -192,14 +192,17 @@ ok(
   'y el copy de la contraseña va en positivo',
 );
 
-console.log('\n── el tema oscuro no se filtra por el estilo en línea ──');
+console.log('\n── la herencia del tema oscuro no se filtra ──');
 /*
- * Las clases están remapeadas en index.css; un color escrito en un `style` no.
- * Se vigilan los dos que se encontraron, que son los que se veían.
+ * Quedan clases con nombre del tema oscuro —`bg-black/20`, `text-white`— que
+ * se escribieron cuando la app era negra. Siguen traducidas al papel en
+ * index.css, ahora sin compuerta de tema: la traducción es la piel, no una
+ * capa encima. Un color escrito en un `style` en línea, en cambio, no pasa
+ * por ahí: por eso se vigilan los dos que se encontraron.
  */
 ok(
-  /\[data-theme="light"\] \.bg-black\\\/20/.test(css) && /\[data-theme="light"\] \.text-white\s/.test(css),
-  'las clases de tema oscuro siguen remapeadas para el papel',
+  /^:root \.bg-black\\\/20/m.test(css) && /^:root \.text-white\s/m.test(css),
+  'las clases heredadas del tema oscuro siguen traducidas al papel',
 );
 ok(
   !/rgba\(255,\s*255,\s*255,\s*0\.10\)/.test(agentes),

@@ -573,7 +573,7 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
             )}
             {(urgente || (d !== null && d <= 0)) && (
               <a href={oferta.checkout || waLink(oferta.mensaje)} target="_blank" rel="noreferrer"
-                 className="inline-block mt-3 btn-primary text-[#1a1206] text-sm font-bold px-5 py-2.5 rounded-xl">
+                 className="inline-block mt-3 btn-primary text-cream text-sm font-bold px-5 py-2.5 rounded-xl">
                 {oferta.boton} →
               </a>
             )}

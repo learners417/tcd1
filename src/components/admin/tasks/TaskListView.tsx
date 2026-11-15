@@ -108,14 +108,14 @@ export default function TaskListView({
 
   if (sorted.length === 0) {
     return (
-      <div className="bg-[#0F0F0F] border border-gold/10 rounded-2xl p-12 text-center text-cream/55 text-sm">
+      <div className="bg-panel border border-gold/10 rounded-2xl p-12 text-center text-cream/55 text-sm">
         No hay tareas que coincidan con los filtros.
       </div>
     );
   }
 
   return (
-    <div className="bg-[#0F0F0F] border border-gold/10 rounded-2xl overflow-hidden">
+    <div className="bg-panel border border-gold/10 rounded-2xl overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-ink border-b border-gold/10">

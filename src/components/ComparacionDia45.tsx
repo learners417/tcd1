@@ -81,8 +81,8 @@ interface StatProps {
 function Stat({ label, valor, suffix, tono = 'neutro' }: StatProps) {
   const color =
     tono === 'verde' ? 'text-success'
-      : tono === 'amarillo' ? 'text-[#F0B429]'
-      : tono === 'rojo' ? 'text-[#ff5e5e]'
+      : tono === 'amarillo' ? 'text-gold'
+      : tono === 'rojo' ? 'text-danger'
       : 'text-gold';
   return (
     <div className="card-panel p-3 border border-[var(--line, rgba(142,104,36,0.18))] bg-surface/30 text-center">
@@ -110,7 +110,7 @@ interface DimensionRowProps {
 function DimensionRow({ dim }: DimensionRowProps) {
   const { label, dia1, dia45, delta } = dim;
   const TrendIcon = delta > 0 ? TrendingUp : delta < 0 ? TrendingDown : Minus;
-  const trendColor = delta > 0 ? 'text-success' : delta < 0 ? 'text-[#F0B429]' : 'text-cream/55';
+  const trendColor = delta > 0 ? 'text-success' : delta < 0 ? 'text-gold' : 'text-cream/55';
 
   return (
     <div className="card-panel p-3 border border-[var(--line, rgba(142,104,36,0.18))] bg-surface/30 flex items-center gap-4">

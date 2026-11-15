@@ -54,10 +54,13 @@ const ok = (cond: boolean, msg: string) => {
  * si no, la pantalla de arranque abre de un color y la app aparece de otro.
  * Así que el valor se toma del CSS, que es donde vive el color de la casa, y
  * los otros tres se comparan contra él.
+ *
+ * El 15 nov, con la piel única, el crema dejó de vivir detrás de una
+ * compuerta de tema: `--bg-root` se declara una sola vez, así que la lente
+ * lo busca donde está y no detrás de `[data-theme="light"]`, que ya no
+ * existe en ningún lado.
  */
-const CREMA = (
-  /\[data-theme="light"\][\s\S]*?--bg-root:\s*(#[0-9A-Fa-f]{6})/.exec(css)?.[1] ?? ''
-).toUpperCase();
+const CREMA = (/--bg-root:\s*(#[0-9A-Fa-f]{6})/.exec(css)?.[1] ?? '').toUpperCase();
 
 console.log('\n── si ocupa la pantalla entera, reserva la franja ──');
 const ocupaTodo = /viewport-fit\s*=\s*cover/.test(html);

@@ -271,7 +271,7 @@ export default function BuyCreditsModal({
                         className={`relative rounded-xl border p-4 text-left transition-all ${
                           isSelected
                             ? 'border-gold bg-gold/10'
-                            : 'border-white/10 bg-[#1A1A1A] hover:border-gold/40 hover:bg-gold/5'
+                            : 'border-white/10 bg-panel hover:border-gold/40 hover:bg-gold/5'
                         }`}
                       >
                         {isSelected && (

@@ -306,8 +306,57 @@ check('el Mentor usa el Consultorio', 'bloqueConsultorio' in cod(todo.get('src/l
 _css = rd('src/index.css')
 # Medido en el CÓDIGO: así el archivo que EXPLICA el cambio de oro deja de
 # contarse como infractor, que era para lo que estaba la coartada de abajo.
-_oro_viejo = sum(1 for f, src in todo.items() if 'E8962E' in cod(src) or 'F4B65C' in cod(src))
-check('el oro mate reemplazo al brillante en todo el repo', _oro_viejo == 0, f'{_oro_viejo} archivos con el oro viejo')
+# ── EL ORO VIEJO, EN LOS DOS ALFABETOS Y EN TODOS LOS ARCHIVOS ─────────
+#
+# Esta lente decía «en todo el repo» y miraba `todo`, que son los `.ts` y
+# `.tsx`: la hoja de estilos nunca entró. Medido el 15 de noviembre: dentro
+# de `src/index.css` vivían DIEZ usos del naranja prohibido escritos en el
+# otro alfabeto —`rgba(232, 150, 46, X)`, que es el mismo #E8962E— en los
+# resplandores, la barra de desplazamiento y la sombra del botón primario.
+# Ninguna lente los veía, porque ninguna leía ese archivo y ninguna conocía
+# la forma `rgb()`. Ahora mira los dos alfabetos y suma el `.css` y el
+# `.html`, siempre sobre CÓDIGO: el comentario que explica por qué el oro
+# cambió no cuenta como infractor.
+#.PIEL.ORO.INICIO
+_ORO_VIEJO = (('E8962E', (232, 150, 46)), ('F4B65C', (244, 182, 92)))
+def _tiene_oro_viejo(_t):
+    _t = _t.upper()
+    for _hex, (_r, _g, _b) in _ORO_VIEJO:
+        if _hex in _t:
+            return True
+        if _re.search(rf'RGBA?\(\s*{_r}\s*,\s*{_g}\s*,\s*{_b}\s*[,)]', _t):
+            return True
+    return False
+_mirados = {f: cod(src) for f, src in todo.items()}
+for _f_extra in ('src/index.css', 'index.html'):
+    try:
+        _mirados[_f_extra] = rdc(_f_extra)
+    except Exception:
+        pass
+_oro_viejo_f = [f for f, src in _mirados.items() if _tiene_oro_viejo(src)]
+check('el oro mate reemplazo al brillante en todo el repo', not _oro_viejo_f,
+      f'{len(_oro_viejo_f)} archivos con el oro viejo: ' + ', '.join(_oro_viejo_f[:4]))
+#.PIEL.ORO.FIN
+
+# ── NINGUNA PANTALLA ESCRIBE SU COLOR A MANO ───────────────────────────
+#
+# El 15 de noviembre había 24 clases con el color escrito adentro
+# —`bg-[#0F0F0F]`, `hover:bg-[#161512]`, `text-[#F0B429]`— y 206 reglas en
+# la hoja de estilos para traducirlas al papel, una por una. Lo que no
+# tenía traducción se veía: `hover:bg-[#161512]` pintaba de casi negro la
+# ficha de Campañas al pasar el dedo, y el medidor no lo veía porque mide
+# la pantalla quieta. La regla es simple: el color sale de un token, y el
+# único con paleta propia —la pieza impresa— tiene los suyos con nombre.
+#.PIEL.AMANO.INICIO
+_A_MANO = _re.compile(
+    r'(?<![\w:-])(?:[a-z][a-z-]*:)*'
+    r'(?:bg|text|border|from|via|to|fill|stroke|ring|accent|placeholder|divide|outline|shadow)'
+    r'-\[#[0-9A-Fa-f]{3,8}\]')
+_a_mano = sorted({f'{f}: {_m.group(0)}' for f, src in todo.items()
+                  for _m in _A_MANO.finditer(cod(src))})
+check('ninguna pantalla escribe su color a mano', not _a_mano,
+      f'{len(_a_mano)}: ' + '; '.join(_a_mano[:4]))
+#.PIEL.AMANO.FIN
 check('el boton primario no lleva degrade', 'linear-gradient(180deg, #F4B65C' not in _css, '')
 
 _pant = ['src/pages/Dashboard.tsx','src/pages/Roadmap.tsx','src/pages/ADN.tsx','src/pages/Biblioteca.tsx']
@@ -339,11 +388,26 @@ try:
     _html_cod = rdc('index.html')
 except Exception:
     _html_cod = ''
-check('la app abre en el tema de la marca', 'data-theme="light"' in _html_cod, '')
 try:
     _css = rd('src/index.css')
 except Exception:
     _css = ''
+# ── UNA SOLA PIEL ───────────────────────────────────────────────────────
+# Hasta el 15 de noviembre la app tenia DOS: la oscura de fabrica en los
+# tokens y, encima, 206 reglas con `[data-theme="light"]` que la tapaban una
+# por una. El papel que se veia era el de la segunda, y bastaba que el Admin
+# pusiera su interruptor en oscuro —o que una regla nueva naciera sin el
+# prefijo— para que asomara la primera. Esta lente mide que no haya vuelta:
+# ni compuerta de tema en el `.css`, ni atributo en el `.html`, ni modulo que
+# lo escriba. Se mide en CODIGO (`rdc`), asi que contarlo en un comentario
+# —como hace este— no la pone roja.
+#.PIEL.UNA.INICIO
+_tema = []
+if 'data-theme' in rdc('src/index.css'): _tema.append('src/index.css')
+if 'data-theme' in _html_cod: _tema.append('index.html')
+if os.path.exists('src/lib/theme.ts'): _tema.append('src/lib/theme.ts')
+check('la app tiene una sola piel, no dos peleando', not _tema, ', '.join(_tema))
+#.PIEL.UNA.FIN
 check('el tema claro usa la paleta de la marca, no gris azulado', '#E8ECF1' not in _css and '#0F172A' not in _css, '')
 
 _bt = todo.get('src/components/BottomTabBar.tsx','')
@@ -363,16 +427,21 @@ try:
     _css_cod = rdc('src/index.css')
 except Exception:
     _css_cod = ''
-_i = _css_cod.find('[data-theme="light"] {')
-_luz = _css_cod[_i:_css_cod.find('}', _i)] if _i >= 0 else ''
+# Los tokens de Tailwind SON la piel: ya no hay una capa que los pise. Lo
+# que esta lente cuida es que esten los cuatro y que digan lo que tienen que
+# decir: el papel claro de verdad y la tinta oscura de verdad. Si alguien
+# devuelve la paleta oscura a `@theme`, se pone roja sin mirar ningun hex
+# puntual: mide la luminancia.
+_i = _css_cod.find('@theme {')
+_luz = _css_cod[_i:_css_cod.find('\n}', _i)] if _i >= 0 else ''
 _falta = [t for t in ['--color-ink','--color-cream','--color-panel','--color-gold'] if t not in _luz]
-check('el tema claro pisa los tokens de Tailwind, no solo los manuales', not _falta, str(_falta))
+check('los cuatro tokens de la casa estan declarados', not _falta, str(_falta))
 
 try:
     _c5 = rdc('src/index.css')
 except Exception:
     _c5 = ''
-_luz5 = _c5[_c5.find('[data-theme="light"]'):]
+_luz5 = _c5
 # El valor literal dejó de estar: `--surface` pasó a `var(--bg-card)` para que
 # el papel se defina en UN lugar. Lo que esta vara protege es que en tema claro
 # `--surface` NO caiga en el respaldo oscuro, así que mira eso y no un hex.
@@ -382,14 +451,26 @@ _luz5 = _c5[_c5.find('[data-theme="light"]'):]
 # sin que nada estuviera mal. Ahora hace lo que su comentario decía: que
 # `--surface` salga del papel, y que ese papel sea CLARO de verdad —se mide
 # su luminancia—, que es lo único que protege de volver al respaldo oscuro.
+#.PIEL.TOKENS.INICIO
 _papel5 = _re.search(r'--bg-card:\s*#([0-9A-Fa-f]{6})', _luz5)
 def _es_claro(_hex):
     _r, _g, _b = (int(_hex[_i:_i+2], 16) / 255 for _i in (0, 2, 4))
     _lin = [(_c / 12.92 if _c <= 0.04045 else ((_c + 0.055) / 1.055) ** 2.4) for _c in (_r, _g, _b)]
     return 0.2126 * _lin[0] + 0.7152 * _lin[1] + 0.0722 * _lin[2] > 0.6
+# Y los dos tokens que deciden la piel entera, medidos y no leidos: el papel
+# de la pagina claro, la tinta oscura. Si `@theme` vuelve a la paleta de
+# fabrica (ink #080808, cream #F2EFE9) esto se pone rojo solo.
+_t_papel = _re.search(r'--color-ink:\s*#([0-9A-Fa-f]{6})', _luz5)
+_t_tinta = _re.search(r'--color-cream:\s*#([0-9A-Fa-f]{6})', _luz5)
+check('el papel de la casa es claro y la tinta es oscura',
+      _t_papel is not None and _t_tinta is not None
+      and _es_claro(_t_papel.group(1)) and not _es_claro(_t_tinta.group(1)),
+      f'papel {_t_papel.group(1) if _t_papel else "?"} · tinta {_t_tinta.group(1) if _t_tinta else "?"}')
+
 check('card-ios no cae en su respaldo negro',
       '--surface: var(--bg-card)' in _luz5 and _papel5 is not None and _es_claro(_papel5.group(1)),
       f'papel de tarjeta: {_papel5.group(1) if _papel5 else "sin declarar"}')
+#.PIEL.TOKENS.FIN
 
 print('══ 6) COPY ══')
 cf = {f: src for f, src in todo.items() if 'Admin' not in f and 'lib/agents/' not in f
@@ -5455,6 +5536,17 @@ _pr16 = subprocess.run([sys.executable, 'scripts/probar-que-la-prueba-puede-pone
 check('la prueba que no puede ponerse roja: verde ayer, roja hoy (probado ejecutando)',
       _pr16.returncode == 0,
       (_pr16.stdout + _pr16.stderr).strip().split('\n')[-1][:170])
+
+# Y las cuatro lentes de la piel única, probadas contra su propio fallo: la
+# compuerta de tema puesta de vuelta, la paleta de fábrica devuelta a
+# `@theme`, el naranja prohibido escrito en rgba() dentro del `.css` —que es
+# como estaba de verdad— y una clase con el color adentro. Los cuatro
+# veredictos se SACAN de esta batería, entre las marcas `#.PIEL.*`.
+_ppiel = subprocess.run([sys.executable, 'scripts/probar-que-la-piel-es-una-sola.py'],
+                        capture_output=True, text=True)
+check('la piel es una sola, y sus cuatro lentes saben ponerse rojas (probado ejecutando)',
+      _ppiel.returncode == 0,
+      (_ppiel.stdout + _ppiel.stderr).strip().split('\n')[-1][:170])
 
 print()
 if F == 0 and _pendientes:

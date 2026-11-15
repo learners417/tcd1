@@ -67,9 +67,14 @@ def comentar_bloque(texto, trozo, ap, ci, entera=True):
 # archivo CRUDO, que es lo que la lente tenía en la mano.
 CASOS_PUERTA = [
     # (archivo, el mecanismo, apertura, cierre, por qué importa)
-    ('index.html', 'data-theme="light"', '<!--', '-->',
-     'sin el atributo la app abre en el tema oscuro, y la lente que dice '
-     'medirlo daba verde'),
+    # Era `data-theme="light"`. El 15 de noviembre de 2026 la app pasó a una
+    # sola piel y ese atributo se fue del `.html` con la compuerta de tema:
+    # la prueba avisó de su propia desactualización, que es lo que tiene que
+    # hacer. En su lugar va otro mecanismo del mismo archivo, el que reserva
+    # la franja del reloj, con su propia lente en prueba-la-franja-del-reloj.
+    ('index.html', 'viewport-fit=cover', '<!--', '-->',
+     'sin eso la app no llega a los bordes del teléfono y el encabezado '
+     'queda bajo el reloj'),
     # El valor del token se mueve cuando se mueve la piel: el 15 de noviembre
     # de 2026 el crema pasó de #EAE4D9 al #F1EBE0 de la home y esta prueba
     # avisó, como tiene que avisar, que su muestra había quedado vieja. Se usa

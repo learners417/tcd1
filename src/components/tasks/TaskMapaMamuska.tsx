@@ -190,11 +190,11 @@ export default function TaskMapaMamuska({
       </div>
 
       {gaps.length > 0 && (
-        <div className="card-panel p-4 border border-[#F0B429]/40 bg-[#F0B429]/[0.05]">
+        <div className="card-panel p-4 border border-gold/40 bg-gold/[0.05]">
           <div className="flex items-start gap-3">
-            <AlertCircle className="w-4 h-4 text-[#F0B429] mt-0.5 flex-shrink-0" />
+            <AlertCircle className="w-4 h-4 text-gold mt-0.5 flex-shrink-0" />
             <div>
-              <p className="text-xs uppercase tracking-widest font-bold text-[#F0B429] mb-1">
+              <p className="text-xs uppercase tracking-widest font-bold text-gold mb-1">
                 {gaps.length} {gaps.length === 1 ? 'fila tiene' : 'filas tienen'} gaps
               </p>
               <p className="text-sm text-cream/70">
@@ -218,7 +218,7 @@ export default function TaskMapaMamuska({
               key={fila._id}
               className={`card-panel p-4 border ${
                 tieneGap
-                  ? 'border-[#F0B429]/25 bg-surface/30'
+                  ? 'border-gold/25 bg-surface/30'
                   : 'border-success/25 bg-success/[0.03]'
               }`}
             >
@@ -229,7 +229,7 @@ export default function TaskMapaMamuska({
                 <button
                   type="button"
                   onClick={() => borrarFila(fila._id)}
-                  className="text-cream/45 hover:text-[#ff5e5e] transition-colors p-1"
+                  className="text-cream/45 hover:text-danger transition-colors p-1"
                   aria-label={`Borrar fila ${idx + 1}`}
                 >
                   <Trash2 className="w-3.5 h-3.5" />

@@ -245,7 +245,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
           {/* Group row */}
           <tr>
             <th
-              className="sticky left-0 top-0 z-50 bg-[#0E0E0E]"
+              className="sticky left-0 top-0 z-50 bg-panel"
               style={{ minWidth: 240 }}
             />
             {secciones.map((sec, idx) => (
@@ -288,7 +288,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
           {/* Column labels */}
           <tr>
             <th
-              className="sticky left-0 z-40 bg-[#0E0E0E]"
+              className="sticky left-0 z-40 bg-panel"
               style={{
                 top: 40,
                 minWidth: 240,
@@ -301,7 +301,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
               return (
                 <th
                   key={step.id}
-                  className="sticky z-20 bg-[#0F0F0F]"
+                  className="sticky z-20 bg-panel"
                   style={{
                     top: 40,
                     padding: '10px 8px 12px',
@@ -334,7 +334,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
               );
             })}
             <th
-              className="sticky right-0 z-30 bg-[#0F0F0F]"
+              className="sticky right-0 z-30 bg-panel"
               style={{
                 top: 40,
                 padding: '10px 12px 12px',
@@ -555,7 +555,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
         <tfoot>
           <tr>
             <td
-              className="sticky left-0 bottom-0 z-30 bg-[#0E0E0E]"
+              className="sticky left-0 bottom-0 z-30 bg-panel"
               style={{ padding: '0 14px', height: 46, borderTop: '2px solid var(--line, rgba(142,104,36,0.18))' }}
             >
               <span className="text-sm font-bold uppercase tracking-widest text-gold">Cuántos lo tienen</span>
@@ -567,7 +567,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
               return (
                 <td
                   key={step.id}
-                  className="sticky bottom-0 z-20 bg-[#0E0E0E]"
+                  className="sticky bottom-0 z-20 bg-panel"
                   style={{
                     height: 46,
                     textAlign: 'center',
@@ -589,7 +589,7 @@ export default function MatrizGrid({ clientes, checks, onToggle, caminoDone, ext
               );
             })}
             <td
-              className="sticky right-0 bottom-0 z-30 bg-[#0E0E0E]"
+              className="sticky right-0 bottom-0 z-30 bg-panel"
               style={{ height: 46, textAlign: 'center', borderTop: '2px solid var(--line, rgba(142,104,36,0.18))', borderLeft: '2px solid var(--matrix-section-divider)' }}
             >
               <span className="text-sm font-bold text-cream/50">{clientes.length}</span>

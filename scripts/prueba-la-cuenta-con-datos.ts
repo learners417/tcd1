@@ -123,7 +123,7 @@ ok(
 console.log('\n── el piso tipográfico vale adentro del prose ──');
 const css = leer('src/index.css');
 ok(
-  /\[data-theme="light"\] #root \.prose-sm,/.test(css),
+  /^:root #root \.prose-sm,/m.test(css),
   '`prose-sm` deja de fijar el cuerpo en 14 px: el piso de la casa también vale ahí',
 );
 ok(

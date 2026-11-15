@@ -111,7 +111,7 @@ function DroppableColumn({
           flex-1 min-h-[300px] rounded-b-2xl border border-t-0 p-2 space-y-2 transition-all
           ${isOver
             ? 'bg-[rgba(255,255,255,0.04)]'
-            : 'bg-[#0F0F0F]/60'
+            : 'bg-panel/60'
           }
         `}
         style={{

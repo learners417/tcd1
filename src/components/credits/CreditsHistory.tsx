@@ -72,11 +72,11 @@ export default function CreditsHistory({ userId, limit = 30 }: CreditsHistoryPro
             <div className="flex items-center gap-3 min-w-0">
               <div
                 className={`rounded-lg p-1.5 shrink-0 ${
-                  isPositive ? 'bg-[#10B981]/15' : isZero ? 'bg-white/5' : 'bg-danger/15'
+                  isPositive ? 'bg-success/15' : isZero ? 'bg-white/5' : 'bg-danger/15'
                 }`}
               >
                 {isPositive ? (
-                  <TrendingUp className="h-3.5 w-3.5 text-[#10B981]" />
+                  <TrendingUp className="h-3.5 w-3.5 text-success" />
                 ) : (
                   <TrendingDown className="h-3.5 w-3.5 text-danger" />
                 )}
@@ -95,7 +95,7 @@ export default function CreditsHistory({ userId, limit = 30 }: CreditsHistoryPro
             <div className="flex items-center gap-3 shrink-0 ml-3">
               <span
                 className={`text-sm font-bold ${
-                  isPositive ? 'text-[#10B981]' : isZero ? 'text-white/55' : 'text-danger'
+                  isPositive ? 'text-success' : isZero ? 'text-white/55' : 'text-danger'
                 }`}
               >
                 {isPositive ? '+' : ''}{tx.delta}

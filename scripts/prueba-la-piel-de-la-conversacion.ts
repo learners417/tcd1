@@ -89,7 +89,7 @@ ok(
   '`--shadow-card` apunta a la sombra de la casa en vez de al negro del tema oscuro',
 );
 ok(
-  /--shadow-float: 0 2px 6px rgba\(42, 33, 24/.test(css),
+  /--shadow-float: 0 2px 6px rgba\(35, 32, 29/.test(css),
   'y el flotante tiene más cuerpo, pero en la misma tierra',
 );
 /*
@@ -97,7 +97,7 @@ ok(
  * la otra puerta, la del token, que es por donde entraban las burbujas.
  */
 ok(
-  /\[data-theme="light"\] #root :is\(\[class~="shadow-md"\]/.test(css),
+  /^:root #root :is\(\[class~="shadow-md"\]/m.test(css),
   'la puerta de las clases sigue cerrada: las dos vías llevan a la misma sombra',
 );
 

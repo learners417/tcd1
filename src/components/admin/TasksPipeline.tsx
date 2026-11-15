@@ -328,7 +328,7 @@ export default function TasksPipeline({
             flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold border transition-all
             ${verArchivadas
               ? 'bg-gold/15 text-gold border-gold/40'
-              : 'bg-[#0F0F0F] text-cream/55 border-[rgba(255,255,255,0.08)] hover:text-cream hover:border-[rgba(255,255,255,0.18)]'
+              : 'bg-panel text-cream/55 border-[rgba(255,255,255,0.08)] hover:text-cream hover:border-[rgba(255,255,255,0.18)]'
             }
           `}
         >
@@ -345,7 +345,7 @@ export default function TasksPipeline({
           <button
             onClick={() => setBulkArchiveOpen(true)}
             title="Archivar todas las tareas completadas"
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold border bg-[#0F0F0F] text-cream/55 border-[rgba(255,255,255,0.08)] hover:text-gold hover:border-gold/30 transition-all"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold border bg-panel text-cream/55 border-[rgba(255,255,255,0.08)] hover:text-gold hover:border-gold/30 transition-all"
           >
             <Archive className="w-3.5 h-3.5" />
             Archivar completadas

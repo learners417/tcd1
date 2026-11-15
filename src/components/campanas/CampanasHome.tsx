@@ -177,7 +177,7 @@ export default function CampanasHome({ campanas, perfil, onNavigate }: Props) {
                   className={`text-left rounded-2xl border p-5 transition-all group ${
                     bloqueada
                       ? 'bg-[var(--bg-card,#17150F)] border-cream/8 cursor-not-allowed'
-                      : 'bg-panel border-[var(--line, rgba(142,104,36,0.18))] hover:border-gold/50 hover:bg-[#161512]'
+                      : 'bg-panel border-[var(--line, rgba(142,104,36,0.18))] hover:border-gold/50 hover:bg-surface'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-3">
@@ -250,7 +250,7 @@ export default function CampanasHome({ campanas, perfil, onNavigate }: Props) {
           {respondidas && (() => {
             const p = PUERTAS.find((x) => x.id === recomendada)!;
             return (
-              <div className="bg-[#161310] border border-gold/30 rounded-2xl p-6 animate-in fade-in duration-300">
+              <div className="bg-ink border border-gold/30 rounded-2xl p-6 animate-in fade-in duration-300">
                 <p className="text-sm font-bold text-gold/70 uppercase tracking-[0.2em] mb-2">
                   Tu campaña es
                 </p>

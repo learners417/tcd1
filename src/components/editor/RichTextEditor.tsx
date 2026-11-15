@@ -277,7 +277,7 @@ export default function RichTextEditor({
 
       {slash.open && filteredOptions.length > 0 && (
         <div
-          className="absolute z-50 w-64 max-h-72 overflow-y-auto bg-[#1A1A1A] border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl shadow-2xl py-1.5"
+          className="absolute z-50 w-64 max-h-72 overflow-y-auto bg-panel border border-[var(--line, rgba(142,104,36,0.18))] rounded-xl shadow-2xl py-1.5"
           style={{ top: slash.top, left: slash.left }}
         >
           {filteredOptions.map((opt, i) => {

@@ -5,15 +5,32 @@
   /* La letra de la casa también para la clase font-sans y el valor por defecto. */
   --font-sans: 'Manrope Variable', 'Manrope', system-ui, sans-serif;
   --font-serif: 'Literata Variable', 'Literata', Georgia, serif;
-  --color-ink: #080808;
-  --color-panel: #111110;
-  --color-surface: #1A1917;
-  --color-gold: #B0822E;
-  --color-goldhi: #C79A45;
+  --color-ink: #F1EBE0;
+  --color-panel: #FAF8F4;
+  --color-surface: #E9E1D3;
+  --color-gold: #A8875A;
+  --color-goldhi: #7A5F33;
   --color-azure: #3B82F6;
-  --color-success: #22C55E;
-  --color-danger: #EF4444;
-  --color-cream: #F2EFE9;
+  --color-success: #2F5638;
+  --color-danger: #9C3626;
+  --color-cream: #23201D;
+  /* LA PIEZA IMPRESA. El certificado y la foto del día 90 no son pantallas:
+     son piezas oscuras con letra de oro, como un diploma, y se ven iguales
+     en cualquier pantalla. Su paleta es la única que no sigue al papel, y
+     por eso vive acá con nombre propio en vez de escrita a mano adentro de
+     los dos componentes. Medido: el oro de la app sobre este fondo da
+     3.7:1; este, 5.4:1. */
+  /* EL QUINTO ESTADO. La matriz de preactivación tiene cinco estados y cada
+     uno necesita su color: rojo, oro, verde, el neutro y uno más para «la
+     pelota la tiene el cliente». Hasta el 15 de noviembre ese quinto era un
+     naranja escrito a mano (#E8862E) porque no había token. Ahora es el río
+     de la colección, que es el único de los cinco paisajes que no se
+     confunde con el oro ni con el rojo. */
+  --color-espera: #1F6E6E;
+
+  --color-pieza: #141210;
+  --color-pieza-oro: #B0822E;
+  --color-pieza-papel: #EAE4D9;
   /* CP2 · escala tipográfica mobile-first (gentle +1px) */
   /* Piso tipografico V5: nada por debajo de 15px, instrucciones desde 17px. */
   --text-xs: 0.9375rem;   /* 15px — solo metadatos, nunca instrucciones */
@@ -59,18 +76,22 @@
  *      instrucciones no bajan de 17px.
  * ────────────────────────────────────────────────────────────────── */
 :root {
-  --bg-root: #0F0E0D;
-  --bg-card: #17150F;
-  --bg-surface2: #211E17;
-  --accent-gold: #B0822E;
-  --accent-gold-hover: #C79A45;
-  --accent-blue: #3B82F6;
-  --green-success: #4E7C52;
+  --bg-root: #F1EBE0;
+  --bg-card: #FAF8F4;
+  --bg-surface2: #E9E1D3;
+  --accent-gold: #A8875A;
+  --accent-gold-hover: #7A5F33;
+  /* El verde que tilda y el rojo que tacha son los de ARQUITECTURA §10, los
+     mismos del libro y de la home. `--green-success` decía #4E7C52, que era
+     el verde del tema oscuro: el único lugar que lo usa es el aviso de pilar
+     desbloqueado, y ahí se leía de otro verde que el resto de la app. */
+  --accent-blue: #2B4E68;
+  --green-success: #2F5638;
   --red-alert: #9C3626;
-  --text-cream: #F4EFE4;
-  --text-muted: rgba(244, 239, 228, 0.62);
-  --border-gold: rgba(176, 130, 46, 0.22);
-  --border-gold-strong: rgba(176, 130, 46, 0.45);
+  --text-cream: #23201D;
+  --text-muted: #5A534C;
+  --border-gold: rgba(168, 135, 90, 0.45);
+  --border-gold-strong: rgba(168, 135, 90, 0.75);
   /* ═══ LAS TRES LETRAS, Y SUS TRES PAPELES ══════════════════════════
    *
    * La misma piel de las páginas, los libros y el video (15 nov 2026,
@@ -110,17 +131,17 @@
 
   /* Matrix-specific tokens (preactivacion grid) so the table can
      theme cleanly without hardcoded hex inside inline styles. */
-  --matrix-section-divider: #252830;
+  --matrix-section-divider: rgba(168, 135, 90, 0.2);
   /* Sereno Pro: la profundidad iOS — sombras en capas, no un solo blur */
-  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.30), 0 8px 24px rgba(0, 0, 0, 0.35);
-  --shadow-float: 0 2px 8px rgba(0, 0, 0, 0.40), 0 16px 48px rgba(0, 0, 0, 0.50);
-  --shadow-gold: 0 8px 24px rgba(176, 130, 46, 0.14);
-  --matrix-cell-divider: rgba(26, 28, 34, 0.35);
-  --matrix-row-divider: rgba(255, 255, 255, 0.05);
-  --matrix-header-text: rgba(255, 255, 255, 0.78);
-  --matrix-subtitle-text: rgba(255, 255, 255, 0.5);
-  --matrix-pct-text: rgba(255, 255, 255, 0.7);
-  --matrix-checkbox-off: #3a3d44;
+  --shadow-card: var(--sombra);
+  --shadow-float: 0 2px 6px rgba(35, 32, 29, 0.06), 0 14px 36px rgba(35, 32, 29, 0.08);
+  --shadow-gold: var(--sombra);
+  --matrix-cell-divider: rgba(35, 32, 29, 0.06);
+  --matrix-row-divider: rgba(35, 32, 29, 0.08);
+  --matrix-header-text: rgba(35, 32, 29, 0.78);
+  --matrix-subtitle-text: rgba(35, 32, 29, 0.6);
+  --matrix-pct-text: rgba(35, 32, 29, 0.72);
+  --matrix-checkbox-off: rgba(35, 32, 29, 0.28);
 }
 
 html,
@@ -170,7 +191,7 @@ body,
  *
  * Solo en el tema claro, que es el del cliente y el del libro.
  */
-[data-theme="light"] body::before {
+:root body::before {
   content: '';
   position: fixed;
   inset: 0;
@@ -180,7 +201,7 @@ body,
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)'/%3E%3C/svg%3E");
 }
 /* Lo que se ve y se toca va por encima del grano. */
-[data-theme="light"] #root { position: relative; z-index: 1; }
+:root #root { position: relative; z-index: 1; }
 
 /* ─── Typography ─────────────────────────────────────────────────── */
 /*
@@ -334,12 +355,12 @@ body,
    */
   .elegido,
   .elegido-etiqueta {
-    border-color: var(--oro, #B0822E);
-    background-color: color-mix(in srgb, var(--oro, #B0822E) 10%, transparent);
+    border-color: var(--oro, #A8875A);
+    background-color: color-mix(in srgb, var(--oro, #A8875A) 10%, transparent);
   }
   /* --text-cream ya lo redefine cada tema, así que el texto sigue al tema. */
   .elegido { color: var(--text-cream); }
-  .elegido-etiqueta { color: var(--oro-t, #74551C); }
+  .elegido-etiqueta { color: var(--oro-t, #7A5F33); }
 
   /*
    * ─── Y CÓMO SE DICE «ESTO LO DIJE YO» ────────────────────────────────
@@ -364,8 +385,8 @@ body,
    * dice — esta caja es la tuya — y una app no necesita dos maneras.
    */
   .burbuja-mia {
-    border: 1px solid var(--oro, #B0822E);
-    background-color: color-mix(in srgb, var(--oro, #B0822E) 10%, transparent);
+    border: 1px solid var(--oro, #A8875A);
+    background-color: color-mix(in srgb, var(--oro, #A8875A) 10%, transparent);
     color: var(--text-cream);
   }
 
@@ -387,14 +408,14 @@ body,
     border-radius: 0.75rem;
     transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
     /* V5: plano. Sin degrade y sin glow — el oro mate no brilla, se apoya. */
-    background: #B0822E;
+    background: #A8875A;
     box-shadow: var(--shadow-gold);
     border-radius: var(--radius);
   }
   .btn-primary:active { transform: scale(0.98); }
   .btn-primary:hover {
     background: var(--accent-gold-hover);
-    box-shadow: 0 6px 28px rgba(232, 150, 46, 0.30), 0 0 60px rgba(232, 150, 46, 0.15);
+    box-shadow: 0 6px 28px rgba(168, 135, 90, 0.30), 0 0 60px rgba(168, 135, 90, 0.15);
     transform: translateY(-1px);
   }
 
@@ -417,7 +438,7 @@ body,
     transition: background 0.2s, border-color 0.2s;
   }
   .btn-secondary:hover {
-    background: rgba(232, 150, 46, 0.1);
+    background: rgba(168, 135, 90, 0.1);
     border-color: var(--border-gold-strong);
   }
 
@@ -434,7 +455,7 @@ body,
   }
   .input-field:focus {
     border-color: var(--accent-gold);
-    box-shadow: 0 0 12px rgba(232, 150, 46, 0.15);
+    box-shadow: 0 0 12px rgba(168, 135, 90, 0.15);
   }
   .input-field::placeholder {
     color: var(--text-muted);
@@ -452,7 +473,7 @@ body,
 
   /* Tech glow utility */
   .glow-accent {
-    box-shadow: 0 0 20px rgba(232, 150, 46, 0.15), 0 0 60px rgba(232, 150, 46, 0.05);
+    box-shadow: 0 0 20px rgba(168, 135, 90, 0.15), 0 0 60px rgba(168, 135, 90, 0.05);
   }
 
   /* Custom select — override native browser dropdown */
@@ -501,8 +522,8 @@ body,
 
   /* Badge pulse — el contador rojo "respira" mientras haya unread */
   @keyframes badge-pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(232, 150, 46, 0.6), 0 0 12px rgba(232, 150, 46, 0.8); }
-    50%      { box-shadow: 0 0 0 6px rgba(232, 150, 46, 0),   0 0 16px rgba(232, 150, 46, 1); }
+    0%, 100% { box-shadow: 0 0 0 0 rgba(168, 135, 90, 0.6), 0 0 12px rgba(168, 135, 90, 0.8); }
+    50%      { box-shadow: 0 0 0 6px rgba(168, 135, 90, 0),   0 0 16px rgba(168, 135, 90, 1); }
   }
   .badge-pulse {
     animation: badge-pulse 1.8s ease-in-out infinite;
@@ -544,7 +565,7 @@ body,
  * de los títulos pasa a Cormorant Garamond, que es la de la tapa. Abrir la app
  * y abrir el libro tienen que sentirse la misma cosa.
  */
-[data-theme="light"] {
+:root {
   /* LOS TOKENS DE TAILWIND. Sin esto, cada clase text-cream, bg-ink y
      bg-panel sigue resolviendo a los valores del tema oscuro: texto casi
      blanco sobre crema. Era la causa del lavado. */
@@ -567,24 +588,6 @@ body,
    * La tarjeta es más clara que la página, igual que antes: el papel de la
    * banda con la ficha de nieve encima, que es como arma la home.
    */
-  --color-ink: #F1EBE0;
-  --color-panel: #FAF8F4;
-  --color-surface: #E9E1D3;
-  --color-cream: #23201D;
-  --color-gold: #A8875A;
-  --color-goldhi: #7A5F33;
-  --color-success: #2F5638;
-  --color-danger: #9C3626;
-
-  --bg-root: #F1EBE0;
-  --bg-card: #FAF8F4;
-  --bg-surface2: #E9E1D3;
-  --accent-gold: #A8875A;
-  --accent-gold-hover: #7A5F33;
-  --text-cream: #23201D;
-  --text-muted: #5A534C;
-  --border-gold: rgba(168, 135, 90, 0.45);
-  --border-gold-strong: rgba(168, 135, 90, 0.75);
 
   /* ═══ UN COLOR POR ESTACIÓN: EL DE SU TAPA ═════════════════════════
    *
@@ -618,20 +621,12 @@ body,
   /* El octavo rayo de la rueda: el terreno donde las siete se apoyan. */
   --terreno: #7A6A52;
 
-  --matrix-section-divider: rgba(176, 130, 46, 0.2);
-  --matrix-cell-divider: rgba(43, 39, 36, 0.06);
-  --matrix-row-divider: rgba(43, 39, 36, 0.08);
-  --matrix-header-text: rgba(43, 39, 36, 0.78);
-  --matrix-subtitle-text: rgba(43, 39, 36, 0.6);
-  --matrix-pct-text: rgba(43, 39, 36, 0.72);
-  --matrix-checkbox-off: rgba(43, 39, 36, 0.28);
-
   color-scheme: light;
 }
 
-[data-theme="light"] html,
-[data-theme="light"] body,
-[data-theme="light"] #root {
+:root html,
+:root body,
+:root #root {
   background-color: var(--bg-root);
   color: var(--text-cream);
 }
@@ -643,34 +638,15 @@ body,
    Cards/popovers     → var(--bg-card)   (pop on panel)
    Surface2 (settings sidebar etc.) → var(--bg-surface2)
 */
-[data-theme="light"] .bg-\[\#080808\]    { background-color: var(--bg-root) !important; }
-[data-theme="light"] .bg-\[\#0E0E0E\]    { background-color: var(--bg-card) !important; }
-[data-theme="light"] .bg-\[\#0F0F0F\]    { background-color: var(--bg-card) !important; }
-[data-theme="light"] .bg-\[\#0F0F0F\]\/60 { background-color: rgba(248, 250, 252, 0.85) !important; }
-[data-theme="light"] .bg-\[\#111110\]    { background-color: var(--bg-card) !important; }
-[data-theme="light"] .bg-\[\#111110\]\/80 { background-color: rgba(248, 250, 252, 0.92) !important; }
-[data-theme="light"] .bg-\[\#1A1A1A\]    { background-color: var(--bg-card) !important; }
-[data-theme="light"] .bg-\[\#1A1917\]    { background-color: var(--bg-surface2) !important; }
-[data-theme="light"] .bg-\[\#1A1917\]\/20 { background-color: rgba(232, 150, 46, 0.06) !important; }
-[data-theme="light"] .bg-\[\#1A1917\]\/30 { background-color: rgba(232, 150, 46, 0.09) !important; }
-[data-theme="light"] .bg-\[\#1A1917\]\/50 { background-color: rgba(238, 241, 245, 0.7) !important; }
-[data-theme="light"] .bg-\[\#1A1917\]\/60 { background-color: rgba(238, 241, 245, 0.8) !important; }
-[data-theme="light"] .bg-\[\#1E1E1E\]    { background-color: var(--bg-card) !important; }
-[data-theme="light"] .bg-\[\#1F1F1F\]    { background-color: var(--bg-surface2) !important; }
 
 /* ── Surface backgrounds — Tailwind standard `white` token ───────── */
-[data-theme="light"] .bg-white\/5  { background-color: rgba(42, 33, 24, 0.05) !important; }
-[data-theme="light"] .bg-white\/10 { background-color: rgba(42, 33, 24, 0.08) !important; }
-[data-theme="light"] .bg-white\/20 { background-color: rgba(42, 33, 24, 0.12) !important; }
+:root .bg-white\/5  { background-color: rgba(35, 32, 29, 0.05) !important; }
 
 /* ── Surface backgrounds — rgba shorthand variants ───────────────── */
-[data-theme="light"] .bg-\[rgba\(255\,255\,255\,0\.025\)\] { background-color: rgba(42, 33, 24, 0.04) !important; }
-[data-theme="light"] .bg-\[rgba\(255\,255\,255\,0\.04\)\]  { background-color: rgba(42, 33, 24, 0.05) !important; }
+:root .bg-\[rgba\(255\,255\,255\,0\.025\)\] { background-color: rgba(35, 32, 29, 0.04) !important; }
+:root .bg-\[rgba\(255\,255\,255\,0\.04\)\]  { background-color: rgba(35, 32, 29, 0.05) !important; }
 
 /* ── Hover-variant backgrounds — restore feedback in light mode ──── */
-[data-theme="light"] .hover\:bg-\[\#1A1917\]:hover        { background-color: var(--bg-surface2) !important; }
-[data-theme="light"] .hover\:bg-\[\#1A1917\]\/50:hover    { background-color: rgba(234, 237, 242, 0.85) !important; }
-[data-theme="light"] .hover\:bg-\[\#1F1F1F\]:hover        { background-color: #E4E7EC !important; }
 /*
  * Acá vivían 30 reglas para `bg-[var(--bg-card)]`, `text-[var(--bg-card)]`,
  * sus hover y sus placeholder. Tenían el escapado mal —`\[\var(` en vez de
@@ -681,12 +657,11 @@ body,
  * aparece en el código. No tenían a qué aplicarse. Se van las dos cosas: la
  * advertencia y la regla sin sujeto.
  */
-[data-theme="light"] .group:hover .group-hover\:bg-\[\#111110\] { background-color: var(--bg-surface2) !important; }
 
 /* ── Light scrim overlays inside content (not modal backdrops) ───── */
-[data-theme="light"] .bg-black\/20 { background-color: rgba(42, 33, 24, 0.04) !important; }
-[data-theme="light"] .bg-black\/30 { background-color: rgba(42, 33, 24, 0.06) !important; }
-[data-theme="light"] .bg-black\/40 { background-color: rgba(42, 33, 24, 0.08) !important; }
+:root .bg-black\/20 { background-color: rgba(35, 32, 29, 0.04) !important; }
+:root .bg-black\/30 { background-color: rgba(35, 32, 29, 0.06) !important; }
+:root .bg-black\/40 { background-color: rgba(35, 32, 29, 0.08) !important; }
 /* Modal scrims (bg-black/60/70/80) stay dark intentionally so modals
    keep clear separation from the page underneath. */
 
@@ -699,40 +674,27 @@ body,
    `/60` on white becomes ~0.6 slate, not 0.72. This keeps icons and
    muted UI feeling soft instead of stamped. Mid range still hits AA.
 */
-[data-theme="light"] .text-white       { color: var(--text-cream) !important; }
-[data-theme="light"] .text-white\/90   { color: rgba(42, 33, 24, 0.9) !important; }
-[data-theme="light"] .text-white\/80   { color: rgba(42, 33, 24, 0.82) !important; }
-[data-theme="light"] .text-white\/70   { color: rgba(42, 33, 24, 0.72) !important; }
-[data-theme="light"] .text-white\/60   { color: rgba(42, 33, 24, 0.62) !important; }
-[data-theme="light"] .text-white\/50   { color: rgba(42, 33, 24, 0.58) !important; }
-[data-theme="light"] .text-white\/40   { color: rgba(42, 33, 24, 0.55) !important; }
-[data-theme="light"] .text-white\/30   { color: rgba(42, 33, 24, 0.48) !important; }
+:root .text-white       { color: var(--text-cream) !important; }
+:root .text-white\/90   { color: rgba(35, 32, 29, 0.9) !important; }
+:root .text-white\/80   { color: rgba(35, 32, 29, 0.82) !important; }
+:root .text-white\/70   { color: rgba(35, 32, 29, 0.72) !important; }
 
 
 /* ── Hover-variant text ──────────────────────────────────────────── */
-[data-theme="light"] .hover\:text-white:hover            { color: var(--text-cream) !important; }
+:root .hover\:text-white:hover            { color: var(--text-cream) !important; }
 
 /* ── Placeholder text ────────────────────────────────────────────── */
-[data-theme="light"] .placeholder-white\/30::placeholder { color: rgba(42, 33, 24, 0.45) !important; }
-[data-theme="light"] .placeholder-white\/40::placeholder { color: rgba(42, 33, 24, 0.52) !important; }
+:root .placeholder-white\/30::placeholder { color: rgba(35, 32, 29, 0.45) !important; }
 
 /* ── Gold text — drop to amber-700 so it hits AA contrast on white ─ */
-[data-theme="light"] .text-\[\#E8962E\] { color: #8E6824 !important; }
-[data-theme="light"] .text-\[\#B0822E\] { color: #8E6824 !important; }
 
 /* ── La excepción: una PIEZA IMPRESA ───────────────────────────────
  *
- * Las dos reglas de arriba oscurecen el oro para que se lea sobre el papel de
- * la app, y están bien. Pero el certificado y la foto del día 90 no son
- * pantallas: son piezas oscuras con letra de oro, como un diploma, y se ven
- * iguales en los dos temas. Adentro de una de ellas el oro oscuro queda en
- * 3.7:1 —medido— y el de siempre en 5.4:1 sobre el mismo fondo.
- *
- * Se marca la pieza con `pieza-impresa` y adentro el oro vuelve a ser el
- * suyo. Es una decisión escrita una vez, como `una-linea` para el corte.
+ * La regla de arriba oscurece el oro para que se lea sobre el papel de la
+ * app. El certificado y la foto del día 90 no la necesitan: desde el 15 de
+ * noviembre no llevan ningún color escrito a mano, sino los tres tokens
+ * `--color-pieza*` de arriba, así que el parche por clase se fue con ellos.
  */
-[data-theme="light"] .pieza-impresa .text-\[\#B0822E\],
-[data-theme="light"] .pieza-impresa .text-\[\#E8962E\] { color: #B0822E !important; }
 
 /* ── Los bordes de oro ya no necesitan parche ─────────────────────
    Estas ocho reglas corregían `rgba(245,166,35,X)` — un color que aparecía
@@ -743,34 +705,32 @@ body,
    cambian solos con el tema y no hace falta parchearlos. */
 
 /* ── White borders — hex + Tailwind + rgba ───────────────────────── */
-[data-theme="light"] .border-white\/5           { border-color: rgba(42, 33, 24, 0.08) !important; }
-[data-theme="light"] .border-white\/10          { border-color: rgba(42, 33, 24, 0.12) !important; }
-[data-theme="light"] .border-white\/20          { border-color: rgba(42, 33, 24, 0.18) !important; }
-[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.04\)\] { border-color: rgba(42, 33, 24, 0.08) !important; }
-[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.05\)\] { border-color: rgba(42, 33, 24, 0.08) !important; }
-[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.06\)\] { border-color: rgba(42, 33, 24, 0.1) !important; }
-[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.08\)\] { border-color: rgba(42, 33, 24, 0.12) !important; }
-[data-theme="light"] .border-\[rgba\(255\,255\,255\,0\.18\)\] { border-color: rgba(42, 33, 24, 0.22) !important; }
+:root .border-white\/10          { border-color: rgba(35, 32, 29, 0.12) !important; }
+:root .border-\[rgba\(255\,255\,255\,0\.04\)\] { border-color: rgba(35, 32, 29, 0.08) !important; }
+:root .border-\[rgba\(255\,255\,255\,0\.05\)\] { border-color: rgba(35, 32, 29, 0.08) !important; }
+:root .border-\[rgba\(255\,255\,255\,0\.06\)\] { border-color: rgba(35, 32, 29, 0.1) !important; }
+:root .border-\[rgba\(255\,255\,255\,0\.08\)\] { border-color: rgba(35, 32, 29, 0.12) !important; }
+:root .border-\[rgba\(255\,255\,255\,0\.18\)\] { border-color: rgba(35, 32, 29, 0.22) !important; }
 
 /* ── Inline-style fallback ───────────────────────────────────────────
    React serializes `color: 'var(--bg-card)'` to `color: rgb(255, 255, 255)`
    in the DOM style attribute, so we match both forms.            */
-[data-theme="light"] [style*="color: var(--bg-card)"],
-[data-theme="light"] [style*="color:var(--bg-card)"],
-[data-theme="light"] [style*="color: rgb(255, 255, 255)"],
-[data-theme="light"] [style*="color:rgb(255,255,255)"] {
+:root [style*="color: var(--bg-card)"],
+:root [style*="color:var(--bg-card)"],
+:root [style*="color: rgb(255, 255, 255)"],
+:root [style*="color:rgb(255,255,255)"] {
   color: var(--text-cream) !important;
 }
 
 /* ── Shadow — soften the heavy black shadows on white surfaces ───── */
-[data-theme="light"] .shadow-2xl {
-  box-shadow: 0 12px 40px rgba(42, 33, 24, 0.12), 0 4px 16px rgba(42, 33, 24, 0.08) !important;
+:root .shadow-2xl {
+  box-shadow: 0 12px 40px rgba(35, 32, 29, 0.12), 0 4px 16px rgba(35, 32, 29, 0.08) !important;
 }
-[data-theme="light"] .shadow-xl {
-  box-shadow: 0 8px 24px rgba(42, 33, 24, 0.1), 0 2px 8px rgba(42, 33, 24, 0.06) !important;
+:root .shadow-xl {
+  box-shadow: 0 8px 24px rgba(35, 32, 29, 0.1), 0 2px 8px rgba(35, 32, 29, 0.06) !important;
 }
-[data-theme="light"] .shadow-black\/50 {
-  --tw-shadow-color: rgba(42, 33, 24, 0.15) !important;
+:root .shadow-black\/50 {
+  --tw-shadow-color: rgba(35, 32, 29, 0.15) !important;
 }
 
 /* ── Tailwind Typography `prose-invert` ──────────────────────────────
@@ -780,23 +740,23 @@ body,
    slate so the output content (Markdown render, code blocks, lists,
    etc.) keeps readable contrast without changing the className.
 */
-[data-theme="light"] .prose-invert {
+:root .prose-invert {
   --tw-prose-invert-body: var(--text-cream);
   --tw-prose-invert-headings: var(--text-cream);
-  --tw-prose-invert-lead: rgba(42, 33, 24, 0.78);
-  --tw-prose-invert-links: #8E6824;
+  --tw-prose-invert-lead: rgba(35, 32, 29, 0.78);
+  --tw-prose-invert-links: #7A5F33;
   --tw-prose-invert-bold: var(--text-cream);
-  --tw-prose-invert-counters: rgba(42, 33, 24, 0.6);
-  --tw-prose-invert-bullets: rgba(42, 33, 24, 0.4);
-  --tw-prose-invert-hr: rgba(42, 33, 24, 0.15);
-  --tw-prose-invert-quotes: rgba(42, 33, 24, 0.85);
-  --tw-prose-invert-quote-borders: rgba(176, 130, 46, 0.4);
-  --tw-prose-invert-captions: rgba(42, 33, 24, 0.6);
+  --tw-prose-invert-counters: rgba(35, 32, 29, 0.6);
+  --tw-prose-invert-bullets: rgba(35, 32, 29, 0.4);
+  --tw-prose-invert-hr: rgba(35, 32, 29, 0.15);
+  --tw-prose-invert-quotes: rgba(35, 32, 29, 0.85);
+  --tw-prose-invert-quote-borders: rgba(168, 135, 90, 0.4);
+  --tw-prose-invert-captions: rgba(35, 32, 29, 0.6);
   --tw-prose-invert-code: var(--text-cream);
   --tw-prose-invert-pre-code: var(--text-cream);
-  --tw-prose-invert-pre-bg: rgba(42, 33, 24, 0.05);
-  --tw-prose-invert-th-borders: rgba(42, 33, 24, 0.2);
-  --tw-prose-invert-td-borders: rgba(42, 33, 24, 0.1);
+  --tw-prose-invert-pre-bg: rgba(35, 32, 29, 0.05);
+  --tw-prose-invert-th-borders: rgba(35, 32, 29, 0.2);
+  --tw-prose-invert-td-borders: rgba(35, 32, 29, 0.1);
 }
 
 /*
@@ -815,8 +775,8 @@ body,
  * Esto le pone el piso al cuerpo y a los dos tamaños de lista que `prose-sm`
  * también achica. Los encabezados del prose no se tocan: ya están por encima.
  */
-[data-theme="light"] #root .prose-sm,
-[data-theme="light"] #root .prose-sm :is(p, li, td, th, blockquote) {
+:root #root .prose-sm,
+:root #root .prose-sm :is(p, li, td, th, blockquote) {
   font-size: var(--text-sm) !important;
   line-height: 1.6;
 }
@@ -836,7 +796,7 @@ body,
 /* Sombras suaves tipo iOS (profundidad sin bordes gruesos) */
 .card-ios {
   background: var(--surface, #111110);
-  border: 1px solid rgba(232, 150, 46, 0.10);
+  border: 1px solid rgba(168, 135, 90, 0.10);
   border-radius: 20px;
   box-shadow:
     0 1px 2px rgba(0, 0, 0, 0.20),
@@ -852,14 +812,14 @@ body,
 
 /* Botón primario con profundidad y respuesta táctil */
 .btn-ios-primary {
-  background: #B0822E;
+  background: #A8875A;
   color: #0F0E0D;
   border-radius: var(--radius);
   font-weight: 700;
-  box-shadow: 0 2px 10px rgba(176, 130, 46, 0.18);
+  box-shadow: 0 2px 10px rgba(168, 135, 90, 0.18);
   transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
 }
-.btn-ios-primary:hover { filter: brightness(1.06); box-shadow: 0 6px 20px rgba(232, 150, 46, 0.42); }
+.btn-ios-primary:hover { filter: brightness(1.06); box-shadow: 0 6px 20px rgba(168, 135, 90, 0.42); }
 .btn-ios-primary:active { transform: scale(0.97); }
 
 /* Números tabulares para métricas (alineación premium) */
@@ -893,10 +853,10 @@ html { font-variant-numeric: lining-nums; }
 .stack-ios > * + * { margin-top: 1.75rem; }
 
 /* Scrollbar sutil (detalle que se nota) */
-* { scrollbar-width: thin; scrollbar-color: rgba(232,150,46,0.25) transparent; }
+* { scrollbar-width: thin; scrollbar-color: rgba(168, 135, 90,0.25) transparent; }
 *::-webkit-scrollbar { width: 8px; height: 8px; }
-*::-webkit-scrollbar-thumb { background: rgba(232,150,46,0.22); border-radius: 8px; }
-*::-webkit-scrollbar-thumb:hover { background: rgba(232,150,46,0.38); }
+*::-webkit-scrollbar-thumb { background: rgba(168, 135, 90,0.22); border-radius: 8px; }
+*::-webkit-scrollbar-thumb:hover { background: rgba(168, 135, 90,0.38); }
 *::-webkit-scrollbar-track { background: transparent; }
 
 /* Entrada suave de las tarjetas al aparecer */
@@ -960,44 +920,37 @@ html { font-variant-numeric: lining-nums; }
    reglas de arriba hacen esto mismo para los hex escritos a mano; esto
    completa el juego con los nombres semanticos que usa el cliente.
 */
-[data-theme="light"] .bg-ink       { background-color: var(--bg-root) !important; }
-[data-theme="light"] .bg-panel     { background-color: var(--bg-card) !important; }
-[data-theme="light"] .bg-surface   { background-color: var(--bg-surface2) !important; }
-[data-theme="light"] .bg-ink\/90,
-[data-theme="light"] .bg-ink\/95,
-[data-theme="light"] .bg-ink\/80   { background-color: rgba(250, 245, 234, .95) !important; }
-[data-theme="light"] .bg-panel\/90,
-[data-theme="light"] .bg-panel\/80,
-[data-theme="light"] .bg-panel\/60,
-[data-theme="light"] .bg-panel\/50 { background-color: rgba(255, 253, 247, .92) !important; }
+:root .bg-ink       { background-color: var(--bg-root) !important; }
+:root .bg-panel     { background-color: var(--bg-card) !important; }
+:root .bg-surface   { background-color: var(--bg-surface2) !important; }
+:root .bg-panel\/60 { background-color: rgba(250, 248, 244, .92) !important; }
 
-[data-theme="light"] .text-cream       { color: var(--text-cream) !important; }
-[data-theme="light"] .text-cream\/90   { color: rgba(42, 33, 24, .92) !important; }
-[data-theme="light"] .text-cream\/85   { color: rgba(42, 33, 24, .88) !important; }
-[data-theme="light"] .text-cream\/80   { color: rgba(42, 33, 24, .84) !important; }
-[data-theme="light"] .text-cream\/75   { color: rgba(42, 33, 24, .78) !important; }
-[data-theme="light"] .text-cream\/70   { color: rgba(42, 33, 24, .74) !important; }
-[data-theme="light"] .text-cream\/65   { color: rgba(42, 33, 24, .70) !important; }
-[data-theme="light"] .text-cream\/60   { color: rgba(42, 33, 24, .66) !important; }
-[data-theme="light"] .text-cream\/55   { color: rgba(42, 33, 24, .62) !important; }
-[data-theme="light"] .text-cream\/50   { color: rgba(42, 33, 24, .58) !important; }
-[data-theme="light"] .text-cream\/45   { color: rgba(42, 33, 24, .54) !important; }
-[data-theme="light"] .text-cream\/40   { color: rgba(42, 33, 24, .48) !important; }
-[data-theme="light"] .text-cream\/35,
-[data-theme="light"] .text-cream\/30,
-[data-theme="light"] .text-cream\/25   { color: rgba(42, 33, 24, .42) !important; }
+:root .text-cream       { color: var(--text-cream) !important; }
+:root .text-cream\/90   { color: rgba(35, 32, 29, .92) !important; }
+:root .text-cream\/85   { color: rgba(35, 32, 29, .88) !important; }
+:root .text-cream\/80   { color: rgba(35, 32, 29, .84) !important; }
+:root .text-cream\/75   { color: rgba(35, 32, 29, .78) !important; }
+:root .text-cream\/70   { color: rgba(35, 32, 29, .74) !important; }
+:root .text-cream\/65   { color: rgba(35, 32, 29, .70) !important; }
+:root .text-cream\/60   { color: rgba(35, 32, 29, .66) !important; }
+:root .text-cream\/55   { color: rgba(35, 32, 29, .62) !important; }
+:root .text-cream\/50   { color: rgba(35, 32, 29, .58) !important; }
+:root .text-cream\/45   { color: rgba(35, 32, 29, .54) !important; }
+:root .text-cream\/40   { color: rgba(35, 32, 29, .48) !important; }
+:root .text-cream\/35,
+:root .text-cream\/30,
+:root .text-cream\/25   { color: rgba(35, 32, 29, .42) !important; }
 
 /* El oro como TEXTO baja de tono para contrastar sobre crema. */
-[data-theme="light"] .text-gold        { color: #8E6824 !important; }
-[data-theme="light"] .text-goldhi      { color: #8E6824 !important; }
+:root .text-gold        { color: #7A5F33 !important; }
+:root .text-goldhi      { color: #7A5F33 !important; }
 /* El oro como RELLENO se queda: sobre crema lee perfecto. */
-[data-theme="light"] .bg-gold          { background-color: #B0822E !important; }
-[data-theme="light"] .text-black       { color: var(--bg-card) !important; }
+:root .bg-gold          { background-color: #A8875A !important; }
+:root .text-black       { color: var(--bg-card) !important; }
 
 /* Sin resplandores: el oro mate no brilla, se apoya. */
-[data-theme="light"] .blur-3xl,
-[data-theme="light"] .blur-2xl         { display: none !important; }
-[data-theme="light"] .shadow-2xl       { box-shadow: 0 1px 2px rgba(42,33,24,.04), 0 16px 40px rgba(42,33,24,.07) !important; }
+:root .blur-2xl { display: none !important; }
+:root .shadow-2xl       { box-shadow: 0 1px 2px rgba(35, 32, 29,.04), 0 16px 40px rgba(35, 32, 29,.07) !important; }
 
 /* ─── V5 · las tres islas que quedaban ──────────────────────────────
    1. card-ios usaba var(--surface) — una variable que NO existe en el
@@ -1006,28 +959,19 @@ html { font-variant-numeric: lining-nums; }
    2. La ceremonia de cinturon tiene el negro escrito a mano.
    3. El aside del menu usa bg-ink/90 con desenfoque.
 */
-[data-theme="light"] {
+:root {
   --surface: var(--bg-card);
 }
-[data-theme="light"] .card-ios,
-[data-theme="light"] .card-panel   { background: var(--bg-card) !important; border-color: rgba(176,130,46,.22) !important; box-shadow: 0 1px 2px rgba(42,33,24,.04), 0 12px 32px rgba(42,33,24,.06) !important; }
-[data-theme="light"] .card-ios:hover { box-shadow: 0 2px 6px rgba(42,33,24,.06), 0 18px 44px rgba(42,33,24,.09) !important; }
+:root .card-ios,
+:root .card-panel   { background: var(--bg-card) !important; border-color: rgba(168, 135, 90,.22) !important; box-shadow: 0 1px 2px rgba(35, 32, 29,.04), 0 12px 32px rgba(35, 32, 29,.06) !important; }
+:root .card-ios:hover { box-shadow: 0 2px 6px rgba(35, 32, 29,.06), 0 18px 44px rgba(35, 32, 29,.09) !important; }
 
 /* La ceremonia y los fondos oscuros escritos a mano. */
-[data-theme="light"] .bg-\[\#0D0C0B\],
-[data-theme="light"] .bg-\[\#0d0a06\],
-[data-theme="light"] .bg-\[\#0d0d0c\],
-[data-theme="light"] .bg-\[\#0d0d0d\],
-[data-theme="light"] .bg-\[\#0B0B0A\],
-[data-theme="light"] .bg-\[\#161310\]  { background-color: var(--bg-root) !important; }
-[data-theme="light"] .bg-\[\#0d0a06\]\/95 { background-color: rgba(250,245,234,.96) !important; }
 
 /* El menu lateral. */
-[data-theme="light"] aside              { background-color: rgba(250,245,234,.96) !important; }
+:root aside              { background-color: rgba(241, 235, 224,.96) !important; }
 /* El color del texto lo pone la regla del bloque de tinta, más abajo. */
-[data-theme="light"] .input-field       { background: var(--bg-card) !important; color: var(--text-cream) !important; }
-[data-theme="light"] .custom-select     { background-color: var(--bg-card) !important; color: var(--text-cream) !important; }
-[data-theme="light"] .custom-select option { background: var(--bg-card) !important; color: var(--text-cream) !important; }
+:root .input-field       { background: var(--bg-card) !important; color: var(--text-cream) !important; }
 
 /* ═══════════════════════════════════════════════════════════════════
    CAPA 10-DISEÑO · 15 sep 2026
@@ -1036,7 +980,7 @@ html { font-variant-numeric: lining-nums; }
    Reglas: nunca degradé · nunca brillo dorado · versalitas a .16em ·
    foco oro de 2 px · movimiento de 120 ms o nada · fuentes de la casa.
    ═══════════════════════════════════════════════════════════════════ */
-[data-theme="light"] {
+:root {
   --ink: var(--text-cream);  --ink2: #5A534C;  --ink3: #6B635A;
   /* El oro, en sus dos papeles de la home: `hilo` para la línea de 1 px,
      `oro` para el texto en versalitas y numerales. Nunca de relleno. */
@@ -1052,7 +996,7 @@ html { font-variant-numeric: lining-nums; }
   --line: rgba(35, 32, 29, 0.14); --line2: rgba(35, 32, 29, 0.24);
   /* Tres esquinas, no nueve: 12 la ficha, 24 la tarjeta, redondo el botón. */
   --r: 12px; --r2: 24px; --r3: 999px;
-  --sombra: 0 1px 2px rgba(42, 33, 24, 0.04), 0 6px 20px rgba(42, 33, 24, 0.05);
+  --sombra: 0 1px 2px rgba(35, 32, 29, 0.04), 0 6px 20px rgba(35, 32, 29, 0.05);
   /*
    * LAS SOMBRAS VIEJAS APUNTAN A LA DE LA CASA.
    *
@@ -1067,55 +1011,56 @@ html { font-variant-numeric: lining-nums; }
    * cierra la otra puerta, la del token, para los usos de hoy y los que
    * vengan. El flotante conserva algo más de cuerpo porque un panel que se
    * levanta del papel necesita decirlo, pero en la tierra de la casa.
+   *
+   * Desde el 15 de noviembre las tres se declaran UNA vez, arriba, con el
+   * resto de la piel: ya no hay un valor de tema oscuro debajo esperando a
+   * que alguien quite la capa.
    */
-  --shadow-card: var(--sombra);
-  --shadow-float: 0 2px 6px rgba(42, 33, 24, 0.06), 0 14px 36px rgba(42, 33, 24, 0.08);
-  --shadow-gold: var(--sombra);
 }
 
 /* Fraunces en su versión suave: la letra cálida y redonda de la casa. */
-[data-theme="light"] h1, [data-theme="light"] h2, [data-theme="light"] h3,
-[data-theme="light"] [style*="font-display"] {
+:root h1, :root h2, :root h3,
+:root [style*="font-display"] {
   font-variation-settings: "SOFT" 100;
 }
 /* Títulos derechos. La regla global de cursiva no está en ninguna capa y le
    ganaba a cada `not-italic`. La cursiva queda solo donde se pide en línea. */
-[data-theme="light"] h1, [data-theme="light"] h2, [data-theme="light"] h3 {
+:root h1, :root h2, :root h3 {
   font-style: normal;
 }
 
 /* 1 · Nunca degradé. Los degradés de Tailwind quedan planos en su primer color. */
-[data-theme="light"] #root [class*="bg-gradient-to-"] {
+:root #root [class*="bg-gradient-to-"] {
   --tw-gradient-via: var(--tw-gradient-from) !important;
   --tw-gradient-to: var(--tw-gradient-from) !important;
 }
 
 /* 2 · Nunca brillo dorado: ni sombras de oro ni manchas difuminadas de fondo. */
-[data-theme="light"] #root [class*="shadow-gold"],
-[data-theme="light"] #root [class*="shadow-[0_0_"] {
+:root #root [class*="shadow-gold"],
+:root #root [class*="shadow-[0_0_"] {
   box-shadow: var(--sombra) !important;
 }
-[data-theme="light"] #root [class*="blur-[1"][class*="rounded-full"],
-[data-theme="light"] #root [class*="blur-3xl"][class*="rounded-full"] {
+:root #root [class*="blur-[1"][class*="rounded-full"],
+:root #root [class*="blur-3xl"][class*="rounded-full"] {
   display: none !important;
 }
 
 /* 3 · Versalitas: el kicker de la especificación, no más espaciado que eso. */
-[data-theme="light"] #root [class*="tracking-[0.2"],
-[data-theme="light"] #root [class*="tracking-[0.3"],
-[data-theme="light"] #root [class*="tracking-[0.4"] {
+:root #root [class*="tracking-[0.2"],
+:root #root [class*="tracking-[0.3"],
+:root #root [class*="tracking-[0.4"] {
   letter-spacing: 0.16em !important;
 }
 
 /* 4 · Tarjeta y botón de la casa. */
-[data-theme="light"] .card-ios,
-[data-theme="light"] .card-panel {
+:root .card-ios,
+:root .card-panel {
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: var(--r2);
   box-shadow: var(--sombra);
 }
-[data-theme="light"] .card-ios:hover { transform: none; box-shadow: var(--sombra); }
+:root .card-ios:hover { transform: none; box-shadow: var(--sombra); }
 /*
  * ═══ EL BOTÓN PRINCIPAL YA NO ES UN BLOQUE DE ORO ═══
  *
@@ -1134,7 +1079,7 @@ html { font-variant-numeric: lining-nums; }
  *
  * Si alguna vez conviene volver al oro, son estas dos reglas y nada más.
  */
-[data-theme="light"] .btn-ios-primary {
+:root .btn-ios-primary {
   background: var(--tinta-boton);
   color: var(--papel-boton) !important;
   min-height: 52px;
@@ -1144,7 +1089,7 @@ html { font-variant-numeric: lining-nums; }
   box-shadow: none;
   border: 1px solid var(--tinta-boton);
 }
-[data-theme="light"] .btn-ios-primary:hover {
+:root .btn-ios-primary:hover {
   filter: none;
   background: var(--tinta-boton-hover);
   border-color: var(--tinta-boton-hover);
@@ -1152,17 +1097,17 @@ html { font-variant-numeric: lining-nums; }
 }
 
 /* 5 · Foco visible: contorno oro de 2 px. */
-[data-theme="light"] :focus-visible {
+:root :focus-visible {
   outline: 2px solid var(--oro) !important;
   outline-offset: 2px;
 }
 
 /* 6 · Movimiento: nada de entradas deslizadas ni pulsos. Estado en 120 ms. */
-[data-theme="light"] #root .animate-pulse { animation: none !important; }
+:root #root .animate-pulse { animation: none !important; }
 @media (prefers-reduced-motion: reduce) {
-  [data-theme="light"] #root *,
-  [data-theme="light"] #root *::before,
-  [data-theme="light"] #root *::after {
+  :root #root *,
+  :root #root *::before,
+  :root #root *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
@@ -1175,19 +1120,19 @@ html { font-variant-numeric: lining-nums; }
    - Y el botón principal ya no va sobre oro: va sobre tinta, que da 13:1
      contra los 4,6 que daba el oro oscuro. Estas dos líneas lo devolvían al
      oro treinta y nueve reglas más abajo de donde se decidió que no. */
-[data-theme="light"] #root [class*="text-cream/3"],
-[data-theme="light"] #root [class*="text-cream/4"],
-[data-theme="light"] #root [class*="text-cream/5"],
-[data-theme="light"] #root [class*="text-cream/6"],
-[data-theme="light"] #root [class*="text-white/3"],
-[data-theme="light"] #root [class*="text-white/4"],
-[data-theme="light"] #root [class*="text-white/5"],
-[data-theme="light"] #root [class*="text-white/6"] {
+:root #root [class*="text-cream/3"],
+:root #root [class*="text-cream/4"],
+:root #root [class*="text-cream/5"],
+:root #root [class*="text-cream/6"],
+:root #root [class*="text-white/3"],
+:root #root [class*="text-white/4"],
+:root #root [class*="text-white/5"],
+:root #root [class*="text-white/6"] {
   color: var(--ink2) !important;
 }
-[data-theme="light"] #root [class~="text-gold"],
-[data-theme="light"] #root [class*="text-gold/"],
-[data-theme="light"] #root [class~="text-goldhi"] {
+:root #root [class~="text-gold"],
+:root #root [class*="text-gold/"],
+:root #root [class~="text-goldhi"] {
   color: var(--oro-d) !important;
 }
 
@@ -1195,15 +1140,15 @@ html { font-variant-numeric: lining-nums; }
    Una tarjeta al 40% de opacidad deja su texto en 2,3:1: ilegible.
    --ink2 baja un tono respecto de la especificación (#6E6252 → #5E5244)
    para pasar AA también sobre --card2. */
-[data-theme="light"] { --ink2: #5E5244; }
-[data-theme="light"] #root [class~="opacity-40"],
-[data-theme="light"] #root [class~="opacity-50"],
-[data-theme="light"] #root [class~="opacity-60"],
-[data-theme="light"] #root [class~="opacity-70"],
-[data-theme="light"] #root [class~="opacity-75"] {
+:root { --ink2: #5E5244; }
+:root #root [class~="opacity-40"],
+:root #root [class~="opacity-50"],
+:root #root [class~="opacity-60"],
+:root #root [class~="opacity-70"],
+:root #root [class~="opacity-75"] {
   opacity: 1 !important;
 }
-[data-theme="light"] #root [class*="text-cream/7"] { color: var(--ink2) !important; }
+:root #root [class*="text-cream/7"] { color: var(--ink2) !important; }
 /* ─── EL VERDE Y EL ROJO CON OPACIDAD, QUE NO TENÍAN REGLA ────────────────
  *
  * Dos líneas más arriba, el crema con opacidad se endereza a `--ink2` porque
@@ -1220,15 +1165,15 @@ html { font-variant-numeric: lining-nums; }
  * Se endereza igual que el crema: el tono entero, y que la jerarquía la haga
  * el tamaño.
  */
-[data-theme="light"] #root [class*="text-success/"] { color: var(--color-success) !important; }
-[data-theme="light"] #root [class*="text-danger/"] { color: var(--color-danger) !important; }
-[data-theme="light"] #root [class*="text-cream/1"],
-[data-theme="light"] #root [class*="text-cream/2"],
-[data-theme="light"] #root [class*="text-white/1"],
-[data-theme="light"] #root [class*="text-white/2"] { color: var(--ink2) !important; }
-[data-theme="light"] #root [class*="text-white/7"],
-[data-theme="light"] #root [class*="text-white/8"],
-[data-theme="light"] #root [class*="text-white/9"] { color: var(--ink2) !important; }
+:root #root [class*="text-success/"] { color: var(--color-success) !important; }
+:root #root [class*="text-danger/"] { color: var(--color-danger) !important; }
+:root #root [class*="text-cream/1"],
+:root #root [class*="text-cream/2"],
+:root #root [class*="text-white/1"],
+:root #root [class*="text-white/2"] { color: var(--ink2) !important; }
+:root #root [class*="text-white/7"],
+:root #root [class*="text-white/8"],
+:root #root [class*="text-white/9"] { color: var(--ink2) !important; }
 /* El amarillo sobre crema no se lee (1,6:1): pasa a oro oscuro.
  *
  * ─── Y VA AL ORO DE TEXTO, NO AL DEL BOTÓN ───────────────────────────────
@@ -1248,17 +1193,17 @@ html { font-variant-numeric: lining-nums; }
  * el fondo, 4,98 sobre la segunda superficie y 5,12 sobre el chip ámbar. La
  * regla ya estaba escrita; el amarillo nunca la había apuntado.
  */
-[data-theme="light"] #root [class*="text-yellow-"],
-[data-theme="light"] #root [class*="text-amber-"] { color: var(--oro-t) !important; }
-[data-theme="light"] #root [class*="fill-yellow-"] { fill: var(--oro-d) !important; }
+:root #root [class*="text-yellow-"],
+:root #root [class*="text-amber-"] { color: var(--oro-t) !important; }
+:root #root [class*="fill-yellow-"] { fill: var(--oro-d) !important; }
 
 /* 9 · Objetivo táctil de 44 px (10-DISENO §9). Los botones con alto propio
    (íconos chicos con h-*) se corrigen en su archivo. */
-[data-theme="light"] #root main button:not([class*=" h-"]):not([class^="h-"]) {
+:root #root main button:not([class*=" h-"]):not([class^="h-"]) {
   min-height: 44px;
 }
 /* El otro botón primario de la app, igual al de la casa. */
-[data-theme="light"] .btn-primary {
+:root .btn-primary {
   background: var(--tinta-boton) !important;
   color: var(--papel-boton) !important;
   font-size: 18px;
@@ -1269,33 +1214,52 @@ html { font-variant-numeric: lining-nums; }
   border-radius: var(--r3);
   box-shadow: none !important;
 }
-[data-theme="light"] .btn-primary:hover {
+:root .btn-primary:hover {
   background: var(--tinta-boton-hover) !important;
   box-shadow: none !important;
   transform: none;
 }
 /* El oro de TEXTO va un tono más oscuro que el del botón: así también pasa AA
    sobre los fondos tintados en oro (pestañas activas, chips). */
-[data-theme="light"] { --oro-t: #74551C; }
-[data-theme="light"] #root [class~="text-gold"],
-[data-theme="light"] #root [class*="text-gold/"],
-[data-theme="light"] #root [class~="text-goldhi"] { color: var(--oro-t) !important; }
-[data-theme="light"] #root [class*="bg-cream/"] { background-color: var(--card2) !important; }
-[data-theme="light"] #root .prose strong,
-[data-theme="light"] #root .prose b { color: var(--oro-t) !important; }
-[data-theme="light"] #root main [class*="bg-black/1"],
-[data-theme="light"] #root main [class*="bg-black/2"],
-[data-theme="light"] #root main [class*="bg-black/3"] { background-color: var(--card2) !important; }
+:root { --oro-t: #7A5F33; }
+:root #root [class~="text-gold"],
+:root #root [class*="text-gold/"],
+:root #root [class~="text-goldhi"] { color: var(--oro-t) !important; }
+
+/* ── EL ORO SOBRE RELLENO DE ORO BAJA UN ESCALÓN ───────────────────
+ *
+ * El oro de texto de la casa es el de la home: #7A5F33. Sobre el papel da
+ * 5,6:1 y pasa de sobra. La pestaña elegida no apoya sobre el papel: apoya
+ * sobre una ficha de oro al 10–15 %, y ahí el mismo oro cae a 4,4:1 — AA
+ * pide 4,5. Medido el 15 de noviembre en 23 vistas: «Escribir», «Montar en
+ * Meta», «Onboarding», «Tu reporte», las diez pestañas de Campañas.
+ *
+ * No es un segundo oro: es el mismo, un escalón más oscuro, para el único
+ * caso en que el relleno se lo come. Se declara UNA vez, con su medida, en
+ * lugar de tocarlo a mano en las cincuenta fichas donde aparece el par.
+ * Sobre esa misma ficha, #74551C da 5,2:1.
+ */
+:root { --oro-t2: #74551C; }
+:root #root [class*="bg-gold/"]:is([class~="text-gold"], [class*="text-gold/"], [class~="text-goldhi"]),
+:root #root [class*="bg-gold/"] :is([class~="text-gold"], [class*="text-gold/"], [class~="text-goldhi"]) {
+  color: var(--oro-t2) !important;
+}
+:root #root [class*="bg-cream/"] { background-color: var(--card2) !important; }
+:root #root .prose strong,
+:root #root .prose b { color: var(--oro-t) !important; }
+:root #root main [class*="bg-black/1"],
+:root #root main [class*="bg-black/2"],
+:root #root main [class*="bg-black/3"] { background-color: var(--card2) !important; }
 
 /* 10 · Los títulos en mayúsculas son rótulos: van en la letra de cuerpo.
    En Fraunces quedaban pesados ("MENTOR IA", "VELOCIDAD DE AVANCE"). */
-[data-theme="light"] #root :is(h1, h2, h3, h4)[class~="uppercase"] {
+:root #root :is(h1, h2, h3, h4)[class~="uppercase"] {
   font-family: var(--font-body) !important;
   font-style: normal !important;
   letter-spacing: 0.14em;
 }
 /* 11 · Sombras: una sola, muy suave (10-DISENO §5). */
-[data-theme="light"] #root :is([class~="shadow-md"], [class~="shadow-lg"], [class~="shadow-xl"], [class~="shadow-2xl"]) {
+:root #root :is([class~="shadow-md"], [class~="shadow-lg"], [class~="shadow-xl"], [class~="shadow-2xl"]) {
   box-shadow: var(--sombra) !important;
 }
 
@@ -1317,19 +1281,19 @@ html { font-variant-numeric: lining-nums; }
  * clases escritas a mano en cada pantalla ganan por especificidad, y lo que
  * se busca es justamente que no decidan esto cada una por su cuenta.
  */
-[data-theme="light"] #root :is(input[type="text"], input[type="number"],
+:root #root :is(input[type="text"], input[type="number"],
   input[type="email"], input[type="tel"], input[type="url"], input[type="date"],
   input[type="password"], input:not([type]), textarea, select) {
   background-color: var(--card, #FFFDF7) !important;
   border: 1px solid var(--line2, #DFD3BC) !important;
   color: var(--text-cream) !important;
 }
-[data-theme="light"] #root :is(input, textarea, select):focus {
-  border-color: var(--oro, #B0822E) !important;
+:root #root :is(input, textarea, select):focus {
+  border-color: var(--oro, #A8875A) !important;
   box-shadow: none !important;
 }
 /* Y su marcador: legible, no un susurro. */
-[data-theme="light"] #root :is(input, textarea)::placeholder {
+:root #root :is(input, textarea)::placeholder {
   color: color-mix(in srgb, var(--text-cream) 45%, transparent) !important;
 }
 
@@ -1338,7 +1302,7 @@ html { font-variant-numeric: lining-nums; }
    - Los rótulos en mayúsculas parten la palabra antes que salirse de su caja.
    - El fondo oro con texto blanco va en oro oscuro (5:1).
    - Las opacidades bajas que quedaban (20–35) también se sacan. */
-[data-theme="light"] #root .truncate {
+:root #root .truncate {
   white-space: normal !important;
   /* `break-word` y no `anywhere`: con `anywhere` el navegador corta por donde
      sea, aunque haya un espacio a mano. El título de la barra salía «El /
@@ -1346,7 +1310,7 @@ html { font-variant-numeric: lining-nums; }
      Con `break-word` solo parte una palabra que no entra ni sola. */
   overflow-wrap: break-word;
 }
-[data-theme="light"] #root [class~="uppercase"] { overflow-wrap: break-word; }
+:root #root [class~="uppercase"] { overflow-wrap: break-word; }
 
 /* La excepción: las cajas de alto fijo.
  *
@@ -1354,15 +1318,15 @@ html { font-variant-numeric: lining-nums; }
  * la mitad no sirve— y está mal en una barra de 56 px de alto: ahí el texto
  * que pasa a tres renglones no se lee mejor, se monta sobre los botones de al
  * lado. En esos pocos lugares vuelve a mandar el corte con puntos. */
-[data-theme="light"] #root .una-linea,
+:root #root .una-linea,
 .una-linea {
   white-space: nowrap !important;
   overflow: hidden;
   text-overflow: ellipsis;
   overflow-wrap: normal !important;
 }
-[data-theme="light"] #root [class~="tracking-widest"] { letter-spacing: 0.08em !important; }
-[data-theme="light"] #root [class~="bg-gold"] { background-color: var(--oro-d) !important; }
+:root #root [class~="tracking-widest"] { letter-spacing: 0.08em !important; }
+:root #root [class~="bg-gold"] { background-color: var(--oro-d) !important; }
 /*
  * Pero un BOTÓN no: la acción se dice con contraste, no con color. El oro
  * sólido se queda donde no es una acción —la barra de progreso, la cinta del
@@ -1370,28 +1334,28 @@ html { font-variant-numeric: lining-nums; }
  * igual que .btn-primary. Es la misma regla de la casa aplicada al único
  * lugar donde faltaba: era el rectángulo dorado más grande de cada pantalla.
  */
-[data-theme="light"] #root button[class~="bg-gold"],
-[data-theme="light"] #root a[class~="bg-gold"] {
+:root #root button[class~="bg-gold"],
+:root #root a[class~="bg-gold"] {
   background-color: var(--tinta-boton) !important;
   color: var(--papel-boton) !important;
 }
-[data-theme="light"] #root button[class~="bg-gold"]:hover,
-[data-theme="light"] #root a[class~="bg-gold"]:hover {
+:root #root button[class~="bg-gold"]:hover,
+:root #root a[class~="bg-gold"]:hover {
   background-color: var(--tinta-boton-hover) !important;
 }
 /* Y su texto, que estaba escrito para leerse sobre oro. */
-[data-theme="light"] #root button[class~="bg-gold"] [class~="text-ink"],
-[data-theme="light"] #root button[class~="bg-gold"][class~="text-ink"],
-[data-theme="light"] #root a[class~="bg-gold"][class~="text-ink"] {
+:root #root button[class~="bg-gold"] [class~="text-ink"],
+:root #root button[class~="bg-gold"][class~="text-ink"],
+:root #root a[class~="bg-gold"][class~="text-ink"] {
   color: var(--papel-boton) !important;
 }
-[data-theme="light"] #root :is([class~="opacity-20"], [class~="opacity-25"], [class~="opacity-30"], [class~="opacity-35"]) {
+:root #root :is([class~="opacity-20"], [class~="opacity-25"], [class~="opacity-30"], [class~="opacity-35"]) {
   opacity: 1 !important;
 }
-[data-theme="light"] #root [class~="bg-gold"] { color: var(--bg-card) !important; }
+:root #root [class~="bg-gold"] { color: var(--bg-card) !important; }
 /* En una tabla no se parte la palabra: la tabla se desplaza dentro de su caja. */
-[data-theme="light"] #root table [class~="uppercase"],
-[data-theme="light"] #root th { overflow-wrap: normal !important; word-break: normal !important; }
+:root #root table [class~="uppercase"],
+:root #root th { overflow-wrap: normal !important; word-break: normal !important; }
 
 
 /* ═══════════════ LO EDITORIAL ═══════════════
@@ -1464,34 +1428,34 @@ html { font-variant-numeric: lining-nums; }
  * lago. Contraste 1,4 a 1. Ilegible.
  *
  * Por eso estas reglas van al final del archivo y llevan `!important`: es la
- * única forma de que el tema no las toque. El `[data-theme="light"]` repetido
+ * única forma de que el tema no las toque. El `:root` repetido
  * sube la especificidad por encima de las reglas de arriba.
  */
 .sobre-paisaje,
-[data-theme="light"] #root .sobre-paisaje {
+:root #root .sobre-paisaje {
   color: #FFFFFF !important;
 }
 .sobre-paisaje-2,
-[data-theme="light"] #root .sobre-paisaje-2 {
+:root #root .sobre-paisaje-2 {
   color: rgba(255, 255, 255, 0.82) !important;
 }
 .sobre-paisaje-3,
-[data-theme="light"] #root .sobre-paisaje-3 {
+:root #root .sobre-paisaje-3 {
   color: rgba(255, 255, 255, 0.62) !important;
 }
 /* El oro de la colección, que en el tema claro se cambiaba por un oro oscuro
    pensado para fondo crema. Sobre el paisaje tiene que seguir siendo el de la
    tapa. */
 .oro-paisaje,
-[data-theme="light"] #root .oro-paisaje,
-[data-theme="light"] #root .rotulo-libro.oro-paisaje {
+:root #root .oro-paisaje,
+:root #root .rotulo-libro.oro-paisaje {
   color: #C9A86F !important;
 }
 .regla-paisaje,
-[data-theme="light"] #root .regla-paisaje {
+:root #root .regla-paisaje {
   border-top-color: #C9A86F !important;
 }
 .accion-paisaje,
-[data-theme="light"] #root .accion-paisaje {
+:root #root .accion-paisaje {
   border-left-color: #C9A86F !important;
 }

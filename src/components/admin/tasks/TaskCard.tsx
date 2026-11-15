@@ -162,8 +162,8 @@ export default function TaskCard({
         backgroundImage: PRIORITY_BG[tarea.prioridad].image,
       }}
       className={`
-        bg-[#1A1A1A] border rounded-xl cursor-pointer
-        hover:bg-[#1F1F1F]
+        bg-panel border rounded-xl cursor-pointer
+        hover:bg-surface
         transition-all group relative
         focus:outline-none focus:ring-2 focus:ring-gold/20
         ${isDragging ? 'opacity-50 scale-95 shadow-2xl' : ''}
@@ -240,7 +240,7 @@ export default function TaskCard({
               <div
                 ref={menuRef}
                 style={{ position: 'fixed', top: menuPos.top, left: menuPos.left, width: 200 }}
-                className="z-50 bg-[#1E1E1E] border border-gold/12 rounded-xl shadow-xl py-1"
+                className="z-50 bg-panel border border-gold/12 rounded-xl shadow-xl py-1"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="px-3 py-1.5 text-sm font-bold text-cream/45 uppercase tracking-wider">

@@ -255,7 +255,7 @@ function EditModal({ campo, clienteId, currentValue, onClose, onSaved }: EditMod
 
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl bg-[#0F0F0F] border border-gold/30 rounded-2xl shadow-2xl">
+      <div className="w-full max-w-2xl bg-panel border border-gold/30 rounded-2xl shadow-2xl">
         <div className="flex items-start justify-between p-5 border-b border-cream/10">
           <div>
             <p className="text-sm text-gold uppercase tracking-widest font-semibold">

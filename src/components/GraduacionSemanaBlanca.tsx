@@ -90,7 +90,7 @@ export default function GraduacionSemanaBlanca() {
         ¿No subiste tu precio todavía? Repite tus 5 días — tu garantía, sin costo.
       </button>
       <a href={waLink('Hola · Terminé mis 5 días y quiero seguir el camino completo')} target="_blank" rel="noreferrer"
-        className="inline-block mt-4 btn-primary text-[#1a1206] text-sm font-bold px-5 py-3 rounded-xl">
+        className="inline-block mt-4 btn-primary text-cream text-sm font-bold px-5 py-3 rounded-xl">
         Quiero seguir el camino →
       </a>
     </div>

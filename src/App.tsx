@@ -164,7 +164,7 @@ function SemanaCompleta({ nombre, planReservado }: { nombre?: string; planReserv
           <p className="text-sm text-cream/60 mt-1 leading-relaxed">{oferta.abre}</p>
         </div>
         <a href={oferta.checkout || waLink(oferta.mensaje)} target="_blank" rel="noreferrer"
-           className="block btn-primary text-[#1a1206] font-bold px-6 py-3.5 rounded-2xl mb-3">
+           className="block btn-primary text-cream font-bold px-6 py-3.5 rounded-2xl mb-3">
           Retomar mi camino →
         </a>
         <p className="text-sm text-cream/35">Sigues exactamente donde quedaste — mismo login, todo intacto.{racha > 1 ? ` Tu racha de ${racha} te espera.` : ''}</p>

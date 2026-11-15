@@ -42,7 +42,8 @@ ok(ESTADO_LABEL.listo === 'Listo', 'verde: hecho');
 ok(ESTADO_LABEL.na === 'No aplica', 'y «no aplica», que no es un estado de avance');
 
 ok(ESTADO_COLOR.pendiente.borde.includes('danger'), 'el rojo sale del token de peligro');
-ok(ESTADO_COLOR.cliente.borde.includes('E8862E'), 'el naranja es propio: no hay token para él');
+ok(ESTADO_COLOR.cliente.borde.includes('espera'), 'el quinto estado tiene su token, no un hex a mano');
+ok(!/#[0-9A-Fa-f]{3,8}/.test(JSON.stringify(ESTADO_COLOR)), 'y ningún estado escribe su color a mano');
 ok(ESTADO_COLOR.nosotros.borde.includes('gold'), 'el amarillo es el oro de la marca');
 ok(ESTADO_COLOR.listo.borde.includes('success'), 'y el verde, el de éxito');
 ok(new Set(Object.values(ESTADO_COLOR).map((c) => c.borde)).size === 5,

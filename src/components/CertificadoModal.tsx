@@ -93,7 +93,7 @@ export default function CertificadoModal({
           <button
             onClick={onClose}
             aria-label="Cerrar"
-            className="-mr-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-[#EAE4D9]/70 hover:text-[#EAE4D9] transition-colors"
+            className="-mr-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-pieza-papel/70 hover:text-pieza-papel transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -108,35 +108,35 @@ export default function CertificadoModal({
           los dos. Una pieza impresa no sigue el tema de la app.
         */}
         <div
-          className="relative rounded-2xl overflow-hidden bg-[#141210] p-8 text-center"
-          style={{ border: '2px solid #B0822E' }}
+          className="relative rounded-2xl overflow-hidden bg-pieza p-8 text-center"
+          style={{ border: '2px solid var(--color-pieza-oro)' }}
         >
-          <div className="absolute inset-3 border border-[#B0822E]/25 rounded-xl pointer-events-none" />
-          <Award className="w-10 h-10 text-[#B0822E] mx-auto mb-3" />
-          <p className="text-sm font-bold uppercase tracking-[0.3em] text-[#B0822E] mb-4">
+          <div className="absolute inset-3 border border-pieza-oro/25 rounded-xl pointer-events-none" />
+          <Award className="w-10 h-10 text-pieza-oro mx-auto mb-3" />
+          <p className="text-sm font-bold uppercase tracking-[0.3em] text-pieza-oro mb-4">
             Tu Clínica Digital · Sanadores Libres
           </p>
-          <p className="text-xs uppercase tracking-widest text-[#EAE4D9]/70 mb-2">Certifica que</p>
+          <p className="text-xs uppercase tracking-widest text-pieza-papel/70 mb-2">Certifica que</p>
           <h2
-            className="text-3xl text-[#B0822E] mb-3"
+            className="text-3xl text-pieza-oro mb-3"
             style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}
           >
             {quien}
           </h2>
-          <p className="text-sm text-[#EAE4D9]/85 leading-relaxed mb-2">
+          <p className="text-sm text-pieza-papel/85 leading-relaxed mb-2">
             {metodoNombre ? (
               <>
-                alcanzó el <span className="text-[#EAE4D9] font-semibold">Cinturón Negro</span> instalando{' '}
-                <span className="text-[#EAE4D9] font-semibold">{metodoNombre}</span>
+                alcanzó el <span className="text-pieza-papel font-semibold">Cinturón Negro</span> instalando{' '}
+                <span className="text-pieza-papel font-semibold">{metodoNombre}</span>
               </>
             ) : (
               <>
-                alcanzó el <span className="text-[#EAE4D9] font-semibold">Cinturón Negro</span> — Sanador
+                alcanzó el <span className="text-pieza-papel font-semibold">Cinturón Negro</span> — Sanador
                 Libre
               </>
             )}
           </p>
-          <p className="text-sm text-[#EAE4D9]/70">
+          <p className="text-sm text-pieza-papel/70">
             Clínica digital instalada · {pacientes} pacientes con precio digno · {fecha}
           </p>
         </div>
@@ -153,7 +153,7 @@ export default function CertificadoModal({
             href={TCD_URL}
             target="_blank"
             rel="noreferrer"
-            className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-[#B0822E]/40 text-[#B0822E] text-sm font-bold uppercase tracking-wider hover:bg-gold/10 transition-colors"
+            className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-pieza-oro/40 text-pieza-oro text-sm font-bold uppercase tracking-wider hover:bg-gold/10 transition-colors"
           >
             <ExternalLink className="w-4 h-4" /> TCD
           </a>

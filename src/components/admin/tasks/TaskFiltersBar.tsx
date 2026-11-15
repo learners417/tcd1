@@ -129,7 +129,7 @@ export default function TaskFiltersBar({ filters, onChange, teamMembers, current
   }, [teamMembers, currentUserId]);
 
   return (
-    <div className="bg-[#0F0F0F] border border-[rgba(255,255,255,0.06)] rounded-xl px-2.5 py-2">
+    <div className="bg-panel border border-[rgba(255,255,255,0.06)] rounded-xl px-2.5 py-2">
       <div className="flex items-center gap-1.5 flex-wrap">
         {/* Filter indicator */}
         <div className="flex items-center gap-1.5 pl-1 pr-2 h-7 text-cream/55">

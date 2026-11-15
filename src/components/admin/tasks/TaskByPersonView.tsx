@@ -166,7 +166,7 @@ function PersonColumn({
       {/* Drop zone con buckets */}
       <div
         ref={setNodeRef}
-        className="flex-1 min-h-[300px] rounded-b-2xl bg-[#0F0F0F]/60 border border-t-0 border-[rgba(255,255,255,0.05)] p-2 space-y-3"
+        className="flex-1 min-h-[300px] rounded-b-2xl bg-panel/60 border border-t-0 border-[rgba(255,255,255,0.05)] p-2 space-y-3"
       >
         {tareas.length === 0 ? (
           <div className="flex items-center justify-center h-32 text-cream/15 text-xs px-3 text-center">

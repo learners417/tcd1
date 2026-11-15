@@ -67,7 +67,7 @@ import {
   Sprout, Target, Sunrise, UserCircle, Lightbulb, Triangle, LayoutGrid, Compass, CalendarDays,
   Cog, Building2, Megaphone, Phone, Handshake, Palette, BarChart3,
   Search, UsersRound, Check, ClipboardList, Menu, ClipboardCheck, Cpu,
-  Mail, KeyRound, Fingerprint, ChevronLeft, Sun, Moon, Rocket , Timer, Paperclip } from 'lucide-react';
+  Mail, KeyRound, Fingerprint, ChevronLeft, Rocket , Timer, Paperclip } from 'lucide-react';
 
 const ADMIN_PILAR_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Sprout, BookOpen, Target, Sunrise, UserCircle, Lightbulb, Triangle, Cog,
@@ -78,7 +78,6 @@ import { STAGE_COLORS, SEMAFORO_BG } from '../lib/teamColors';
 import { SEED_ROADMAP_V3, SEED_ROADMAP_V2 } from '../lib/roadmapSeed';
 import { generateText } from '../lib/aiProvider';
 import { usePersistedState } from '../lib/usePersistedState';
-import { useAdminTheme } from '../lib/theme';
 import { TAREAS_TAGS } from '../lib/diarioCalcs';
 import { calcularEmbudoV3KPIs, postsTotales } from '../lib/funnelCalcs';
 import { toast } from 'sonner';
@@ -610,7 +609,6 @@ export default function Admin({ adminProfile, onSignOut }: AdminProps) {
   const [adminAvatar, setAdminAvatar] = useState<string>(() => localStorage.getItem(`tcd_admin_avatar_${adminProfile.id}`) || '');
   const [guardandoAdmin, setGuardandoAdmin] = useState(false);
   const adminAvatarInputRef = useRef<HTMLInputElement>(null);
-  const [theme, setTheme] = useAdminTheme();
 
   // Equipo
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
@@ -3619,7 +3617,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                 />
                               </button>
                               {expandido && (
-                                <div className="px-6 pb-5 pt-1 space-y-4 bg-[#0F0F0F] border-t border-gold/5">
+                                <div className="px-6 pb-5 pt-1 space-y-4 bg-panel border-t border-gold/5">
                                   {/* Distribución 5→1 */}
                                   <div className="space-y-1.5">
                                     <p className="text-sm font-bold uppercase tracking-widest text-cream/55 mb-2">Distribución</p>
@@ -4539,40 +4537,6 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                   className="w-full bg-black/20 border border-gold/12 rounded-lg px-4 py-3 text-sm text-cream focus:outline-none focus:border-gold/50 transition-colors"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-bold uppercase tracking-wider text-cream/75 mb-2">Apariencia</label>
-                <div role="radiogroup" aria-label="Tema visual" className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    role="radio"
-                    aria-checked={theme === 'dark'}
-                    onClick={() => setTheme('dark')}
-                    className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl border text-sm font-semibold transition-colors ${
-                      theme === 'dark'
-                        ? 'bg-gold/15 border-gold/50 text-gold'
-                        : 'bg-black/20 border-gold/10 text-cream/70 hover:text-cream hover:border-gold/18'
-                    }`}
-                  >
-                    <Moon className="w-4 h-4" />
-                    Oscuro
-                  </button>
-                  <button
-                    type="button"
-                    role="radio"
-                    aria-checked={theme === 'light'}
-                    onClick={() => setTheme('light')}
-                    className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl border text-sm font-semibold transition-colors ${
-                      theme === 'light'
-                        ? 'bg-gold/15 border-gold/50 text-gold'
-                        : 'bg-black/20 border-gold/10 text-cream/70 hover:text-cream hover:border-gold/18'
-                    }`}
-                  >
-                    <Sun className="w-4 h-4" />
-                    Claro
-                  </button>
-                </div>
-                <p className="text-sm text-cream/55 mt-2">El cambio se aplica al toque y se recuerda la próxima vez que entres.</p>
-              </div>
             </div>
 
             <div className="flex gap-3 mt-8">
@@ -5065,7 +5029,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 type="button"
                 onClick={confirmarEliminarCliente}
                 disabled={eliminando}
-                className="flex-1 py-3 rounded-xl text-sm font-bold bg-danger hover:bg-[#DC2626] text-white transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
+                className="flex-1 py-3 rounded-xl text-sm font-bold bg-danger hover:bg-danger text-white transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
               >
                 {eliminando ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Trash2 className="w-4 h-4" /> Eliminar</>}
               </button>
@@ -5112,7 +5076,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                 type="button"
                 onClick={confirmarEliminarMiembro}
                 disabled={eliminando}
-                className="flex-1 py-3 rounded-xl text-sm font-bold bg-danger hover:bg-[#DC2626] text-white transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
+                className="flex-1 py-3 rounded-xl text-sm font-bold bg-danger hover:bg-danger text-white transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
               >
                 {eliminando ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Trash2 className="w-4 h-4" /> Eliminar</>}
               </button>

@@ -203,7 +203,7 @@ export default function PreactivacionMatriz({ clientes, adminId }: Preactivacion
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-3 px-4 md:px-6 py-3 border-b border-[rgba(255,255,255,0.05)] shrink-0">
         {/* View toggle */}
-        <div className="inline-flex p-1 rounded-xl bg-[#0F0F0F] border border-gold/10">
+        <div className="inline-flex p-1 rounded-xl bg-panel border border-gold/10">
           <button
             type="button"
             onClick={() => setView('matriz')}

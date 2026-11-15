@@ -955,7 +955,7 @@ Devuelve SOLO este JSON:
               <button
                 onClick={handleGuardar}
                 disabled={saving}
-                className="w-full py-3.5 rounded-xl bg-gold hover:bg-goldhi disabled:opacity-50 text-[#0A0806] font-semibold tracking-wide transition-all flex justify-center items-center gap-2"
+                className="w-full py-3.5 rounded-xl bg-gold hover:bg-goldhi disabled:opacity-50 text-cream font-semibold tracking-wide transition-all flex justify-center items-center gap-2"
               >
                 {saving ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /> Guardando...</>

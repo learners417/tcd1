@@ -142,7 +142,7 @@ export default function TarjetaCliente({
       {/* ── Lo demás, cuando alguien lo pide ── */}
       {abierto && (
         <div className="absolute right-4 top-14 z-20 w-60 rounded-xl border
-          border-cream/15 bg-[#0d0d0d] py-1.5 shadow-xl">
+          border-cream/15 bg-ink py-1.5 shadow-xl">
           {extras.map((e) => (
             <button key={e.id}
               onClick={() => { setAbierto(false); e.onClick(); }}
