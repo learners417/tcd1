@@ -339,6 +339,53 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 | **15 nov, 16:30** · `df84d81` | la cola vieja seguía con sus 17 filas cerradas y el plan de la piel tenía su T1 y su T2 cerrados, así que se tomó el **T3: los tres hilos del día**. **La premisa se cayó tres veces**: el seed no se escribe a mano —lo escribe `generar_seed.py`, y la batería ya lo medía—; los «28 días en que la app no pide nada visible» no salen del dato (59 jornadas no piden acciones de campo, así que los 28 son criterio de LIBROS); y la tercera es el hallazgo: **la lección escrita ya existía en el código y su pantalla no podía dibujarla nunca** —la `esencia` de 37 guiones, bajo el rótulo «La lección de hoy», en una rama que solo corre sin video dentro de un componente que solo se monta con video— (abajo, en «El 15 de noviembre a las 16:30») |
 | **15 nov, 07:25** · `65f7ac2` | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`edd97d2` en TCD, `d7b905a` en MCD), los dos repos en `origin/main`—, `node_modules` en cero y la `main` local de los dos atrás con el `HEAD` suelto. Las cuatro despertadas anteriores auditaron la batería de TCD contra sí misma; esta preguntó por **el otro cuerpo de afirmaciones que la batería ni mira: las 133 `prueba-*.ts`**, que el bloque 10 juzga SOLO por el código de salida. **Una de las 133 no tenía ninguno**: `prueba-cadena.ts` imprimía `✗` por escenario y terminaba en 0. Probado con el defecto puesto: cinco de sus seis escenarios decían «La cadena está sana» a un cliente que no cobra, y la batería daba las 133 en verde y «el ZIP puede salir» (abajo) |
 | **14 nov, 19:30** · `d5ead99` | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`dc8dc42` en TCD, `a76e8e7` en MCD)—, `node_modules` en cero en los dos y la trampa del `HEAD` suelto con la **`main` local de TCD 31 commits atrás** (un `git checkout main` a secas la hubiera dejado ahí: se arregló antes de medir). Esta despertada tomó el último candidato de este frente —**el recorrido por AST de la ausencia**— y la premisa se cayó otra vez: de las 46 ausencias de mecanismo que hay de verdad, **tres seguían en un recolector**, y las dos lentes que las usan estaban **ciegas hoy**, probado sacando el mecanismo del código. Y de paso, la lente del catch mudo conocía **una sola manera de escribir «mudo»**: las dos que están mudas de verdad en main se escriben distinto y nunca se vieron (abajo) |
+| **15 nov, 18:30** · `5af53b5` | se tomó el **T4: las micro-tareas del papel**, y al empujarlo apareció lo que ninguna lente mira: **otra sesión había hecho el T3 en paralelo** (`df84d81`) y el remoto rechazó el commit. Dos archivos de datos, dos lentes y dos pantallas para lo mismo. Comparadas antes de tocar: su capa de lecciones y pausas es mejor —cada pausa con su marca y su fuente—, y **sus 28 pasos afuera eran cinco textos rotando**, así que «Cambia una línea de tu perfil» le salía seis veces en los 90 días. Quedó su capa con mis 28 pasos adentro, una sola de cada cosa. Y el campo `checklist` que el plan mandaba llenar **no lo dibujaba ninguna pantalla**: era copia textual de `pasos` (abajo, en «El 15 de noviembre a las 18:30») |
+
+### El 15 de noviembre a las 18:30: el mismo turno, hecho dos veces
+
+Turno **T4 de los siete**: las 530 micro-tareas del papel. Lo que encontró no
+estaba en el plan.
+
+**El campo que el plan mandaba llenar no existía como pantalla.** El plan
+decía: «entran las 530 en el campo `checklist`». `checklist` estaba declarado
+en el tipo, el seed lo traía en cada jornada y la app lo llenaba desde
+`pasos`… y **ninguna pantalla lo leía**: era una copia textual de `pasos`
+viajando en las 91 jornadas. Cargar ahí las micro-tareas era trabajar para
+nadie. Entraron en un campo nuevo, `micro`, atado por posición a su paso, y
+`checklist` se fue.
+
+**Dónde se ven.** Solo las de la tarea en curso. Los trece movimientos del
+día 1 juntos son la misma pared que las micro-tareas venían a sacar. Y sin
+tilde propia: el día sigue teniendo cinco cosas que cerrar, no trece.
+
+**Las 530 son 530.** 252 tareas en 64 días, 2 o 3 micro cada una, ninguna
+tarea sin las suyas y ninguna colgando de otra. El generador se planta si un
+día trae más micro que pasos.
+
+**Y el hallazgo, que no es técnico.** Al empujar, el remoto rechazó el
+commit: **otra sesión había hecho el T3 en paralelo** y ya lo había subido
+(`df84d81`). El mismo turno, dos veces, el mismo día. Comparadas las dos
+antes de tocar nada:
+
+| | Suyo | Mío |
+|---|---|---|
+| Lección y pausa | con su marca de evidencia y su fuente, y las pausas una sola vez en el seed | solo el nombre de la pausa |
+| Paso afuera | **cinco textos rotando entre 28 días** | 28, cada uno contra la tarea de ESE día |
+| Pantalla | dentro de la sesión | en la tarjeta de Hoy |
+
+Quedó su capa de lecciones y pausas, con mis 28 pasos afuera adentro, su
+pantalla, y **una sola** de cada cosa: borré mi archivo de datos, mi
+componente y mi script. Tres de mis pasos empezaban con «Publica», que el
+medidor lee como «pública» sin su tilde: reescritos, respetando la nota que
+ellos ya habían dejado en el archivo.
+
+Lo que queda anotado para el turno de simpleza: **el paso de diez minutos
+debería alcanzarse sin entrar a una sesión de 75**, porque el día que vale es
+justo el día en que no se hace la sesión.
+
+Batería en verde sobre el árbol fusionado: `tsc`, `build` y **136** lentes, 0
+rojas. La lente nueva, mordida tres veces —sin micro, micro de 100 caracteres
+y el campo muerto de vuelta— y roja en las tres.
 
 ### El 15 de noviembre a las 16:30: la lección ya estaba escrita, y su pantalla no podía dibujarla
 
@@ -3186,6 +3233,13 @@ pasa a mostrar: tu lección · tu pausa de 5 · tu paso afuera · lo que pide la
 app. La tabla de las lecciones la pasa LIBROS; hoy está completa la del Lago
 (ARQUITECTURA §4) y las otras cuatro llegan cuando cierre cada libro.
 
+**T4 · Las micro-tareas del papel.** — **CERRADO el 15 de noviembre** ·
+`5af53b5` (arriba, en «El 15 de noviembre a las 18:30»). Entraron las 530,
+pero no en `checklist`: ese campo no lo dibujaba ninguna pantalla y era copia
+textual de `pasos`. Van en `micro`, atadas por posición, y se ven solo las de
+la tarea en curso.
+
+El plan decía:
 **T4 · Las micro-tareas del papel.** Entran las 530 de `checklist-90.json` en
 el campo `checklist`, con su forma real (tarea con sus micro), y una lente que
 compara app contra papel para que no vuelvan a separarse.
