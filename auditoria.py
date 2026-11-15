@@ -191,7 +191,7 @@ print('══ 3) HERRAMIENTAS ══')
 # herramienta. Antes acá se comparaba lo usado contra `herramientas.ts`, que ya
 # no existe, y esta auditoría se caía entera al abrirlo. La vara que queda es
 # la misma que guarda `prueba-codigos.ts`: que no vuelva a aparecer ninguna.
-usadas = set(re.findall(r"herramienta_id: '([^']+)'", s))
+usadas = set(re.findall(r"herramienta_id: '([^']+)'", cod(s)))
 check('ninguna jornada apunta a una herramienta: el catálogo ya no existe',
       not usadas, str(sorted(usadas)))
 
@@ -204,13 +204,13 @@ for f in glob.glob('src/components/**/*.tsx', recursive=True) + glob.glob('src/p
     if n in ('App','main'): continue
     if not re.search(r'\b' + re.escape(n) + r'\b', todos_str.replace(rd(f), '')): huerf.append(n)
 check('sin componentes huérfanos', not huerf, str(huerf))
-rotas = [m.group(0) for src in todo.values() for m in re.finditer(r"from '[^']*/(SesionPasos|TaskDetailModal|Liga|Red|ModoHueco|Plan|Oferta|Onboarding)'", src)]
+rotas = [m.group(0) for src in todo.values() for m in re.finditer(r"from '[^']*/(SesionPasos|TaskDetailModal|Liga|Red|ModoHueco|Plan|Oferta|Onboarding)'", cod(src))]
 check('sin imports a componentes borrados', not rotas, str(rotas[:3]))
 
 print('══ 5) DATOS (localStorage productor↔consumidor) ══')
 claves = defaultdict(lambda: {'g': set(), 's': set()})
 for f, src in todo.items():
-    for m in re.finditer(r"localStorage\.(getItem|setItem)\('(tcd_[\w-]+)'", src):
+    for m in re.finditer(r"localStorage\.(getItem|setItem)\('(tcd_[\w-]+)'", cod(src)):
         claves[m.group(2)]['g' if m.group(1)=='getItem' else 's'].add(f.split('/')[-1])
 LEGADO_OK = {'tcd_racha','tcd_diary_weekly','tcd_pacto','tcd_campana_objetivo',
              'tcd_metrics_v2','tcd_diario_v2',   # fallbacks legítimos (v3 || v2)
@@ -235,13 +235,13 @@ SESION_FILES = ['SesionGuiadaPlayer.tsx', 'TaskCoach.tsx', 'TaskHerramientaIA.ts
 fugas = []
 for f, src in todo.items():
     if f.split('/')[-1] not in SESION_FILES: continue
-    for m in re.finditer(r"onClick=\{[^}]{0,120}(setCurrentPage\('coach'\)|onNavigateToCoach\(\)|onMentor\(\))", src):
+    for m in re.finditer(r"onClick=\{[^}]{0,120}(setCurrentPage\('coach'\)|onNavigateToCoach\(\)|onMentor\(\))", cod(src)):
         fugas.append(f.split('/')[-1])
 check('ninguna sesión expulsa al Mentor', not fugas, str(sorted(set(fugas))))
 
 # Toda página nombrada en un título o en el buscador tiene que existir en el router
 app_src = rd('src/App.tsx')
-rutas = set(re.findall(r"currentPage === '(\w+)'", app_src))
+rutas = set(re.findall(r"currentPage === '(\w+)'", cod(app_src)))
 tb = rd('src/components/Topbar.tsx')
 nombradas = set(re.findall(r"^  (\w+): '", tb, re.M)) | set(re.findall(r"id: '(\w+)', label:", tb))
 fantasmas = sorted(p for p in nombradas - rutas if p not in ('ajustes', 'salir'))
@@ -324,13 +324,24 @@ check('la navegacion tiene 4 destinos', _nitems == 4, f'{_nitems} items')
 _viejos = [l for l in ['El Camino','Mi ADN','Lo que sigue','El Metodo','El Método','Entrenadores IA'] if f"label: '{l}'" in _bt0]
 check('los nombres siguen el sistema Tu/Tus', not _viejos, str(_viejos))
 
+# El `.html` y el `.css` tambien llevan comentarios, y hasta el 15 de
+# noviembre estos tres archivos se leian con `open(...)` en vez de `rd()`:
+# fuera de la unica puerta que `solo_codigo` y el bloque 16 conocen. Medido
+# ese dia, con el defecto puesto en el archivo de verdad y la bateria entera
+# corrida: con `data-theme="light"` dentro de un `<!-- -->`, con
+# `--color-ink` comentado con `/* */` y con `--surface: var(--bg-card)`
+# tambien, LAS TRES LENTES DIERON VERDE. Las dos del `.css` no las vio nadie
+# mas —el medidor de pantallas dio 0 faltas—, y la del `.html` solo la vio el
+# medidor, de rebote, con 686 faltas en 13 pantallas y sin nombrar la causa.
+# Ahora la PRESENCIA se mide con `rdc()`, que sabe el comentario de cada
+# lenguaje; la AUSENCIA sigue sobre el crudo, que es mas estricto.
 try:
-    _html = open('index.html', encoding='utf-8').read()
+    _html_cod = rdc('index.html')
 except Exception:
-    _html = ''
-check('la app abre en el tema de la marca', 'data-theme="light"' in _html, '')
+    _html_cod = ''
+check('la app abre en el tema de la marca', 'data-theme="light"' in _html_cod, '')
 try:
-    _css = open('src/index.css', encoding='utf-8').read()
+    _css = rd('src/index.css')
 except Exception:
     _css = ''
 check('el tema claro usa la paleta de la marca, no gris azulado', '#E8ECF1' not in _css and '#0F172A' not in _css, '')
@@ -349,16 +360,16 @@ check('la misma barra en el telefono y en la computadora', 'md:hidden' not in _b
       'dos formas de navegar es volver a aprender la app en cada pantalla')
 
 try:
-    _css = open('src/index.css', encoding='utf-8').read()
+    _css_cod = rdc('src/index.css')
 except Exception:
-    _css = ''
-_i = _css.find('[data-theme="light"] {')
-_luz = _css[_i:_css.find('}', _i)] if _i >= 0 else ''
+    _css_cod = ''
+_i = _css_cod.find('[data-theme="light"] {')
+_luz = _css_cod[_i:_css_cod.find('}', _i)] if _i >= 0 else ''
 _falta = [t for t in ['--color-ink','--color-cream','--color-panel','--color-gold'] if t not in _luz]
 check('el tema claro pisa los tokens de Tailwind, no solo los manuales', not _falta, str(_falta))
 
 try:
-    _c5 = open('src/index.css', encoding='utf-8').read()
+    _c5 = rdc('src/index.css')
 except Exception:
     _c5 = ''
 _luz5 = _c5[_c5.find('[data-theme="light"]'):]
@@ -373,13 +384,19 @@ cf = {f: src for f, src in todo.items() if 'Admin' not in f and 'lib/agents/' no
       and not any(x in f for x in ['coachPrompt','mentorPanelPrompt','vozLocalizada','voz-javo','adn-context','coachConversation',
           'TasksPipeline','TaskModal','MigrationWizard','TaskDescriptionEditor','TaskComments','components/editor/'])}
 VOS = re.compile(r"(?<![a-záéíóúñ])(tenés|podés|querés|entrá|tocá|revisá|esperá|pegá|volvé|mandá|cargá|fijate|acordate)(?![a-záéíóúñ])")
+# El voseo se mide en el CÓDIGO, no en el crudo con una coartada a mano. La
+# guarda de antes —«si 70 caracteres atrás hay un `*` o un `//`, no cuenta»—
+# era un limpiador de comentarios escrito al pasar: se comía el voseo de
+# verdad que tuviera un `//` cerca y dejaba pasar el de un bloque largo.
+# Medido el 15 de noviembre: sobre `cod(src)` y SIN la coartada, el voseo
+# user-facing sigue en cero, así que la vara es más estricta y más simple.
 vos = []
 for f, src in cf.items():
+    _cod = cod(src)
     if 'roadmapSeed' in f:
-        for p in re.findall(r"coach_instruccion: '[^']*'", src): src = src.replace(p, '')
-    for m in VOS.finditer(src):
-        ctx = src[max(0,m.start()-70):m.start()]
-        if '*' not in ctx and '//' not in ctx: vos.append(f"{f.split('/')[-1]}:{m.group(0)}")
+        for p in re.findall(r"coach_instruccion: '[^']*'", _cod): _cod = _cod.replace(p, '')
+    for m in VOS.finditer(_cod):
+        vos.append(f"{f.split('/')[-1]}:{m.group(0)}")
 check('voseo user-facing = 0', not vos, str(vos[:4]))
 sb = [f.split('/')[-1] for f, src in cf.items() for m in re.finditer(r"['\">][^'\"<>\n]{0,60}Semana Blanca", src) if '*' not in m.group(0)]
 check('"Semana Blanca" customer-facing = 0', not sb, str(sb))
@@ -455,7 +472,7 @@ import tempfile as _tf64, shutil as _sh64
 with _tf64.TemporaryDirectory() as _tmp64:
     _sh64.copytree('tcd-spec', f'{_tmp64}/spec')
     _g = subprocess.run([sys.executable, 'datos/generar_seed.py'], cwd=f'{_tmp64}/spec', capture_output=True, text=True)
-    _regen = open(f'{_tmp64}/spec/datos/roadmap.seed.json', encoding='utf-8').read() if _g.returncode == 0 else ''
+    _regen = rd(f'{_tmp64}/spec/datos/roadmap.seed.json') if _g.returncode == 0 else ''
 check('el seed de la app es exactamente el que genera hoy generar_seed.py',
       _g.returncode == 0 and _regen == rd('src/lib/roadmap.seed.json'), (_g.stderr or 'difiere: correr generar_seed.py y copiar')[-160:])
 
@@ -466,7 +483,7 @@ with _tf64.TemporaryDirectory() as _tmpP:
     _dst = f'{_tmpP}/plan.md'
     _p = subprocess.run([sys.executable, 'scripts/generar-plan-90-dias.py', _dst],
                         capture_output=True, text=True)
-    _plan = open(_dst, encoding='utf-8').read() if _p.returncode == 0 else ''
+    _plan = rd(_dst) if _p.returncode == 0 else ''
 check('el plan escrito de los 90 días sale del seed, no de la mano',
       _p.returncode == 0 and _plan == rd('EL-CAMINO-DIA-POR-DIA.md'),
       (_p.stderr or 'difiere: correr scripts/generar-plan-90-dias.py')[-160:])
@@ -1911,7 +1928,7 @@ if _os38.path.exists('src/lib/permisos.ts'):
           "requiere: ['dinero_tcd', 'motor_propio', 'rendimiento_equipo']" in cod(_pm),
           'si dependiera, desarrollo entraría a la pantalla donde están las ventas del dueño')
     check('son cuatro momentos, no dieciséis tabs',
-          _pm.count("{ id: '") >= 4 and 'MOMENTOS' in cod(_pm))
+          cod(_pm).count("{ id: '") >= 4 and 'MOMENTOS' in cod(_pm))
     check('los permisos están probados',
           _os38.path.exists('scripts/prueba-permisos.ts'))
 
@@ -3132,7 +3149,7 @@ print('══ 8) CONTRATOS DE DATOS (la clase de bug del brief vacío) ══')
 # Ninguno viajaba: brief vacío para todos y TODO cliente tratado como
 # 'completo' (pilar 99) sin importar qué plan compró.
 _auth = rd('src/lib/auth.ts')
-_m = re.search(r"localStorage\.setItem\('tcd_profile', JSON\.stringify\(\{(.*?)\}\)\);", _auth, re.S)
+_m = re.search(r"localStorage\.setItem\('tcd_profile', JSON\.stringify\(\{(.*?)\}\)\);", cod(_auth), re.S)
 _escritos = set(re.findall(r'^\s*(\w+):', _m.group(1), re.M)) if _m else set()
 _leidos = {}
 for _f, _src in todo.items():
@@ -3516,7 +3533,7 @@ _rm9 = todo.get('src/pages/Roadmap.tsx', '')
 check('ninguna jornada abre el catálogo viejo de herramientas',
       'herramienta_id' not in rd('src/lib/roadmapSeed.ts'))
 check('las jornadas con entrenador se practican con él',
-      "j.agente !== null ? 'COACH'" in rd('src/lib/roadmapSeed.ts'))
+      "j.agente !== null ? 'COACH'" in rdc('src/lib/roadmapSeed.ts'))
 check('el consultorio responde por jornada o por pieza',
       'diaDelCodigo' in rdc('src/lib/consultorio.ts'))
 check('el cliente no ve la palabra Pilar en su Camino', 'Pilar {pilar' not in _rm9)
@@ -3597,9 +3614,9 @@ check('el paso a paso no se muestra dos veces',
 check('el grupo de jornadas no se llama igual que su primera jornada',
       'Días ${primera.dia} a' in rdc('src/lib/roadmapSeed.ts'))
 check('el constructor de anuncios está paginado',
-      "pantalla === 'brief'" in rd('src/components/campanas/ConstructorAnuncios.tsx'))
+      "pantalla === 'brief'" in rdc('src/components/campanas/ConstructorAnuncios.tsx'))
 check('el ADN vive en el Camino, no dentro de Entrenadores',
-      "onNavigate?.('adn')" in todo.get('src/pages/Roadmap.tsx', '')
+      "onNavigate?.('adn')" in cod(todo.get('src/pages/Roadmap.tsx', ''))
       and 'ADN' not in rd('src/pages/Entrenadores.tsx').split('export default')[1])
 check('nada dice "Delta" sin explicar', 'Delta' not in rd('src/components/ComparacionDia45.tsx'))
 
@@ -4077,7 +4094,7 @@ check('y ninguno queda sin jornada que lo pida (la app los busca por día)',
 check('el día de cada tutorial sale calculado, no escrito a mano',
       'DIA_DEL_TUTORIAL' in rdc('tcd-spec/datos/generar_seed.py'))
 check('el alta marca el escalón con el RPC que sella quién y cuándo',
-      "rpc('marcar_servicio'" in rd('src/pages/Admin.tsx')
+      "rpc('marcar_servicio'" in rdc('src/pages/Admin.tsx')
       and 'servicio_contratado: nuevoForm.servicio' not in rd('src/pages/Admin.tsx'))
 check('y dice qué abre la oferta elegida antes de crear la cuenta',
       'loQueAbre(nuevoForm.servicio)' in rdc('src/pages/Admin.tsx'))
@@ -4147,7 +4164,7 @@ check('la tabla de mensajes está en la publicación de tiempo real',
 
 # El aviso del equipo salía con un insert que la RLS rechaza en silencio.
 check('el aviso del equipo al cliente sale por el RPC, no por un insert',
-      "rpc('crear_notificacion'" in rd('src/lib/cerebroStorage.ts'))
+      "rpc('crear_notificacion'" in rdc('src/lib/cerebroStorage.ts'))
 
 # Los 21 tutoriales tienen su paso a paso: trece no tenían ni texto ni PDF, y
 # cuatro jornadas abrían sin ninguno.
@@ -4163,7 +4180,7 @@ check('y la jornada muestra todos los de su día, no solo el primero',
 # Un solo sistema de roles: había dos, contestaban distinto, y la pestaña Hoy
 # del Admin se rompía con tres de los cuatro valores.
 check('hay un solo rolDe, y es el de permisos.ts',
-      "export { rolDe } from './permisos';" in rd('src/lib/roles.ts'))
+      "export { rolDe } from './permisos';" in rdc('src/lib/roles.ts'))
 check('y el cálculo de carga no se llama con `as never`',
       'as never' not in rd('src/components/admin/Jornada.tsx'),
       'tapaba el error de tipo que avisaba del crash')
@@ -4793,7 +4810,15 @@ check('y el token sale de la sesión, no del localStorage',
 # prueba SQL (.sh). Medido el 15 de noviembre: con la guarda de la carpeta
 # del dueño comentada con `--`, «y la función comprueba que el archivo esté
 # en la carpeta de su dueño» dio VERDE y ninguna otra lente la vio.
-_FUENTE16 = ('.ts', '.tsx', '.js', '.jsx', '.sql', '.py', '.sh')
+# Y el noveno agujero, medido el 15 de noviembre a las 06:30: la fuente
+# tampoco es solo esos cinco. La batería mide el tema de la marca en
+# `index.html` y los tokens del tema claro en `src/index.css`, y esos dos
+# archivos entraban por `open(...)`, fuera de la única puerta que esta lente
+# conoce. Con `data-theme="light"` dentro de un `<!-- -->` y con
+# `--color-ink` y `--surface: var(--bg-card)` comentados con `/* */`, las
+# tres lentes dieron VERDE y a las dos del `.css` no las vio NADIE.
+_FUENTE16 = ('.ts', '.tsx', '.js', '.jsx', '.sql', '.py', '.sh',
+             '.html', '.css')
 # En SQL y en el shell, el mecanismo no se escribe en camello ni lleva
 # guión bajo: `for select`, `where anuncio is null` y `alter table … enable
 # row level security` son todas minúsculas con espacios, que es justo la
@@ -4807,6 +4832,15 @@ _PALABRAS16 = (
     'column', ' from ', 'where ', 'enable ', 'auth.uid', 'set role',
     'row level', '::', '||',
 )
+# En el `.css` y en el `.html` el mecanismo tampoco se escribe en camello:
+# `--color-ink`, `--surface: var(--bg-card)` y `data-theme="light"` son
+# minúsculas con guiones, que es la forma que `_mecanismo16` reserva para el
+# idioma. Así que acá también se reconoce por su palabra.
+_PALABRAS_HOJA16 = (
+    '--', 'var(', '@media', '@supports', ':root', '!important', 'data-',
+    'class=', 'id=', '<html', '<head', '<meta', '<link', '<script',
+    'rgba(', 'calc(', 'px', '#',
+)
 _ASIG16 = _re16.compile(r'([A-Za-z_][A-Za-z0-9_]*)\s*=\s*rd\(\s*'
                         r'(f?[\'"][^\'"\n]*[\'"]|[A-Za-z_][A-Za-z0-9_]*)\s*\)')
 # El octavo agujero, medido el 15 de noviembre: el cuerpo de la cadena
@@ -4814,12 +4848,17 @@ _ASIG16 = _re16.compile(r'([A-Za-z_][A-Za-z0-9_]*)\s*=\s*rd\(\s*'
 # y una comilla simple adentro —`"rol = 'admin'" in _mig_nc`, que es
 # EXACTAMENTE como estaba escrita la lente de las métricas del equipo— no la
 # veía ninguna de las cuatro formas. Ahora se excluye sólo la que delimita.
+# Y el 15 de noviembre a las 06:30, probando las fugas puestas: ese arreglo
+# había entrado en UNA de las cuatro —la de la variable—. La directa, el
+# `.count`, el `.get(…)` y la regex seguían excluyendo las dos comillas, así
+# que `'data-theme="light"' in rd('index.html')` no la veía ninguna. Las
+# cuatro miran ahora el mismo cuerpo.
 _PRES_VAR16 = _re16.compile(r'([\'"])((?:(?!\1)[^\\\n]|\\.){2,200})\1\s+in\s+([A-Za-z_][A-Za-z0-9_]*)\b')
-_PRES_DIR16 = _re16.compile(r'([\'"])((?:[^\'"\\\n]|\\.){2,200})\1\s+in\s+rd\(\s*f?[\'"]([^\'"\n]+)[\'"]')
-_CUENTA16 = _re16.compile(r'\b([A-Za-z_][A-Za-z0-9_]*)\.count\(\s*([\'"])((?:[^\'"\\\n]|\\.){1,200})\2')
+_PRES_DIR16 = _re16.compile(r'([\'"])((?:(?!\1)[^\\\n]|\\.){2,200})\1\s+in\s+rd\(\s*f?[\'"]([^\'"\n]+)[\'"]')
+_CUENTA16 = _re16.compile(r'\b([A-Za-z_][A-Za-z0-9_]*)\.count\(\s*([\'"])((?:(?!\2)[^\\\n]|\\.){1,200})\2')
 _CUENTA_DIR16 = _re16.compile(r'\brd\(\s*(f?[\'"][^\'"\n]*[\'"])\s*\)\.count\(')
 _REGEX16 = _re16.compile(r'\bre\d*\.(?:search|findall|finditer|match)\(\s*'
-                         r'r?([\'"])((?:[^\'"\\\n]|\\.)*)\1\s*,\s*([A-Za-z_][A-Za-z0-9_]*)\b')
+                         r'r?([\'"])((?:(?!\1)[^\\\n]|\\.)*)\1\s*,\s*([A-Za-z_][A-Za-z0-9_]*)\b')
 # Y el sexto y el séptimo agujero, medidos el 14 a las 15:25: el contenido de
 # los archivos guardado en un DICCIONARIO —`todo = {f: rd(f) for f in glob(…)}`,
 # `_API64`, `_SRC46`…— o pegado en una sola cadena con `join`. Sobre esos
@@ -4829,7 +4868,7 @@ _REGEX16 = _re16.compile(r'\bre\d*\.(?:search|findall|finditer|match)\(\s*'
 _COL16 = _re16.compile(r'\b([A-Za-z_]\w*)\s*=\s*\{\s*\w+\s*:\s*rd\(')
 _PEGOTE16 = _re16.compile(r'\b([A-Za-z_]\w*)\s*=\s*[\'"][^\'"]*[\'"]\.join\([^)]*\brd\(')
 _BUCLE16 = _re16.compile(r'\bfor\s+([A-Za-z_]\w*)\s*(?:,\s*([A-Za-z_]\w*)\s*)?in\s+([A-Za-z_]\w*)')
-_PRES_GET16 = _re16.compile(r'([\'"])((?:[^\'"\\\n]|\\.){2,200})\1\s+in\s+([A-Za-z_]\w*)\.get\(')
+_PRES_GET16 = _re16.compile(r'([\'"])((?:(?!\1)[^\\\n]|\\.){2,200})\1\s+in\s+([A-Za-z_]\w*)\.get\(')
 
 
 def _mecanismo16(frag: str, solo_nombres: bool = False, ext: str = '') -> bool:
@@ -4838,6 +4877,9 @@ def _mecanismo16(frag: str, solo_nombres: bool = False, ext: str = '') -> bool:
     puntuación marcaría el buscador de voseo —`\\b\\w+(?:ás|és|ís)\\b`— que mide
     el idioma y lee crudo con todo derecho."""
     if ext in ('.sql', '.sh') and any(_p16 in frag.lower() for _p16 in _PALABRAS16):
+        return True
+    if ext in ('.css', '.html') and any(_p16 in frag.lower()
+                                        for _p16 in _PALABRAS_HOJA16):
         return True
     if not solo_nombres and any(_c16 in frag for _c16 in '(){}[]<>=;'): return True
     for _t16 in _re16.findall(r'[A-Za-z_$][A-Za-z0-9_$]*', frag):
@@ -4963,6 +5005,10 @@ _ROJO16 = [
     ("_h = rd('scripts/medir-app.py')", "'DIA_DEL_TUTORIAL' in _h"),
     ("_i = rd('scripts/prueba-sql.sh')", "'alter table profiles enable row level security' in _i"),
     ("", "'where anuncio is null' in rd('sala-de-mando.sql')"),
+    ("_j = rd('index.html')", "'data-theme=\"light\"' in _j"),
+    ("_k = rd('src/index.css')", "'--surface: var(--bg-card)' in _k"),
+    ("_l = rd('src/index.css')", "'--color-ink' in _l"),
+    ("", "'data-theme=\"light\"' in rd('index.html')"),
 ]
 _VERDE16 = [
     ("_x = rd('src/a.ts')", "'marcarEncendida' in cod(_x)"),
@@ -4981,6 +5027,9 @@ _VERDE16 = [
     ("_g = rd('supabase/migrations/20261002_y.sql')", "'for insert' not in _g"),
     ("_i = rd('scripts/prueba-sql.sh')", "'el primer dia de un cliente nuevo' in _i"),
     ("", "'where anuncio is null' in rdc('sala-de-mando.sql')"),
+    ("_j = rdc('index.html')", "'data-theme=\"light\"' in _j"),
+    ("_k = rd('src/index.css')", "'#E8ECF1' not in _k"),
+    ("", "'--surface: var(--bg-card)' in rdc('src/index.css')"),
 ]
 #.LENTE16.PRUEBAS.FIN
 _sin_rojo16 = [_c16[1] for _c16 in _ROJO16 if not _fugas16(list(_c16))]
@@ -5301,6 +5350,23 @@ _sin_marca16 = sorted(_e16 for _e16 in _LEIDAS16 if _e16 not in _MARCAS)
 check('la batería no lee ningún lenguaje cuyo comentario no sepa escribir',
       not _sin_marca16,
       f'{_sin_marca16} — declararlo en _MARCAS, con su marca de línea')
+
+# Y esa lista sirve de algo solo si TODO entra por la misma puerta. Hasta el
+# 15 de noviembre no era así: `index.html` y `src/index.css` se leían con
+# `open(...).read()`, y por ahí el bloque 16 no mira, `_MARCAS` no se aplica
+# y `solo_codigo` no se llama nunca. Tres lentes vivían de ese lado. Se mide
+# con el ÁRBOL, que no se come el comentario de arriba ni una cadena: cada
+# `open(` tiene que estar adentro de `rd()`.
+_rd16 = next((_n16 for _n16 in _ast16.walk(_ARB16)
+              if isinstance(_n16, _ast16.FunctionDef) and _n16.name == 'rd'), None)
+_dentro16 = (set(range(_rd16.lineno, (_rd16.end_lineno or _rd16.lineno) + 1))
+             if _rd16 else set())
+_puertas16 = [f'línea {_n16.lineno}' for _n16 in _ast16.walk(_ARB16)
+              if isinstance(_n16, _ast16.Call) and isinstance(_n16.func, _ast16.Name)
+              and _n16.func.id == 'open' and _n16.lineno not in _dentro16]
+check('ningún archivo se lee con `open()`: la puerta es `rd()`',
+      not _puertas16,
+      '; '.join(_puertas16) + ' — por ahí no pasa ni _MARCAS ni el bloque 16')
 
 # Y la prueba de que sirve, corrida sobre los archivos de verdad: el
 # mecanismo se comenta en memoria con la marca de SU lenguaje, en las dos

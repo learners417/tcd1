@@ -46,6 +46,37 @@ def comentar(texto, trozo, marca, entera=True):
     return '\n'.join(out)
 
 
+def comentar_bloque(texto, trozo, ap, ci, entera=True):
+    """Lo mismo, con el comentario DE BLOQUE: el `/* */` del .css y el
+    `<!-- -->` del .html. Ahí no hay marca de línea, así que el mecanismo se
+    envuelve: la forma en que alguien desactiva una regla y la deja escrita."""
+    out = []
+    for l in texto.split('\n'):
+        if trozo in l:
+            _sangria = l[:len(l) - len(l.lstrip())]
+            out.append(f'{_sangria}{ap} {l.strip()} {ci}' if entera
+                       else f'{_sangria}z-index: 0;  {ap} {l.strip()} {ci}')
+        else:
+            out.append(l)
+    return '\n'.join(out)
+
+
+# Y los que entraban por la OTRA puerta: `index.html` y `src/index.css` se
+# leían con `open(...).read()`, así que `solo_codigo` no se llamaba nunca y
+# `_MARCAS` no se aplicaba. Acá la «vieja» no es el limpiador de ayer: es el
+# archivo CRUDO, que es lo que la lente tenía en la mano.
+CASOS_PUERTA = [
+    # (archivo, el mecanismo, apertura, cierre, por qué importa)
+    ('index.html', 'data-theme="light"', '<!--', '-->',
+     'sin el atributo la app abre en el tema oscuro, y la lente que dice '
+     'medirlo daba verde'),
+    ('src/index.css', '--color-ink: #EAE4D9', '/*', '*/',
+     'sin el token, cada clase text-ink del tema claro vuelve al valor '
+     'oscuro: texto casi blanco sobre crema'),
+    ('src/index.css', '--surface: var(--bg-card)', '/*', '*/',
+     'sin eso, card-ios cae en su respaldo negro con el tema claro puesto'),
+]
+
 CASOS = [
     # (archivo, el mecanismo, la marca de su lenguaje, por qué importa)
     ('supabase/migrations/20261025_el_veredicto_queda.sql',
@@ -90,8 +121,26 @@ for archivo, trozo, marca, porque in CASOS:
               + ('' if ok else f'  ← se esperaba nueva=roja ({porque})'))
         if not ok: fallos += 1
 
+for archivo, trozo, ap, ci, porque in CASOS_PUERTA:
+    crudo = rd(os.path.join(_raiz, archivo))
+    if trozo not in crudo:
+        print(f'  ✗ {archivo}: ya no existe «{trozo}» — la prueba quedó desfasada')
+        fallos += 1; continue
+    for entera in (True, False):
+        roto = comentar_bloque(crudo, trozo, ap, ci, entera)
+        cruda = trozo in roto                              # lo que daba `open()`
+        nueva = trozo in solo_codigo(roto, archivo)        # por `rdc()`
+        ok = cruda and not nueva
+        donde = 'línea entera' if entera else 'final de línea'
+        print(('  ✓ ' if ok else '  ✗ ')
+              + f'{archivo} · «{trozo[:34]}» con {ap} {ci} ({donde}): '
+                f'crudo={"verde" if cruda else "roja"} '
+                f'por rdc={"verde" if nueva else "roja"}'
+              + ('' if ok else f'  ← se esperaba rdc=roja ({porque})'))
+        if not ok: fallos += 1
+
 print()
 if fallos:
     print(f'════ {fallos} no probaron nada — EL LIMPIADOR NO SIRVE ════'); sys.exit(1)
-print(f'════ los {len(CASOS)} mecanismos: ciegos con el comentario de su lenguaje, '
-      f'rojos ahora ════')
+print(f'════ los {len(CASOS) + len(CASOS_PUERTA)} mecanismos: ciegos con el '
+      f'comentario de su lenguaje, rojos ahora ════')
