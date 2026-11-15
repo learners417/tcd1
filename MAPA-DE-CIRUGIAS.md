@@ -340,6 +340,66 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 | **15 nov, 07:25** · `65f7ac2` | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`edd97d2` en TCD, `d7b905a` en MCD), los dos repos en `origin/main`—, `node_modules` en cero y la `main` local de los dos atrás con el `HEAD` suelto. Las cuatro despertadas anteriores auditaron la batería de TCD contra sí misma; esta preguntó por **el otro cuerpo de afirmaciones que la batería ni mira: las 133 `prueba-*.ts`**, que el bloque 10 juzga SOLO por el código de salida. **Una de las 133 no tenía ninguno**: `prueba-cadena.ts` imprimía `✗` por escenario y terminaba en 0. Probado con el defecto puesto: cinco de sus seis escenarios decían «La cadena está sana» a un cliente que no cobra, y la batería daba las 133 en verde y «el ZIP puede salir» (abajo) |
 | **14 nov, 19:30** · `d5ead99` | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`dc8dc42` en TCD, `a76e8e7` en MCD)—, `node_modules` en cero en los dos y la trampa del `HEAD` suelto con la **`main` local de TCD 31 commits atrás** (un `git checkout main` a secas la hubiera dejado ahí: se arregló antes de medir). Esta despertada tomó el último candidato de este frente —**el recorrido por AST de la ausencia**— y la premisa se cayó otra vez: de las 46 ausencias de mecanismo que hay de verdad, **tres seguían en un recolector**, y las dos lentes que las usan estaban **ciegas hoy**, probado sacando el mecanismo del código. Y de paso, la lente del catch mudo conocía **una sola manera de escribir «mudo»**: las dos que están mudas de verdad en main se escriben distinto y nunca se vieron (abajo) |
 | **15 nov, 18:30** · `5af53b5` | se tomó el **T4: las micro-tareas del papel**, y al empujarlo apareció lo que ninguna lente mira: **otra sesión había hecho el T3 en paralelo** (`df84d81`) y el remoto rechazó el commit. Dos archivos de datos, dos lentes y dos pantallas para lo mismo. Comparadas antes de tocar: su capa de lecciones y pausas es mejor —cada pausa con su marca y su fuente—, y **sus 28 pasos afuera eran cinco textos rotando**, así que «Cambia una línea de tu perfil» le salía seis veces en los 90 días. Quedó su capa con mis 28 pasos adentro, una sola de cada cosa. Y el campo `checklist` que el plan mandaba llenar **no lo dibujaba ninguna pantalla**: era copia textual de `pasos` (abajo, en «El 15 de noviembre a las 18:30») |
+| **15 nov, 21:40** · `7bb7835` | se tomó el **T5: Mi protocolo, las 33 piezas**, y la premisa ya no era cierta: el plan dice «Mi protocolo no existe» y existía desde esa misma mañana —`miProtocolo.ts`, su pantalla en El Camino, la pista de 66, las tres señales de la OMS— con su lente en verde. Lo que no existía era que funcionara. **Tres de las 33 piezas eran imposibles de escribir**: las lecciones 7, 15 y 27 caen en los días 6 y 13, que son fin de semana y no se completan, así que su pieza no se pedía nunca y la pantalla decía «cada una llega con su lección». Y el mismo agujero por el otro lado: **la única pieza escribible era la de hoy**, así que las otras 30 tenían una sola oportunidad cada una. Más la pista de 66 clavada en cero porque `diasSostenidos` no se pasaba (abajo, en «El 15 de noviembre a las 21:40») |
+
+### El 15 de noviembre a las 21:40: tres piezas que no se podían escribir
+
+Turno **T5 de los siete** del plan de la piel: Mi protocolo, las 33 piezas.
+
+**La premisa se cayó antes de empezar.** El plan dice ««Mi protocolo» no
+existe. Ninguna de las 33 piezas tiene dónde escribirse». Existía desde esa
+misma mañana, del turno de las 18:21 (`58ced97`): `src/lib/miProtocolo.ts` con
+los 33 nombres y sus pies, `MiProtocolo.tsx` montada sin condición dentro de
+El Camino, la pista de 66 con sus hitos en 21, 44 y 66 y su fuente, las tres
+señales de la OMS con sus dos campos, y `prueba-mi-protocolo.ts` **en verde**.
+Las cuatro partes del turno estaban escritas. Ninguna llegaba entera.
+
+**Tres de las 33 eran imposibles.** «La pieza N es la de la lección N» es
+cierto, y no alcanza. El Camino se detiene solo en los **pasos del cliente**, y
+las lecciones 7, 15 y 27 viven en los días 6 y 13, que son «Fin de semana»: 0
+minutos, sin grado, nunca un paso. Medido corriendo el recorrido entero sobre
+los 64 pasos: **30 piezas alcanzables de 33**. «Tu para qué», «Tu permiso
+nuevo» y «Tu voz expuesta» no se pedían jamás, y el renglón de abajo decía
+«Quedan 3, y cada una llega con su lección».
+
+**Y las otras 30 tenían un solo día.** El mismo agujero por el otro lado: la
+única pieza escribible era la de hoy. Las que faltan se cuentan y no se listan
+—está bien pensado y se queda: 31 nombres seguidos son seis renglones que no
+sirven para nada—, pero no tenían **ninguna entrada**. El que no escribía la
+suya el día que su lección caía la perdía para siempre. Treinta y tres piezas,
+una oportunidad cada una, y nada fallaba.
+
+| | antes | ahora |
+|---|---|---|
+| Piezas que se piden alguna vez | 30 de 33 | 33 de 33 |
+| Veces que se puede escribir cada una | 1 (su día) | su día, y cuando vuelva |
+| Máximo de piezas en un día | 2 | 2 |
+
+**El arrastre.** La pieza de una lección que cae en un día que no se camina se
+pide en el primer paso siguiente: se lee el sábado, se escribe el lunes. Es una
+función pura, `leccionesDelDia`, y el recorrido del Camino quedó **uno y
+plano**, para que el paso de hoy y sus piezas salgan del mismo índice y no
+puedan discrepar.
+
+**La pista de 66 estaba clavada en cero.** `diasSostenidos` no se pasaba nunca
+en el llamado, así que las 66 casillas no podían avanzar ni una. Va con
+`calcularRacha()`, que ya existe y ya se guarda. **Decisión tuya, y es un botón
+de dos:** qué cuenta como «sostener» el protocolo —la sesión del día (lo que
+mide hoy, días hábiles con gracia de uno) o el **paso afuera**, que es lo que
+el T6 pide para la racha del juego del sur—. Mientras no la toques, mide la
+sesión.
+
+**La lente, mordida cinco veces.** Seis medidas nuevas, y ahora corre el
+recorrido en vez de leerlo como texto: sin arrastre se pone roja y **nombra 7,
+15 y 27**; con el arrastre sin tope, roja (33 piezas en un día); sin
+`diasSostenidos`, roja; con las que faltan sin entrada, roja por los dos
+renglones; con dos jornadas intercambiadas en el seed, roja. Las cinco,
+probadas poniendo el defecto y sacándolo.
+
+**Y lo de siempre, otra vez:** al empujar, el remoto había avanzado dos veces
+—`dba6ea8` y `d114216`, de otras sesiones—. Ninguno de los dos toca estos
+cuatro archivos; el segundo toca una línea de `Roadmap.tsx`. Rebasado, y
+`tsc`, `build` y las lentes vecinas en verde sobre el árbol fusionado.
 
 ### El 15 de noviembre a las 20:10: la corrección — el medidor nunca estuvo ciego
 
@@ -3275,6 +3335,13 @@ El plan decía:
 el campo `checklist`, con su forma real (tarea con sus micro), y una lente que
 compara app contra papel para que no vuelvan a separarse.
 
+**T5 · Mi protocolo, las 33 piezas.** — **CERRADO el 15 de noviembre** ·
+`7bb7835` (abajo, en «El 15 de noviembre a las 21:40»). Las cuatro partes
+estaban construidas desde esa mañana y ninguna llegaba entera: tres de las 33
+piezas no se podían escribir nunca, las otras 30 tenían una sola oportunidad
+cada una, y la pista de 66 no podía avanzar un casillero.
+
+El plan decía:
 **T5 · Mi protocolo, las 33 piezas.** La pieza del día se escribe igual que en
 el libro; la guarda se va llenando; la pista de 66 con sus marcas en 21, 44 y
 66; y el chequeo semanal de tres preguntas contra el burnout (las tres
