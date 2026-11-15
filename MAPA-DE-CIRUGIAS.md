@@ -401,6 +401,54 @@ probadas poniendo el defecto y sacándolo.
 cuatro archivos; el segundo toca una línea de `Roadmap.tsx`. Rebasado, y
 `tsc`, `build` y las lentes vecinas en verde sobre el árbol fusionado.
 
+### El 15 de noviembre a las 23:40: la revisión que no vio el trabajo
+
+Una revisión con ojos nuevos sobre todo lo del día. Corrió `tsc`, `build`,
+**las 143 lentes**, la auditoría entera y el medidor: **todo verde**. Y
+después encontró **doce defectos**, cinco de ellos graves.
+
+**El diagnóstico de fondo, que vale más que la lista:** las lentes de este
+repo *verifican con expresiones que una llamada EXISTA, no que su condición
+pueda ser verdadera alguna vez*. Los cinco hallazgos más graves pasan por
+ahí. Una lente que ejecute la función y compare contra una cuenta
+independiente los hubiera agarrado a los cinco.
+
+**El peor, y era de este turno.** El cron de los avisos tenía el calendario
+del Camino copiado a mano: **33 de sus 40 códigos ya no existen en el seed**.
+`CAMINO.find(m => !done.has(m.c))` devolvía siempre un código imposible, así
+que todo cliente quedaba atrasado —incluido el que cerró las noventa
+jornadas— con el atraso creciendo con el calendario:
+
+| estado del cliente | lo que veía el cron |
+|---|---|
+| todo hecho, día 5 | «4 días atrasado» |
+| todo hecho, día 90 | «64 días atrasado» |
+
+Mientras eso solo encendía una alarma en el Admin, ensuciaba. Esta mañana se
+le colgaron encima **los avisos que salen al cliente**: el día que se pegue
+el webhook, todos reciben cada semana un mensaje diciéndoles que no
+avanzaron. Del mismo calendario vencido: «Camino completo» no podía salir
+nunca y «cerró el día 5» se disparaba al cerrar el día 3.
+
+Ahora se deriva del seed, y la lente **ejecuta esa derivación** en vez de
+buscar texto.
+
+**Los otros once, en una línea cada uno:** el de 97 veía las nueve clases del
+método (el filtro miraba días de calendario y dejaba pasar las piezas sin
+día) · tres piezas del protocolo no se podían escribir · la racha no recibía
+«hoy» y no se podía cortar, así que el mensaje de reenganche era código
+muerto · el vaso decía 120 debajo de una grilla de 100 · el tablero no se
+movía al marcar el paso afuera · la pista de 66 no recibía su dato · un aviso
+roto se llevaba puestas las entregas del equipo · la consulta de tareas sin
+paginar truncaba el progreso del cliente 16 en adelante · la fuente de Lally
+avalaba los tres números, incluido el que ese estudio contradice · cinco
+frases en negativo · tres palabras prohibidas que venían de antes.
+
+**Y una lección de método para el que venga:** la revisión encontró en una
+pasada lo que 143 lentes en verde no vieron, porque no leyó los mensajes de
+commit: ejecutó.
+
+
 ### El 15 de noviembre a las 20:10: la corrección — el medidor nunca estuvo ciego
 
 **Lo escrito en el commit `58ced97` y en el chat estaba mal, y se corrige
