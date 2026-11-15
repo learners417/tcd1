@@ -206,13 +206,23 @@ export default function App() {
     // lugar nuevo para que ningún aviso ni enlace quede sin destino.
     const ALIAS: Record<string, string> = { agentes: 'entrenadores', manualNegocio: 'adn' };
     page = ALIAS[page] ?? page;
+    /*
+     * El Método salió de acá el 15 de noviembre: pedía pilar 2, y el que
+     * entra por Tu nuevo precio compra «los 8 libros y los cinco primeros
+     * días» con un plan que llega al pilar 1. Pagaba los libros y la puerta
+     * lo devolvía al Camino sin decirle nada.
+     *
+     * Lo de adentro sigue atado a su día —`loQuePuedeVer(catalogo, {
+     * diaActual })`—, así que abrir la puerta no le abre el programa.
+     */
     const PAGINA_PILAR: Record<string, number> = {
-      biblioteca: 2, metrics: 4, campanas: 4, creador: 4, miclinica: 5,
+      metrics: 4, campanas: 4, creador: 4, miclinica: 5,
     };
     const pilarNec = PAGINA_PILAR[page];
     let destino = pilarNec !== undefined && !planActualPermite(pilarNec) ? 'roadmap' : page;
-    // Diario y El Método se ganan terminando Sanar el Dinero (cinturón 2) — igual que el menú.
-    if ((page === 'diario' || page === 'biblioteca') && destino === page) {
+    // El Diario se gana terminando Sanar el Dinero (cinturón 2) — igual que
+    // el menú. El Método ya no: son los libros que ya compró.
+    if (page === 'diario' && destino === page) {
       try {
         const hechas = new Set<string>(JSON.parse(localStorage.getItem('tcd_hoja_ruta_v2') ?? '[]'));
         if (cinturonDesdeProgreso(hechas).orden < 2) destino = 'roadmap';

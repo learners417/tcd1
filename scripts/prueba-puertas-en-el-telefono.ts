@@ -70,17 +70,31 @@ for (const [pagina, pilar] of exigido) {
 
 console.log('\n── y el cinturón también ──');
 /*
- * El Diario y El Método se ganan terminando Sanar el Dinero, y eso vive en
- * otro punto de App.tsx, no en el mapa de pilares.
+ * Lo que se gana con un grado —hoy el Diario— vive en otro punto de App.tsx,
+ * no en el mapa de pilares.
+ *
+ * La lectura cuenta CUÁNTAS pantallas hay ahí, no da por hecho que sean dos.
+ * Estaba escrita para el par «Diario o Método», y el día que el Método salió
+ * de esa puerta —los libros son parte de lo que ya compró— la expresión dejó
+ * de calzar y la lente dijo «no se pudo leer»: roja por su propia forma, con
+ * los dos lados de acuerdo. Ahora toma las que haya.
  */
-const porCinturon = /\(page === '(\w+)' \|\| page === '(\w+)'\)[\s\S]{0,320}?orden < (\d)/.exec(app);
-if (porCinturon) {
-  const [, a, b, orden] = porCinturon;
-  for (const id of [a, b]) {
+const bloqueCinturon = /if \(([^)]*page === '[^']+'[^)]*)\)[\s\S]{0,360}?orden < (\d)/.exec(app);
+if (bloqueCinturon) {
+  const [, condicion, orden] = bloqueCinturon;
+  const porCinturon = [...condicion.matchAll(/page === '(\w+)'/g)].map((m) => m[1]);
+  ok(porCinturon.length > 0, `${porCinturon.length} pantalla(s) se ganan con un grado`);
+  for (const id of porCinturon) {
     const d = destinoPorId(id);
     ok(d?.minCinturon === Number(orden),
        `${d?.label ?? id} pide cinturón ${orden} en los dos lados (la lista dice ${d?.minCinturon ?? 'ninguno'})`);
   }
+  /* Y al revés: lo que la lista dice que pide grado tiene que estar ahí. En
+     la lista sola, el menú apaga la puerta y la pantalla igual se abre. */
+  const enLaLista = DESTINOS.filter((d) => typeof d.minCinturon === 'number').map((d) => d.id);
+  const sueltas = enLaLista.filter((id) => !porCinturon.includes(id));
+  ok(sueltas.length === 0,
+     `ninguna pide grado solo en la lista${sueltas.length ? ` — ${sueltas.join(', ')}` : ''}`);
 } else {
   ok(false, 'el requisito de cinturón de la app se pudo leer');
 }

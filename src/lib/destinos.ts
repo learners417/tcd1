@@ -55,7 +55,20 @@ export const DESTINOS: Destino[] = [
   { id: 'mensajes', label: 'Mi comunidad', icon: Users, desc: 'El grupo, tu reporte y tus victorias', minPilar: 0 },
   { id: 'numero', label: 'Mi Número', icon: Target, desc: 'Tu precio nuevo y lo que lo sostiene', minPilar: 0 },
   { id: 'diario', label: 'Diario del Fundador', icon: BookOpen, desc: 'Tu cierre de cada día', minPilar: 0, minCinturon: 2 },
-  { id: 'biblioteca', label: 'El Método', icon: Library, desc: 'Tus libros y las clases del método', minPilar: 2, minCinturon: 2 },
+  /*
+   * LOS LIBROS SON PARTE DE LO QUE PAGÓ, Y ESTABAN DETRÁS DE UN CANDADO.
+   *
+   * Pedía pilar 2 y grado 2. El que entra por Tu nuevo precio compra «los 8
+   * libros y los cinco primeros días», y su plan llega hasta el pilar 1: no
+   * alcanzaba ninguno de los dos, así que pagaba los libros y en la app los
+   * veía con candado. Medido el 15 de noviembre.
+   *
+   * Abrir la puerta no abre el material del programa: lo de adentro ya se
+   * filtra por el día del Camino —`loQuePuedeVer(catalogo, { diaActual })`—,
+   * así que quien va por el día 3 sigue viendo lo del día 3 y nada más. El
+   * candado estaba de más justo para el único que lo tocaba.
+   */
+  { id: 'biblioteca', label: 'El Método', icon: Library, desc: 'Tus libros y las clases del método', minPilar: 0 },
   { id: 'metrics', label: 'Métricas', icon: TrendingUp, desc: 'Tus números: visitas, llamadas, consultantes', minPilar: 4 },
   { id: 'campanas', label: 'Campañas', icon: Megaphone, desc: 'Tus anuncios, carruseles y portadas', minPilar: 4 },
   { id: 'creador', label: 'Creador de Contenido', icon: PenLine, desc: 'Tus guiones y publicaciones', minPilar: 4 },

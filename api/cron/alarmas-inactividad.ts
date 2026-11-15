@@ -23,6 +23,7 @@ import {
   ENTREGAS, entregaPendiente, avisoAlCliente, tareaDelEquipo,
 } from '../../src/lib/entregasDelEquipo.js';
 import { leTocanLasEntregas } from '../../src/lib/topeDelEscalon.js';
+import { avisarAGHL, type EventoDeAviso } from '../_lib/avisar-a-ghl.js';
 
 /** La semana ISO, igual que en el resto de la app: '2026-W31'. */
 function semanaISOde(d: Date): string {
@@ -100,7 +101,7 @@ async function handler(req: any, res: any) {
     // 1) clientes activos con fecha de inicio
     const { data: clientes, error: e1 } = await admin
       .from('profiles')
-      .select('id, nombre, fecha_inicio, rol, status, servicio_contratado, servicio_marcado_el')
+      .select('id, nombre, email, fecha_inicio, rol, status, servicio_contratado, servicio_marcado_el')
       .neq('rol', 'admin');
     if (e1) throw e1;
 
@@ -130,6 +131,60 @@ async function handler(req: any, res: any) {
       .ilike('titulo', '%atrasado%');
     const avisadosHoy = new Set((yaHoy ?? []).map((n: { descripcion: string }) => n.descripcion?.split(' lleva ')[0] ?? ''));
 
+    /*
+     * ─── LOS TRES AVISOS QUE SALEN DE LA APP AL SISTEMA ──────────────────
+     *
+     * La campanita suena adentro de la app, y los tres momentos que importan
+     * son del que NO está adentro. Salen por el Sistema, que es donde están
+     * el WhatsApp y el correo.
+     *
+     * Se anotan en `notificaciones` con su clave para no repetirse: el día 5
+     * y el final, una sola vez en la vida; el atraso, una vez por semana —un
+     * cliente trabado un mes recibe cuatro mensajes, no treinta—.
+     *
+     * Sin `GHL_AVISOS_WEBHOOK` no sale ningún pedido: el código está arriba
+     * y callado hasta que Javo pegue la dirección del flujo.
+     */
+    const haceUnaSemana = new Date(Date.now() - 7 * 86400000).toISOString();
+    const { data: avisosPrevios } = await admin
+      .from('notificaciones')
+      .select('usuario_id, clave, created_at')
+      .eq('tipo', 'sistema')
+      .like('clave', 'ghl_%');
+    const yaAvisado = new Map<string, string>();
+    for (const n of (avisosPrevios ?? []) as Array<{ usuario_id: string; clave: string; created_at: string }>) {
+      const id = `${n.usuario_id}|${n.clave}`;
+      if (!yaAvisado.has(id) || n.created_at > (yaAvisado.get(id) as string)) yaAvisado.set(id, n.created_at);
+    }
+    const avisarUnaVez = async (
+      evento: EventoDeAviso,
+      cli: { id: string; nombre?: string | null; email?: string | null },
+      dia: number,
+      cadaSemana = false,
+    ) => {
+      const clave = `ghl_${evento}`;
+      const cuando = yaAvisado.get(`${cli.id}|${clave}`);
+      if (cuando && (!cadaSemana || cuando > haceUnaSemana)) return;
+      const salida = await avisarAGHL(evento, {
+        email: cli.email ?? '',
+        nombre: cli.nombre ?? 'Cliente',
+        dia,
+      });
+      if (salida !== 'enviado') return;
+      await admin.from('notificaciones').insert({
+        usuario_id: cli.id, tipo: 'sistema', clave,
+        titulo: 'Aviso enviado al Sistema',
+        descripcion: evento, leida: true,
+      });
+      yaAvisado.set(`${cli.id}|${clave}`, new Date().toISOString());
+    };
+
+    /* Los códigos del día 5 y del día 90 salen del mismo calendario que usa
+       el atraso, para que no haya dos listas de días que se peleen. */
+    const DEL_DIA_5 = CAMINO.filter((m) => m.d === 5).map((m) => m.c);
+    const ULTIMO_DIA = Math.max(...CAMINO.map((m) => m.d));
+    const DEL_ULTIMO = CAMINO.filter((m) => m.d === ULTIMO_DIA).map((m) => m.c);
+
     let alarmas = 0;
     for (const cli of clientes ?? []) {
       if (!cli.fecha_inicio) continue;
@@ -157,6 +212,24 @@ async function handler(req: any, res: any) {
         ),
       );
       alarmas++;
+      await avisarUnaVez('sin_entrar_3_dias', cli, dia, true);
+    }
+
+    /*
+     * Y los dos de buenas noticias, que no dependen del atraso: se miran
+     * aparte porque un cliente al día no entra nunca al bucle de arriba.
+     */
+    for (const cli of clientes ?? []) {
+      if (!cli.fecha_inicio) continue;
+      if (cli.status && !['ACTIVE', 'activo', null].includes(cli.status)) continue;
+      const dia = Math.max(1, Math.min(95, Math.floor((Date.now() - new Date(cli.fecha_inicio).getTime()) / 86400000) + 1));
+      const done = completadasPor.get(cli.id) ?? new Set<string>();
+      if (DEL_DIA_5.length > 0 && DEL_DIA_5.every((c) => done.has(c))) {
+        await avisarUnaVez('dia_5_hecho', cli, dia);
+      }
+      if (DEL_ULTIMO.length > 0 && DEL_ULTIMO.every((c) => done.has(c))) {
+        await avisarUnaVez('camino_completo', cli, dia);
+      }
     }
 
     // ── LOS AVISOS QUE LA APP MANDA SOLA ──

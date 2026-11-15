@@ -179,7 +179,11 @@ const PIPELINE_STAGES: { label: string; sub: string; maxDay: number; fase: numbe
   { label: 'F1 · Sanar el Dinero',      sub: 'Días 2–9',   maxDay: 9,  fase: 1, icon: Fingerprint },
   { label: 'F2 · Método y Oferta',      sub: 'Días 10–18', maxDay: 18, fase: 2, icon: Search },
   { label: 'F3 · Sistema Encendido',    sub: 'Días 19–33', maxDay: 33, fase: 3, icon: Sparkles },
-  { label: 'F4 · Vender y Escalar',     sub: 'Días 34–90', maxDay: 90, fase: 4, icon: Rocket },
+  /* «Escalar» es palabra prohibida de la casa, y era la última que quedaba
+     escrita en una pantalla —esta, que mira Javo todos los días—. El
+     reemplazo sale de sus propios libros: crecer es lo que el programa
+     promete. Medido el 15 de noviembre: era la única. */
+  { label: 'F4 · Vender y crecer',      sub: 'Días 34–90', maxDay: 90, fase: 4, icon: Rocket },
 ];
 
 function getFaseFromProgress(tareas_completadas: number): number {
