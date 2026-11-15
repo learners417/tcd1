@@ -3893,9 +3893,23 @@ def _correr_prueba(_p):
 with _cf_pr.ThreadPoolExecutor(max_workers=8) as _ex_pr:
     _salidas = sorted(_ex_pr.map(_correr_prueba, _pruebas), key=lambda t: t[0])
 
+# ── EL CÓDIGO DE SALIDA NO ES LA ÚNICA VOZ DE UNA PRUEBA ───────────────
+#
+# Hasta el 15 de noviembre este bloque juzgaba las 133 SOLO por el código de
+# salida, y `prueba-cadena.ts` no tenía ninguno: imprimía `✗` por cada
+# escenario mal diagnosticado y terminaba en 0. Medido: con `encontrarDomino`
+# ignorando el primer eslabón roto, cinco de los seis escenarios decían «La
+# cadena está sana» a un cliente que no cobra, y la batería daba las 133 en
+# verde y «el ZIP puede salir».
+#
+# La lección ya estaba escrita DOS VECES más abajo —el `.sh` del SQL y
+# `prueba-movil.py` se juzgan por el código Y por sus renglones `✗`— y no
+# estaba aplicada acá. Ahora una prueba está roja si termina en rojo O si
+# imprime un renglón que empieza con `✗`, sea cual sea su código.
 _rojas, _pendientes = [], []
 for _p, _codigo, _salida in _salidas:
-    if _codigo == 0:
+    _cruces = [l.strip() for l in _salida.split('\n') if l.strip().startswith('✗')]
+    if _codigo == 0 and not _cruces:
         continue
     _nom = _p.split('/')[-1]
     if _nom in PENDIENTES_DE_CONTENIDO:
@@ -5379,6 +5393,56 @@ check('el comentario de cada lenguaje: ciego ayer, rojo hoy (probado ejecutando)
       _pc16.returncode == 0,
       (_pc16.stdout + _pc16.stderr).strip().split('\n')[-1][:170])
 
+
+# ── Y la prueba que no puede ponerse roja no es una prueba ──────────────
+#
+# El bloque 10 ya lee los renglones `✗` además del código de salida, así que
+# una prueba que falle hoy se ve. Lo que esa guarda no alcanza es la prueba
+# que NACE sin salida roja y pasa meses en verde sin que nadie la rompa:
+# `prueba-cadena.ts` estuvo así, y el día que se midió, cinco de sus seis
+# escenarios estaban mal y la batería decía «el ZIP puede salir».
+#
+# Se mide sobre el CÓDIGO —`rdc()`, sin comentarios— y se exige que cada
+# `scripts/prueba-*.ts` tenga al menos un `process.exit(` cuyo argumento no
+# sea el cero literal. Un `process.exit(r.status ?? 1)` que delega en otro
+# proceso cuenta: su rojo es el rojo del otro.
+def _arg_del_exit16(_txt: str, _i: int) -> str:
+    """Lo que hay entre los paréntesis de un `process.exit(` que empieza en _i."""
+    _j = _txt.index('(', _i)
+    _prof, _k = 0, _j
+    while _k < len(_txt):
+        if _txt[_k] == '(':
+            _prof += 1
+        elif _txt[_k] == ')':
+            _prof -= 1
+            if _prof == 0:
+                return _txt[_j + 1:_k].strip()
+        _k += 1
+    return ''
+
+
+_sin_rojo16 = []
+for _pr16 in sorted(_g16.glob('scripts/prueba-*.ts')):
+    _c16 = rdc(_pr16)
+    _args16 = [_arg_del_exit16(_c16, _m16.start())
+               for _m16 in _re16.finditer(r'process\s*\.\s*exit\s*\(', _c16)]
+    if not _args16 or all(_a16 in ('0', "'0'", '"0"') for _a16 in _args16):
+        _sin_rojo16.append(_pr16.split('/')[-1])
+check(f'las {len(sorted(_g16.glob("scripts/prueba-*.ts")))} pruebas pueden ponerse '
+      'rojas: cada una termina en un código que depende de sus fallas',
+      not _sin_rojo16,
+      '; '.join(_sin_rojo16) + ' — sin `process.exit` distinto de 0: '
+      'imprime su rojo y el bloque 10 la cuenta verde')
+
+# Y la prueba de que las dos guardas sirven, corrida: el defecto se pone en
+# memoria sobre el contenido de los archivos de verdad y se evalúan las dos
+# —el veredicto del bloque 10 y la lente de acá— sacadas de esta misma
+# batería, no copiadas.
+_pr16 = subprocess.run([sys.executable, 'scripts/probar-que-la-prueba-puede-ponerse-roja.py'],
+                       capture_output=True, text=True)
+check('la prueba que no puede ponerse roja: verde ayer, roja hoy (probado ejecutando)',
+      _pr16.returncode == 0,
+      (_pr16.stdout + _pr16.stderr).strip().split('\n')[-1][:170])
 
 print()
 if F == 0 and _pendientes:

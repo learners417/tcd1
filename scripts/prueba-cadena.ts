@@ -44,3 +44,12 @@ const p = proyectar(10, casos[5][1]);
 console.log(`\nProyección para 10 ventas (tasas reales, colchón 30%):`);
 console.log(`  ${p.conversacionesNecesarias} conversaciones → ${p.agendasNecesarias} agendas → ${p.llamadasNecesarias} llamadas`);
 console.log(`  inversión $${p.inversionNecesaria} · gobierna la semana: ${p.gobierna}`);
+
+// El 15 de noviembre esta prueba era la única de las 133 que NO podía ponerse
+// roja: imprimía `✗` por cada escenario mal diagnosticado y terminaba en 0, y
+// el bloque 10 de la batería la juzga solo por el código de salida. Probado:
+// con `encontrarDomino` ignorando el primer eslabón roto, cinco de los seis
+// escenarios decían «La cadena está sana» a un cliente que no cobra, y la
+// batería daba las 133 en verde y «el ZIP puede salir».
+console.log(ok === casos.length ? '\n✓ TODO EN VERDE\n' : `\n✗ ${casos.length - ok} FALLAS\n`);
+process.exit(ok === casos.length ? 0 : 1);
