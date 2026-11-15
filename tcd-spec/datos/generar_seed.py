@@ -344,13 +344,18 @@ add(12,"sesion","Tu primer cobro al precio nuevo",sistema=1,minutos=30,
     adn=["numeros.primer_cobro_precio_nuevo"],cinturon="8gup")
 
 add(13,"sesion","A quién le vas a escribir",sistema=1,minutos=60,piezas=["P7.2"],
-    lleva="Sesenta nombres con su canal, ordenados por quién te contesta.",
+    lleva="Veinte nombres con su canal, ordenados por quién te contesta.",
     veredicto="Esa es tu primera fuente de consultantes, y ya la tienes. Los diez de arriba son los de mañana.",
     pasos=["Tu red no es tu cartera: colegas, egresados y contactos del rubro",
            "Escribe sesenta nombres con apellido y por dónde le escribes a cada uno. Ejemplo: Ana Pérez · Instagram",
            "Ordénalos por quién te contesta más fácil",
            "Marca los diez primeros: esos son los de mañana"],
-    evidencias=[ev("texto","Los sesenta nombres","sesenta filas con nombre y canal",
+    # VEINTE, NO SESENTA. Esta jornada se mudó al día 8 —«A quién le hablas»—
+    # y ahí el paso pide «tu lista de veinte». La evidencia se quedó pidiendo
+    # sesenta: el cliente escribía veinte nombres y la app le decía que le
+    # faltaban cuarenta, en el mismo día que acababa de pedirle veinte. El
+    # papel dice veinte, y el papel manda.
+    evidencias=[ev("texto","Los veinte nombres","veinte filas con nombre y canal",
                    pide="Escribe tu lista, con el canal de cada uno."),
                 ev("numero","Tamaño de la red",">= 20",
                    pide="Escribe cuántos nombres juntaste.")],

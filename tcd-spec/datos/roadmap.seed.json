@@ -1623,8 +1623,8 @@
         },
         {
           "tipo": "texto",
-          "nombre": "Los sesenta nombres",
-          "valida": "sesenta filas con nombre y canal",
+          "nombre": "Los veinte nombres",
+          "valida": "veinte filas con nombre y canal",
           "del_mercado": false,
           "pide": "Escribe tu lista, con el canal de cada uno."
         }

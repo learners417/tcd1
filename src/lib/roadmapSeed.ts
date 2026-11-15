@@ -200,7 +200,11 @@ export interface Jornada {
   lleva?: string | null
   /** La lectura que devuelve la app al subir la evidencia. */
   veredicto?: string | null
-  /** Modo 15 minutos: qué paso produce la evidencia. Base 1. */
+  /**
+   * CUÁNTOS pasos tiene el día. El nombre engaña y por eso está escrito acá:
+   * el generador lo llena con `len(pasos)`, no con el índice del paso que
+   * produce la evidencia. Leerlo como índice da siempre el último.
+   */
   paso_esencial: number | null
   /** Adentro · la lección del libro de ese día. Vacío mientras LIBROS no la pase. */
   leccion: LeccionDelDia[]
@@ -327,12 +331,24 @@ export const minutosDe = (dia: number): number =>
 export const jornadasLargas = (): Jornada[] =>
   roadmap.jornadas.filter(j => j.jornada_larga)
 
-/** El paso esencial de una jornada, para el modo 15 minutos. */
-export const pasoEsencialDe = (dia: number): string | undefined => {
-  const j = jornadaPorDia.get(dia)
-  if (!j || !j.paso_esencial) return undefined
-  return j.pasos[j.paso_esencial - 1]
-}
+/*
+ * ACÁ VIVÍA `pasoEsencialDe`, Y DEVOLVÍA EL ÚLTIMO PASO SIEMPRE.
+ *
+ * Leía `j.paso_esencial` como si fuera el índice del paso que hay que hacer
+ * cuando solo tienes quince minutos. No lo es: el generador lo escribe como
+ * `len(r["pasos"])`, o sea CUÁNTOS pasos tiene el día. Leído como índice,
+ * `pasos[paso_esencial - 1]` es siempre el último — y el último del día 5 es
+ * «Si recién empiezas: escribe a quién no vas a atender», no «Sella el precio
+ * y crea tu link de pago», que es para lo que existe ese día.
+ *
+ * No llegó a romper nada porque no lo llamaba nadie, archivo por archivo. Se
+ * saca para que no lo llame el que venga a hacer el reenganche —«vuelves al
+ * primer día sin terminar y haces solo su paso esencial»—, que es justo lo
+ * que necesita este dato y lo que recibiría mal.
+ *
+ * Cuál es el paso esencial de cada día lo marca El Camino en papel, en
+ * negrita. La app no lo puede deducir: lo pasa LIBROS.
+ */
 
 /** Total de trabajo del cliente, en minutos. Verificado: 4265 ≈ 71 horas. */
 export const cargaTotal = (): number =>

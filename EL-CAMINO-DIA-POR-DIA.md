@@ -183,7 +183,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 - Arma tu lista de veinte: nombres, no categorías
 - Al lado de cada nombre, su canal
 
-**Lo que queda hecho:** Audiencia contada · Los sesenta nombres
+**Lo que queda hecho:** Audiencia contada · Los veinte nombres
 
 **Veredicto:** Ya no le hablas a todos. Le hablas a una persona, y tienes veinte nombres.
 
