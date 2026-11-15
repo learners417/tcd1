@@ -3116,6 +3116,25 @@ De la 0 a la 6 se puede cobrar. De la 7 a la 10 se ve caro.
 
 ## Lo que es tuyo
 
+### Antes de pasar el acceso (martes 17 de noviembre)
+
+- **Promover el deploy a producción.** Vercel compiló `26c5d03` y salió bien,
+  pero los últimos cien deploys de este repo figuran como *Preview*: ninguno
+  como *Production*. Vercel → cuenta `tuclinicadigital` → proyecto `sanar` →
+  Deployments: si el que dice **Production** no es de hoy, **Promote to
+  Production** al de `26c5d03`. Mientras no se promueva,
+  `app.tuclinica.digital` sigue sirviendo un build viejo.
+- **`VITE_LIBROS_URL`** en Vercel, con el link de la carpeta de los libros.
+  Sin esa variable los cinco libros aparecen en el estante con su nombre y su
+  bajada, y sin el botón «Abrirlo». No hay enlace roto: hay un camino que
+  termina. El link no se escribe en el repo, por eso va por entorno.
+- **`GHL_AVISOS_WEBHOOK`** en Vercel, con la dirección del webhook de entrada
+  de GHL. Sin esa variable los tres avisos —tres días sin entrar, día 5 hecho,
+  camino completo— se calculan y no salen. Nada se rompe sin ella; lo que no
+  pasa es el reenganche. Ninguna dirección de GHL se escribe en el repo.
+
+### Lo demás
+
 - **El SQL de `fallas_vistas`** — hasta que corra, si a un cliente se le traba
   una pantalla, la app le dice «ya nos llegó el aviso» y no llega nada.
 - **El workflow de GHL que manda el `plan`** (verde/negro).
