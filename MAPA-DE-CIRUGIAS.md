@@ -254,7 +254,11 @@ cayó también**: estaba cerrado para **un** idioma. El `//` de TypeScript era e
 dueño comentada con `--` la lente que dice medirla daba verde y ninguna otra la
 veía (abajo, en «El 15 de noviembre a las 03:25»). Cerrado ahora para `.sql`,
 `.py`, `.sh` y el `.gitignore` de MCD, con 33 fugas vivas más que salieron por
-el camino. El primero de los tres que quedan es
+el camino. **Y el 15 a las 06:30 se cayó una tercera vez, por otro lado:** no
+la marca del comentario sino **la puerta** —`index.html` y `src/index.css` se
+leían con `open(...)`, fuera de `rd()`, y tres lentes vivían de ese lado—, más
+el décimo agujero y sus 14 fugas vivas (abajo, en «El 15 de noviembre a las
+06:30»). El primero de los tres que quedan es
 **cerrar `/api/mcd-bridge`**, la última ruta sin llave, con su botón abajo en
 «El 14 de noviembre a las 03:30». Los otros dos son
 del 13: subir el `next` de MCD, y subir el editor de TCD (las dos
@@ -326,7 +330,80 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 | **14 nov, 15:25** · `da98ce6` | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`93c3961` en TCD, `a76e8e7` en MCD), los dos árboles limpios y `HEAD` suelto en los dos—, `node_modules` en cero. Esta despertada tomó el candidato que el mapa daba por **mecánico y preventivo** («ninguna de las 183 miente hoy») y la premisa se cayó dos veces: la lente del bloque 16 **estaba verde por un punto y coma** —veía la asignación cruda solo al principio de la línea, así que once presencias con forma de nombre vivían hoy en la forma exacta que la lente prohíbe—, y había **cuatro ausencias que eran el defecto**, donde un comentario escondía al endpoint que cobra sin poder devolver el crédito. Seis formas cerradas, 225 medidas pasadas al código, y una lente que medía la cadena vacía (abajo) |
 
 | **15 nov, 03:25** · `eb59091` + `0c49ffb` (MCD) | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`480fb2b` en TCD, `a76e8e7` en MCD)—, `node_modules` en cero en los dos y el `HEAD` suelto en TCD. Con el frente de la auditoría de la auditoría dado por **cerrado de los dos lados**, esta despertada preguntó lo único que ese frente nunca había preguntado: **¿y el comentario de los otros lenguajes?** Todo lo cerrado entre el 13 y el 14 cuidaba el `//` de TypeScript, y la batería lee además `.sql`, `.py` y `.sh`. **Con la guarda de la carpeta del dueño comentada con `--`, la lente que dice medirla dio VERDE y ninguna otra la vio.** Y al endurecer la lente aparecieron **33 fugas vivas en main** que ninguna de las cuatro formas podía ver: la comilla de adentro. En MCD, lo mismo con `#`: `.env.local` comentado del `.gitignore` y las 57 en verde (abajo) |
+| **15 nov, 06:30** · `f8fb28b` + `d7b905a` (MCD) | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`6e77528` en TCD, `0c49ffb` en MCD), los dos repos en `origin/main`—, `node_modules` en cero en los dos. El frente de los comentarios estaba cerrado en los cuatro idiomas, así que esta despertada preguntó por **la puerta**, no por la marca: `index.html` y `src/index.css` se leían con `open(...).read()`, por donde no pasa `_MARCAS`, no se llama `solo_codigo` y el bloque 16 no mira. **Tres lentes vivían de ese lado, y a dos de las tres no las vio nadie** (abajo, en «El 15 de noviembre a las 06:30»). Y al probar las fugas puestas salió el décimo agujero: el arreglo de la comilla de adentro había entrado en UNA de las cuatro formas, con **14 fugas vivas más** detrás |
 | **14 nov, 19:30** · `d5ead99` | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`dc8dc42` en TCD, `a76e8e7` en MCD)—, `node_modules` en cero en los dos y la trampa del `HEAD` suelto con la **`main` local de TCD 31 commits atrás** (un `git checkout main` a secas la hubiera dejado ahí: se arregló antes de medir). Esta despertada tomó el último candidato de este frente —**el recorrido por AST de la ausencia**— y la premisa se cayó otra vez: de las 46 ausencias de mecanismo que hay de verdad, **tres seguían en un recolector**, y las dos lentes que las usan estaban **ciegas hoy**, probado sacando el mecanismo del código. Y de paso, la lente del catch mudo conocía **una sola manera de escribir «mudo»**: las dos que están mudas de verdad en main se escriben distinto y nunca se vieron (abajo) |
+
+### El 15 de noviembre a las 06:30: no era la marca, era la puerta
+
+Cuatro despertadas seguidas cerraron el COMENTARIO: el `//` de TypeScript, el
+`--` del SQL, el `#` del Python y del shell, el `<!-- -->` del `.gitignore` de
+MCD. Esta preguntó lo otro: **¿y si la lente no llama al limpiador?**
+
+`index.html` y `src/index.css` se leían con `open(...).read()`. Por ahí no pasa
+`_MARCAS`, no se llama `solo_codigo` y el bloque 16 —que mide toda presencia
+sobre archivo crudo— **no mira**, porque solo conoce `rd()`. Medido antes de
+construir, con el defecto puesto en los archivos de verdad y la batería entera
+corrida:
+
+| el mecanismo comentado | la lente que dice medirlo | ¿lo cazó otra? |
+|---|---|---|
+| `data-theme="light"` dentro de un `<!-- -->` (`index.html`) | **verde** | el medidor, de rebote: 686 faltas en 13 pantallas, sin nombrar la causa |
+| `--color-ink` con `/* */` (`src/index.css`) | **verde** | **nadie** — el medidor dio **cero** faltas |
+| `--surface: var(--bg-card)` con `/* */` | **verde** | **nadie** |
+
+Las dos del `.css` son las que importan. La primera deja cada clase `text-ink`
+del tema claro en el valor oscuro —texto casi blanco sobre crema, que es el
+lavado que esa lente existe para impedir—; la segunda deja la tarjeta cayendo
+en su respaldo negro con el tema claro puesto. Las dos, con la batería entera
+diciendo «el ZIP puede salir».
+
+**Cerrado de raíz: la puerta es una sola.** Las tres lentes miden la presencia
+con `rdc()`, que ya sabía los dos comentarios y nunca se llamaba; la ausencia
+sigue sobre el crudo, que es más estricto; los dos archivos generados pasaron
+también por `rd()`; y una lente nueva, medida con el **árbol** —que no se come
+el comentario de arriba ni una cadena—, exige que cada `open(` viva adentro de
+`rd()`. `.html` y `.css` entraron a `_FUENTE16` con su palabra: en una hoja de
+estilos el mecanismo se escribe `--color-ink`, no en camello.
+
+#### Y el décimo agujero: la comilla de adentro, en las otras tres formas
+
+El 15 a las 03:25 se corrigió el cuerpo de la cadena para que excluyera solo la
+comilla que delimita, y salieron 33 fugas vivas. **Ese arreglo había entrado en
+UNA de las cuatro formas** —la de la variable—. La directa, el `.count`, el
+`.get(…)` y la regex seguían excluyendo las dos, así que
+`'data-theme="light"' in rd('index.html')` no la veía ninguna: salió probando
+las fugas puestas a propósito, que es para lo que están. Corregidas las cuatro,
+aparecieron **14 fugas vivas más en main**, todas de esa forma:
+`rpc('marcar_servicio'` del alta, `rpc('crear_notificacion'` del aviso del
+equipo, el único `rolDe`, `pantalla === 'brief'`, `j.agente !== null ? 'COACH'`,
+`onNavigate?.('adn')`, y seis inventarios que se armaban leyendo crudo —las
+claves de localStorage, las rutas del router, los imports a componentes
+borrados, los `onClick` que expulsan al Mentor, las herramientas del seed y los
+campos del perfil que se guardan al entrar—. Las 14 pasaron a medirse sobre el
+código.
+
+#### De paso, el voseo, que tenía su propio limpiador escrito al pasar
+
+«Voseo user-facing = 0» leía el archivo crudo con una coartada a mano: *si 70
+caracteres atrás hay un `*` o un `//`, no cuenta*. Eso se comía el voseo de
+verdad que tuviera un `//` cerca y dejaba pasar el de un bloque largo. Medido:
+sobre `cod(src)` y **sin** la coartada, sigue en cero. Así que la vara quedó
+más estricta y más simple.
+
+#### Y en MCD, el espejo, antes de que haga falta
+
+MCD no tenía el agujero vivo —todas sus lecturas pasan por `rd()`— pero tenía
+la forma: `rdc(f)` era `solo_codigo(rd(f))` a secas, el `//` de TypeScript para
+cualquier archivo, con `solo_sql` y `solo_almohadilla` al lado esperando que
+alguien se acordara de llamarlos. Una lente nueva sobre una migración o sobre
+`globals.css` nacía ciega. Ahora la extensión elige el limpiador, con
+`solo_bloque` para el `/* */` del `.css` —el del SQL no se puede reusar: se
+comería `--surface`, que es una propiedad— y `solo_xml` para el `<!-- -->`.
+
+Y su lente del nombre pasó del texto al árbol: la de texto marcaba como lectura
+una **cadena** que apenas contuviera `rd(`, y no veía la tupla
+(`_a, _b = rd(x), rd(y)`), el casillero (`_d['k'] = rd(x)`) ni el atributo.
+**75 lentes en verde**, con las cuatro nuevas probadas contra su propio fallo.
 
 ### El 15 de noviembre a las 03:25: el `//` era el único comentario que la batería sabía leer
 
@@ -412,10 +489,11 @@ TCD cierra con **893 miradas, cero faltas** («el ZIP puede salir»), `tsc` y
 `npm run build` limpios y las **133** pruebas en verde. MCD, con **64** en
 verde, `tsc` y `next build` limpios.
 
-**Lo que queda de este frente:** `.md` y `.html` entraron a la tabla de marcas
-con su `<!--  -->`, pero ninguna lente afirma hoy un mecanismo sobre ellos. Si
-mañana alguna lo hace, la lente «la batería no lee ningún lenguaje cuyo
-comentario no sepa escribir» la obliga a declararlo antes.
+**Lo que queda de este frente:** nada. Esto decía que `.md` y `.html` habían
+entrado a la tabla de marcas «pero ninguna lente afirma hoy un mecanismo sobre
+ellos», y **era falso**: había tres —una sobre el `.html` y dos sobre el
+`.css`—, y no se veían porque esos dos archivos no entraban por `rd()`.
+Medido y cerrado el 15 a las 06:30, abajo.
 
 ### El 14 de noviembre a las 19:30: tres ausencias seguían en un recolector
 
