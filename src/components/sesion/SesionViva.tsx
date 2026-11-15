@@ -267,8 +267,10 @@ export default function SesionViva({
                       {pasoAfueraHecho ? 'Lo hiciste' : 'Lo hice'}
                     </button>
                   ) : null}
+                  {/* La misma bajada que en Hoy: es el mismo paso, y decirlo
+                      con dos frases distintas lo convierte en dos cosas. */}
                   <p className="text-[15px] leading-snug text-cream/70">
-                    Es opcional: el día cierra igual.
+                    Diez minutos. El día cierra igual.
                   </p>
                 </div>
               )}

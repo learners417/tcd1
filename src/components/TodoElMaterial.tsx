@@ -30,11 +30,18 @@ export default function TodoElMaterial({
   cargadosEnLaBase,
   diaActual,
   bibliotecaAbierta,
+  hastaElDia = null,
 }: {
   titulos: TitulosPorDia;
   cargadosEnLaBase: Record<string, string>;
   diaActual: number | null;
   bibliotecaAbierta: boolean;
+  /**
+   * El último día que abre su plan. El escalón de entrada compra los días 1
+   * a 5: sin esto veía el material de los noventa, porque `diaActual` son
+   * días de calendario y pasan igual aunque no trabaje.
+   */
+  hastaElDia?: number | null;
 }) {
   const [texto, setTexto] = useState('');
   const [abiertos, setAbiertos] = useState<Set<string>>(() => new Set());
@@ -45,8 +52,8 @@ export default function TodoElMaterial({
     [titulos, cargadosEnLaBase],
   );
   const suyas = useMemo(
-    () => loQuePuedeVer(catalogo, { diaActual, bibliotecaAbierta }),
-    [catalogo, diaActual, bibliotecaAbierta],
+    () => loQuePuedeVer(catalogo, { diaActual, bibliotecaAbierta, hastaElDia }),
+    [catalogo, diaActual, bibliotecaAbierta, hastaElDia],
   );
   const encontradas = useMemo(() => buscar(suyas, texto), [suyas, texto]);
   const grupos = useMemo(() => porOrigen(encontradas), [encontradas]);
@@ -60,7 +67,7 @@ export default function TodoElMaterial({
           Todo el material
         </h2>
         <p className="text-[17px] text-cream/60">
-          {VOC(comoLaVe(catalogo, { diaActual, bibliotecaAbierta }))}
+          {VOC(comoLaVe(catalogo, { diaActual, bibliotecaAbierta, hastaElDia }))}
         </p>
       </div>
 

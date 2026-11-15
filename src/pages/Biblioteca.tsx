@@ -33,6 +33,7 @@ import {
 } from '../lib/videos';
 import TodoElMaterial from '../components/TodoElMaterial';
 import EstanteDeLibros from '../components/EstanteDeLibros';
+import { ultimoDiaDeSuPlan } from '../lib/planes';
 import { videosCargadosEnLaBase } from '../lib/bibliotecaDatos';
 import { VOC } from '../lib/vocabulario';
 import { idDeYoutube } from '../lib/videosCargados';
@@ -459,6 +460,14 @@ export default function Biblioteca({ userId, diaActual = null, bibliotecaAbierta
         cargadosEnLaBase={videosDeLaBase}
         diaActual={diaActual}
         bibliotecaAbierta={bibliotecaAbierta}
+        /* El último día que abre su plan: el escalón de entrada compra los
+           días 1 a 5 y tiene que ver el material de esos cinco, no el de los
+           noventa por dejar pasar el calendario. */
+        hastaElDia={ultimoDiaDeSuPlan(
+          SEED_ROADMAP_V2.flatMap((p) => p.metas.map((m) => ({
+            pilar: p.numero, dia: m.dia_asignado ?? null,
+          }))),
+        )}
       />
 
       {/* ── LOS NUEVE DEL MÉTODO ESTABAN DOS VECES ──

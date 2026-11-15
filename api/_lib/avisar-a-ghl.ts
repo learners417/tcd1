@@ -62,9 +62,17 @@ export async function avisarAGHL(
   const url = process.env.GHL_AVISOS_WEBHOOK;
   if (!url) return 'sin-webhook';
   if (!contacto.email) return 'sin-email';
+  /*
+   * CON RELOJ. Los pedidos salen uno detrás de otro, cliente por cliente,
+   * dentro de un cron que tiene su propio límite de tiempo. Un Sistema lento
+   * —no caído: lento— se come ese límite y mata de paso los avisos del equipo
+   * y las entregas, que corren después. Ocho segundos y se sigue.
+   */
+  const reloj = AbortSignal.timeout(8000);
   try {
     const r = await fetch(url, {
       method: 'POST',
+      signal: reloj,
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         evento,

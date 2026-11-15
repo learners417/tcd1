@@ -18,6 +18,8 @@
  * Correr con: npx tsx scripts/prueba-avisos-a-ghl.ts
  */
 import { readFileSync } from 'node:fs';
+import { SEED_ROADMAP_V3 } from '../src/lib/roadmapSeed';
+import { esPasoDelCliente } from '../src/lib/diaPrograma';
 
 let fallas = 0;
 const ok = (cond: boolean, que: string) => {
@@ -72,6 +74,57 @@ ok(/select\('id, nombre, email,/.test(cronCodigo),
   'el cron trae el correo, que es como GHL conoce a la persona');
 ok(/if \(!contacto\.email\) return 'sin-email';/.test(modCodigo),
   'y sin correo no se manda un aviso que GHL no puede entregar');
+
+console.log('\n══ y el calendario del que cuelgan dice la verdad ══');
+
+/*
+ * ACÁ ESTABA LA CEGUERA, Y COSTÓ CARO. Esta lente verificaba que la llamada
+ * `avisarUnaVez('camino_completo'…)` estuviera escrita en el cron. Estaba — y
+ * no podía ser verdad nunca: colgaba de una tabla del Camino copiada a mano
+ * en la que 33 de 40 códigos ya no existían en el seed.
+ *
+ * Así que ahora se EJECUTA la misma derivación que hace el cron y se compara
+ * con el seed, en vez de buscar texto. Lo que se mide es si la condición
+ * puede ser verdadera, no si la línea está escrita.
+ */
+const camino = SEED_ROADMAP_V3
+  .flatMap((p) => (p.metas ?? [])
+    .filter((m) => esPasoDelCliente(m) && (m.dia_asignado ?? 0) > 0)
+    .map((m) => ({ c: m.codigo, d: m.dia_asignado as number })))
+  .sort((a, b) => a.d - b.d);
+
+ok(camino.length > 0, `${camino.length} jornadas del cliente salen del seed`);
+ok(/CAMINO: \{ p: number; c: string; d: number \}\[\] = SEED_ROADMAP_V3/.test(cronCodigo),
+  'el cron lo deriva del seed y no de una copia a mano');
+
+const delDia5 = camino.filter((m) => m.d === 5);
+ok(delDia5.length > 0, `el día 5 existe en el camino (${delDia5.map((m) => m.c).join(', ')})`);
+
+const ultimo = Math.max(...camino.map((m) => m.d));
+ok(ultimo === 90, `el último día del camino es el 90 (es ${ultimo})`);
+
+/* El que cerró todo no puede quedar «atrasado»: así se veían todos. */
+const todoHecho = new Set(camino.map((m) => m.c));
+const pendienteConTodo = camino.find((m) => !todoHecho.has(m.c));
+ok(!pendienteConTodo, `el que cerró todo no queda con una jornada pendiente${
+  pendienteConTodo ? ` — ${pendienteConTodo.c}` : ''}`);
+
+/* Y el aviso del día 5 no puede dispararse antes del día 5. */
+const hastaElCuatro = new Set(camino.filter((m) => m.d <= 4).map((m) => m.c));
+ok(!delDia5.every((m) => hastaElCuatro.has(m.c)),
+  'el aviso del día 5 no se cumple con lo hecho hasta el día 4');
+
+console.log('\n══ un aviso viejo no sale de golpe ══');
+ok(/const VENTANA: Record<EventoDeAviso, number>/.test(cronCodigo),
+  'cada aviso tiene su ventana en días de programa');
+ok(/if \(dia > VENTANA\[evento\]\) return;/.test(cronCodigo),
+  'y fuera de su ventana no sale: el día que se prenda el webhook no se inunda a nadie');
+
+console.log('\n══ un aviso roto no se lleva puesto el cron ══');
+ok(/\} catch \(e\) \{\s*Sentry\.captureException\(e\);\s*\}/.test(cronCodigo),
+  'los avisos tienen su propio catch');
+ok(/AbortSignal\.timeout\(/.test(modCodigo),
+  'y el pedido al Sistema tiene reloj, para que un Sistema lento no coma el cron');
 
 console.log(fallas === 0 ? '\n✓ los avisos, en su lugar' : `\n✗ ${fallas} fallas`);
 process.exit(fallas === 0 ? 0 : 1);

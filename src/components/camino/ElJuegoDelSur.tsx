@@ -13,10 +13,10 @@
  * único que se muestra de más es la marca que alcanzó, porque es la que
  * está dibujada en el vaso del libro.
  */
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
-  VASO, MARCAS, piedras, marcaAlcanzada,
-  rachaDe, SI_SE_CORTA,
+  VASO, MARCAS, piedras, piedrasEnElVaso, vasoLleno, marcaAlcanzada,
+  rachaDe, SI_SE_CORTA, alMarcarPasoAfuera,
   PALABRAS, ECUACION, LO_QUE_ABRE,
   leerPalabras, encontrarPalabra, estanLasDiez,
 } from '../../lib/elJuegoDelSur';
@@ -26,6 +26,8 @@ interface Props {
   diasHechos: number[];
   /** Los días en que marcó su paso afuera. */
   pasosAfuera: number[];
+  /** El día de programa en que va: sin él la racha no se puede cortar. */
+  diaActual: number;
   /** Los días que tienen paso afuera, para medir la racha contra ellos. */
   diasConPasoAfuera: number[];
   /** Día del camino → número de sistema (1 a 5), para pintar el mapa. */
@@ -37,16 +39,22 @@ interface Props {
 }
 
 export default function ElJuegoDelSur({
-  diasHechos, pasosAfuera, diasConPasoAfuera, sistemaPorDia, coloresDeSistema, horaReal,
+  diasHechos, pasosAfuera, diasConPasoAfuera, diaActual, sistemaPorDia, coloresDeSistema, horaReal,
 }: Props) {
+  /* Lo que marca la sesión, en la misma pantalla: sin esto el vaso y la racha
+     se quedaban quietos hasta recargar. */
+  const [marcados, setMarcados] = useState<number[]>(pasosAfuera);
+  useEffect(() => setMarcados(pasosAfuera), [pasosAfuera]);
+  useEffect(() => alMarcarPasoAfuera(setMarcados), []);
   const [palabras, setPalabras] = useState<string[]>(() => leerPalabras());
   const [escribiendo, setEscribiendo] = useState('');
 
-  const cuantas = piedras(diasHechos.length, pasosAfuera.length);
+  const ganadas = piedras(diasHechos.length, marcados.length);
+  const cuantas = piedrasEnElVaso(ganadas);
   const marca = marcaAlcanzada(cuantas);
   const racha = useMemo(
-    () => rachaDe(pasosAfuera, diasConPasoAfuera),
-    [pasosAfuera, diasConPasoAfuera],
+    () => rachaDe(marcados, diasConPasoAfuera, diaActual),
+    [marcados, diasConPasoAfuera, diaActual],
   );
   const hechos = useMemo(() => new Set(diasHechos), [diasHechos]);
   const lasDiez = estanLasDiez(palabras);
@@ -82,7 +90,9 @@ export default function ElJuegoDelSur({
           ))}
         </div>
         <p className="text-[17px] leading-snug text-cream">
-          {cuantas} {cuantas === 1 ? 'piedra' : 'piedras'}
+          {/* Se dice lo que hay EN EL VASO, no lo que ganó: el Camino da para
+              120 y el vaso tiene 100. Lleno es lleno. */}
+          {vasoLleno(ganadas) ? `${VASO} de ${VASO}` : `${cuantas} ${cuantas === 1 ? 'piedra' : 'piedras'}`}
           {marca ? ` · ${marca.nombre}` : ''}
         </p>
         <p className="text-[15px] leading-snug text-cream/60">
@@ -122,7 +132,7 @@ export default function ElJuegoDelSur({
         <p className="rotulo-libro">Tu racha</p>
         <p className="text-[19px] leading-snug text-cream">
           {racha.actual === 0
-            ? 'Todavía no empezó'
+            ? 'Empieza con tu primer paso afuera'
             : `${racha.actual} ${racha.actual === 1 ? 'día seguido' : 'días seguidos'}`}
           {racha.mejor > racha.actual ? ` · tu mejor, ${racha.mejor}` : ''}
         </p>
@@ -195,7 +205,7 @@ export default function ElJuegoDelSur({
             </>
           ) : (
             <p className="text-[15px] leading-snug text-cream/60">
-              La respuesta no es una palabra: es tu número. Llega con las diez.
+              La respuesta es tu número, y llega con las diez.
             </p>
           )}
         </div>

@@ -247,3 +247,26 @@ export function planActual(): PlanComercial {
 export function planActualPermite(pilarNum: number): boolean {
   return planPermitePilar(planActual(), pilarNum);
 }
+
+/**
+ * EL ÚLTIMO DÍA DEL CAMINO QUE ABRE SU PLAN.
+ *
+ * `PILAR_MAX` dice hasta qué pilar llega cada plan; esto lo traduce al día,
+ * que es con lo que se mide el material de la biblioteca.
+ *
+ * Devuelve `null` para los planes que abren todo: ahí no hay tope y el
+ * material se abre con su día, como siempre.
+ *
+ * Hizo falta el 15 de noviembre de 2026: con la puerta de los libros abierta
+ * para el escalón de entrada —que compra los días 1 a 5—, el material se
+ * filtraba solo por días de CALENDARIO, y al día 60 veía los noventa.
+ */
+export function ultimoDiaDeSuPlan(
+  metas: Array<{ pilar: number; dia: number | null }>,
+  plan: PlanComercial = planActual(),
+): number | null {
+  const tope = PILAR_MAX[plan];
+  if (tope >= 99) return null;
+  const dias = metas.filter((m) => m.pilar <= tope).map((m) => m.dia ?? 0);
+  return dias.length ? Math.max(...dias) : null;
+}

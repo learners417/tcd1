@@ -158,17 +158,39 @@ function ordenado(piezas: PiezaDeBiblioteca[]): PiezaDeBiblioteca[] {
  */
 export function loQuePuedeVer(
   catalogo: PiezaDeBiblioteca[],
-  x: { diaActual: number | null; bibliotecaAbierta: boolean },
+  x: { diaActual: number | null; bibliotecaAbierta: boolean; hastaElDia?: number | null },
 ): PiezaDeBiblioteca[] {
   if (x.bibliotecaAbierta) return catalogo;
-  const hasta = x.diaActual ?? 0;
-  return catalogo.filter((p) => p.dia === null || p.dia <= hasta);
+  /*
+   * ─── EL DÍA NO ALCANZA: TAMBIÉN MANDA LO QUE COMPRÓ ──────────────────
+   *
+   * Esto filtraba solo por `diaActual`, y `diaActual` son días de CALENDARIO:
+   * pasan igual para el que trabaja y para el que no. Con la puerta de los
+   * libros abierta para el escalón de entrada —que compra los días 1 a 5—,
+   * al día 60 del calendario veía las 46 piezas sin haber hecho nada.
+   *
+   * Y peor: las piezas sin día —las nueve clases del método entre ellas—
+   * pasaban SIEMPRE, desde el día 1. Son material del programa, no del
+   * escalón de entrada.
+   *
+   * `hastaElDia` es el último día que su plan abre. Con él, el que compró
+   * cinco días ve cinco días, aunque su calendario diga sesenta. Sin él
+   * —el cliente del programa completo— nada cambia.
+   */
+  const porPlan = x.hastaElDia ?? null;
+  const hasta = porPlan === null
+    ? (x.diaActual ?? 0)
+    : Math.min(x.diaActual ?? 0, porPlan);
+  return catalogo.filter((p) => {
+    if (p.dia === null) return porPlan === null;
+    return p.dia <= hasta;
+  });
 }
 
 /** Cuántas piezas quedan por delante, para decirlo sin mostrarlas. */
 export function cuantasFaltan(
   catalogo: PiezaDeBiblioteca[],
-  x: { diaActual: number | null; bibliotecaAbierta: boolean },
+  x: { diaActual: number | null; bibliotecaAbierta: boolean; hastaElDia?: number | null },
 ): number {
   return catalogo.length - loQuePuedeVer(catalogo, x).length;
 }
@@ -206,7 +228,7 @@ function sinTildes(s: string): string {
  */
 export function comoLaVe(
   catalogo: PiezaDeBiblioteca[],
-  x: { diaActual: number | null; bibliotecaAbierta: boolean },
+  x: { diaActual: number | null; bibliotecaAbierta: boolean; hastaElDia?: number | null },
 ): string {
   const puede = loQuePuedeVer(catalogo, x).length;
   if (x.bibliotecaAbierta) {

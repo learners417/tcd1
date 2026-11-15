@@ -57,6 +57,17 @@ export function piedras(diasHechos: number, pasosAfueraHechos: number): number {
   return diasHechos * PIEDRA_POR_DIA + pasosAfueraHechos * PIEDRA_POR_PASO_AFUERA;
 }
 
+/*
+ * LO QUE ENTRA EN EL VASO, QUE NO ES LO MISMO QUE LO QUE GANÓ.
+ *
+ * El Camino da para 120 piedras —64 días por una y 28 pasos afuera por dos—
+ * y el vaso del libro tiene 100. Está bien así: se llena cerca del día 70 y
+ * «lleno el vaso, cambias de nivel». Lo que estaba mal era la cuenta en
+ * pantalla, que decía «120 piedras» debajo de una grilla de 100.
+ */
+export const piedrasEnElVaso = (ganadas: number): number => Math.min(ganadas, VASO);
+export const vasoLleno = (ganadas: number): boolean => ganadas >= VASO;
+
 /** En qué marca va: la última alcanzada, o null si todavía no llegó a la primera. */
 export function marcaAlcanzada(piedras: number): MarcaDelVaso | null {
   let ultima: MarcaDelVaso | null = null;
@@ -78,27 +89,28 @@ export interface Racha {
   mejor: number;
 }
 
-export function rachaDe(diasConPaso: number[], diasPosibles: number[]): Racha {
+/**
+ * La racha, contada contra HOY.
+ *
+ * ═══ POR QUÉ HACE FALTA EL DÍA DE HOY ═══
+ *
+ * Sin él, «actual» era el largo de la última corrida, por vieja que fuera: el
+ * que hizo los días 1 a 5 y desapareció un mes seguía leyendo «5 días
+ * seguidos». Y como siempre había una corrida, `actual` nunca llegaba a cero,
+ * así que el mensaje de reenganche —«si te caíste, no empiezas de nuevo»— no
+ * se podía dibujar nunca: estaba escrito y muerto.
+ *
+ * La racha corre hasta el último día con paso que ya pasó, y se corta si
+ * desde ahí hubo un día posible sin marcar.
+ */
+export function rachaDe(diasConPaso: number[], diasPosibles: number[], hoy: number): Racha {
   const hechos = new Set(diasConPaso);
-  const orden = [...diasPosibles].sort((a, b) => a - b);
-  let actual = 0;
+  const orden = [...diasPosibles].sort((a, b) => a - b).filter((d) => d <= hoy);
+  let corriendo = 0;
   let mejor = 0;
   for (const d of orden) {
-    if (hechos.has(d)) {
-      actual += 1;
-      if (actual > mejor) mejor = actual;
-    } else {
-      actual = 0;
-    }
-  }
-  /* `actual` queda en la racha que termina en el último día posible. Para el
-     que todavía no llegó a los últimos días, la racha que importa es la que
-     termina en el último día que YA pasó: se cuenta hacia atrás desde ahí. */
-  const ultimo = Math.max(...diasConPaso, 0);
-  let corriendo = 0;
-  for (const d of orden) {
-    if (d > ultimo) break;
     corriendo = hechos.has(d) ? corriendo + 1 : 0;
+    if (corriendo > mejor) mejor = corriendo;
   }
   return { actual: corriendo, mejor };
 }
@@ -178,11 +190,26 @@ export function leerPasosAfuera(): number[] {
   }
 }
 
+/*
+ * Quien marca el paso afuera es la sesión del día; quien lo cuenta es el
+ * tablero, que está en la misma pantalla. `localStorage` no avisa a nadie
+ * dentro de la misma ventana, así que el vaso y la racha se quedaban
+ * quietos hasta recargar: el cliente tocaba «Lo hice» y no pasaba nada.
+ */
+type Oyente = (dias: number[]) => void;
+const oyentes = new Set<Oyente>();
+
+export function alMarcarPasoAfuera(f: Oyente): () => void {
+  oyentes.add(f);
+  return () => { oyentes.delete(f); };
+}
+
 export function marcarPasoAfuera(dia: number, hecho: boolean): number[] {
   const todos = new Set(leerPasosAfuera());
   if (hecho) todos.add(dia);
   else todos.delete(dia);
   const lista = [...todos].sort((a, b) => a - b);
   try { localStorage.setItem(CLAVE_PASOS, JSON.stringify(lista)); } catch { /* noop */ }
+  for (const f of oyentes) { try { f(lista); } catch { /* un oyente roto no frena a los otros */ } }
   return lista;
 }

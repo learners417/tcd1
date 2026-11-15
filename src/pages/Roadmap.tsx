@@ -1506,6 +1506,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
       <ElJuegoDelSur
         diasHechos={diasHechosDelCamino}
         pasosAfuera={pasosAfueraMarcados}
+        diaActual={diaActual}
         diasConPasoAfuera={diasQueTienenPasoAfuera}
         sistemaPorDia={sistemaPorDia}
         coloresDeSistema={PAISAJES.map((p) => p.color.fondo)}

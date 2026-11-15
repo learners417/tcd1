@@ -16,6 +16,9 @@
  * Correr con: npx tsx scripts/prueba-el-juego-del-sur.ts
  */
 import { readFileSync } from 'node:fs';
+import { rachaDe, piedras, piedrasEnElVaso, vasoLleno, VASO } from '../src/lib/elJuegoDelSur';
+import { SEED_ROADMAP_V3 } from '../src/lib/roadmapSeed';
+import { esPasoDelCliente } from '../src/lib/diaPrograma';
 
 let fallas = 0;
 const ok = (cond: boolean, que: string) => {
@@ -72,6 +75,19 @@ const camino = readFileSync('src/pages/Roadmap.tsx', 'utf-8');
 ok(/diaDelPaso=\{meta\.dia_asignado\}/.test(camino), 'El Camino le pasa ese día');
 ok(/<ElJuegoDelSur\s/.test(camino), 'y el tablero está puesto en El Camino');
 
+console.log('\n══ el tablero se entera al instante ══');
+
+/*
+ * Quien marca el paso afuera es la sesión; quien lo cuenta es el tablero, y
+ * los dos están en El Camino. `localStorage` no avisa dentro de la misma
+ * ventana: el cliente tocaba «Lo hice» y el vaso y la racha no se movían
+ * hasta recargar. Probado en el navegador antes de arreglarlo.
+ */
+ok(/export function alMarcarPasoAfuera/.test(soloCodigo),
+  'marcar un paso afuera avisa a quien esté mirando');
+ok(/alMarcarPasoAfuera\(setMarcados\)/.test(pantalla),
+  'y el tablero está suscrito');
+
 console.log('\n══ ningún mapa de más ══');
 
 /* El sello por tramo YA existe en la app: son los grados. Una insignia nueva
@@ -82,6 +98,40 @@ ok(!/insignia|sello/i.test(soloCodigo),
 /* Y el color de cada día sale del seed, no de rangos copiados acá. */
 ok(!/\b(1 a 7|8 a 14|15 a 35|36 a 84|85 a 90)\b/.test(soloCodigo),
   'los días de cada paisaje no están copiados: salen del seed');
+
+console.log('\n══ y las cuentas, corridas de verdad ══');
+
+/*
+ * ACÁ FALTABA LO QUE IMPORTA. Esta lente buscaba con expresiones que las
+ * constantes coincidieran con el libro, y nunca llamaba a una función. Así
+ * pasaron dos cosas que solo se ven ejecutando:
+ *
+ *   · la racha no recibía «hoy», así que el que hizo cinco días y desapareció
+ *     un mes seguía leyendo «5 días seguidos», y el mensaje de reenganche no
+ *     se podía dibujar nunca;
+ *   · el Camino da 120 piedras y el vaso tiene 100, así que la línea decía
+ *     «120 piedras» debajo de una grilla de 100.
+ */
+const posibles = [1, 2, 3, 4, 8, 9, 10, 12, 18, 19, 25, 30, 32, 43, 51, 52,
+  59, 60, 65, 66, 73, 74, 82, 85, 87, 88, 89, 90];
+
+ok(rachaDe([1, 2, 3], posibles, 3).actual === 3, 'tres días seguidos hasta hoy son racha de tres');
+ok(rachaDe([1, 2, 3], posibles, 4).actual === 0, 'y si hoy es un día posible sin marcar, se cortó');
+ok(rachaDe([1, 2, 3, 4], posibles, 40).actual === 0,
+  'el que marcó hasta el día 4 y hoy va por el 40 no tiene racha corriendo');
+ok(rachaDe([1, 2, 3, 4], posibles, 40).mejor === 4, 'pero su mejor no se pierde');
+/* Y con eso el mensaje de reenganche se puede dibujar: era código muerto. */
+const corte = rachaDe([1, 2, 3, 4], posibles, 40);
+ok(corte.mejor > 0 && corte.actual === 0,
+  'hay un estado real en que sale «si te caíste, no empiezas de nuevo»');
+
+const jornadasDelCliente = SEED_ROADMAP_V3
+  .flatMap((p) => (p.metas ?? []).filter((m) => esPasoDelCliente(m) && (m.dia_asignado ?? 0) > 0));
+const maximo = piedras(jornadasDelCliente.length, posibles.length);
+ok(maximo > VASO, `el Camino da ${maximo} piedras y el vaso tiene ${VASO}: se llena antes del final`);
+ok(piedrasEnElVaso(maximo) === VASO, 'lo que se muestra nunca pasa del vaso');
+ok(vasoLleno(maximo), 'y llegando al final el vaso está lleno');
+ok(piedrasEnElVaso(piedras(10, 2)) === 14, 'a mitad de camino la cuenta es la del libro (1 por día, 2 por paso)');
 
 console.log(fallas === 0 ? '\n✓ el juego del sur, con la cuenta del libro' : `\n✗ ${fallas} fallas`);
 process.exit(fallas === 0 ? 0 : 1);

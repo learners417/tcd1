@@ -110,7 +110,10 @@ export default function TarjetaDeHoy({ hoy, esFinde, onEmpezar }: Props) {
           */}
           {hoy.pasoAfuera && dia ? (
             <div className="mt-5 pt-4 border-t border-[var(--line2,#DFD3BC)] space-y-1.5">
-              <p className="rotulo-libro">Afuera · tu paso</p>
+              {/* El mismo rótulo que adentro de la sesión, con su duración:
+                  es el mismo paso, y en Hoy los diez minutos son justo el
+                  dato que decide si lo hace. */}
+              <p className="rotulo-libro">Tu paso afuera · 10 min</p>
               <p className="text-[17px] leading-snug text-cream">{hoy.pasoAfuera}</p>
               <button
                 type="button"

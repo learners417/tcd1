@@ -54,7 +54,7 @@ export const PIEZAS: PiezaDelProtocolo[] = [
   { numero: 13, nombre: 'Tu cuenca', pie: 'De dónde te llega lo que te sostiene.' },
   { numero: 14, nombre: 'El tamaño de tu vaso', pie: 'Cuánto crees que te cabe. Y cuánto te cabe de verdad.' },
   { numero: 15, nombre: 'Tu permiso nuevo', pie: 'Gano más y sigo siendo de mi familia. Con tu letra.' },
-  { numero: 16, nombre: 'Tu rueda sin juicio', pie: 'Cómo estás hoy en cada área, sin castigarte por el número.' },
+  { numero: 16, nombre: 'Tu rueda sin juicio', pie: 'Cómo estás hoy en cada área, con el número que sea.' },
   { numero: 17, nombre: 'Tus señales del cuerpo', pie: 'Dónde lo sientes: pecho, estómago, garganta o mandíbula.' },
   { numero: 18, nombre: 'Tus disparadores', pie: 'Las tres situaciones que te sacan de eje.' },
   { numero: 19, nombre: 'Tu dieta de entrada', pie: 'Qué pantallas, qué comida y qué personas te entran.' },
@@ -103,16 +103,33 @@ export interface HitoDeLaPista {
 export const PISTA = 66;
 
 export const HITOS: HitoDeLaPista[] = [
-  { dia: 21, nombre: 'Tu piso', dice: 'Obligatorio. Sin esto, no empezaste.' },
+  /* En positivo, que es la regla de la casa: dice lo que pasa a los 21, no
+     lo que no pasa antes. */
+  { dia: 21, nombre: 'Tu piso', dice: 'Los primeros 21 son los que lo vuelven tuyo.' },
   { dia: 44, nombre: 'El ideal', dice: null },
   {
     dia: 66,
     nombre: 'Aprendiz ejemplar',
-    dice: 'La mediana del estudio de Lally: a esa altura, a la mitad de las personas el hábito ya le sale solo.',
+    dice: 'A esa altura, a la mitad de las personas el hábito ya le sale solo.',
   },
 ];
 
-export const FUENTE_DE_LA_PISTA = 'Lally y otros, University College London, 2010 · estudio revisado por pares';
+/*
+ * LA FUENTE ES DEL 66, Y DE NADA MÁS.
+ *
+ * El 21 y el 44 los decidió Javo. El 66 sale de un estudio — y el 21 es justo
+ * la cifra popular que ESE estudio contradice. Una sola línea de fuente
+ * debajo de los tres se los atribuía a Lally, incluido el que lo desmiente.
+ *
+ * Y el rango va en pantalla, no solo acá: 66 es la mediana de un rango que va
+ * de 18 a 254 días. Sin eso, un número redondo parece una promesa.
+ */
+export const EL_66 = {
+  dice: '66 es la mediana: en ese estudio las personas tardaron entre 18 y 254 días.',
+  fuente: 'Lally y otros, University College London, 2010 · estudio revisado por pares',
+} as const;
+export const FUENTE_DE_LA_PISTA = EL_66.fuente;
+export const DE_JAVO = 'El piso de 21 y el ideal de 44 los eligió Javo.';
 
 /* ═══════════════ EL TABLERO CONTRA EL BURNOUT ═══════════════
  *

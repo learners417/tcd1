@@ -25,7 +25,7 @@
  */
 import { useMemo, useState } from 'react';
 import {
-  PIEZAS, PIEZA_POR_NUMERO, HITOS, PISTA, FUENTE_DE_LA_PISTA,
+  PIEZAS, PIEZA_POR_NUMERO, HITOS, PISTA, EL_66, DE_JAVO,
   SENALES, CAMPOS_DE_LA_SENAL, FUENTE_DEL_BURNOUT,
   leerProtocolo, guardarPieza, leerSenales, guardarSenal,
   cuantasEscritas,
@@ -208,7 +208,17 @@ export default function MiProtocolo({ leccionesDeHoy, diasSostenidos = 0 }: Prop
         {HITOS.filter((h) => h.dice).map((h) => (
           <p key={h.dia} className="text-[15px] leading-snug text-cream/60">{h.dice}</p>
         ))}
-        <p className="text-[15px] leading-snug text-cream/55">Fuente: {FUENTE_DE_LA_PISTA}.</p>
+        {/*
+          LA FUENTE ES DEL 66, Y DE NADA MÁS. Una sola línea debajo de los tres
+          números se los atribuía a Lally — incluido el 21, que es justo la
+          cifra popular que ESE estudio contradice, y que además lo eligió Javo.
+          Y el rango va en pantalla: 66 es la mediana de 18 a 254 días. Sin eso,
+          un número redondo se lee como una promesa.
+        */}
+        <p className="text-[15px] leading-snug text-cream/60">{EL_66.dice}</p>
+        <p className="text-[15px] leading-snug text-cream/55">
+          Fuente del 66: {EL_66.fuente}. {DE_JAVO}
+        </p>
       </div>
 
       {/* ─── EL TABLERO CONTRA EL BURNOUT ─── */}

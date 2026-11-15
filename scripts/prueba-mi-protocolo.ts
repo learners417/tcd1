@@ -75,10 +75,21 @@ for (const d of [21, 44, 66]) {
 /* Se lee el VALOR de la constante, no el archivo entero: «Lally» aparece
    también en el comentario de arriba y en el texto del hito, así que buscarlo
    en todo el archivo daba verde con la fuente ya borrada. Probado. */
-const valorFuente = (soloCodigo.match(/FUENTE_DE_LA_PISTA\s*=\s*'([^']*)'/) ?? [])[1] ?? '';
+const valorFuente = (soloCodigo.match(/fuente:\s*'([^']*)'/) ?? [])[1] ?? '';
 ok(/\d{4}/.test(valorFuente), `la fuente del 66 nombra su año — «${valorFuente}»`);
 ok(valorFuente.split(/[·,]/).length >= 3,
   'y nombra quién, dónde y qué tipo de fuente es, como pide la casa');
+/*
+ * Y la fuente es DEL 66. Una sola línea debajo de los tres números se los
+ * atribuía a Lally, incluido el 21 — que lo eligió Javo y que es justo la
+ * cifra que ese estudio contradice.
+ */
+ok(/DE_JAVO/.test(soloCodigo), 'se dice cuáles de los tres números decidió Javo');
+ok(/18 a 254|18 y 254/.test(soloCodigo),
+  'y el rango real del estudio está escrito, para que 66 no se lea como promesa');
+const pantallaFuente = readFileSync('src/components/camino/MiProtocolo.tsx', 'utf-8');
+ok(/EL_66\.fuente/.test(pantallaFuente) && /DE_JAVO/.test(pantallaFuente),
+  'y la pantalla lo dice así, no con una línea para los tres');
 
 console.log('\n══ el tablero contra el burnout ══');
 

@@ -416,7 +416,7 @@ function Inicio({ ir }: { ir: (p: Pestania) => void }) {
   ];
   const MOMENTOS: Array<[string, string, boolean]> = [
     ['No la vio', 'Todavía no sabe que puede lograrlo. Piezas de «¿sabías que…?».', false],
-    ['Interesado', 'Consume tips y errores. Hay que romperle un mito.', false],
+    ['Interesado', 'Lee de todo y sigue igual. Hay que romperle un mito.', false],
     ['Urgente', 'Ya lo decidió y busca quién se lo resuelva. A este se le pauta.', true],
   ];
   const PUERTAS: Array<[Pestania, string, string]> = [
@@ -493,7 +493,7 @@ function Aprende(
         <div className="grid gap-4 sm:grid-cols-2">
           <Par tipo="no" items={[
             ['Dolor y miseria en el gancho', 'Atrae a quien está hundido'],
-            ['Explicar el método o las razones', 'Lo mira el que quiere aprender gratis'],
+            ['Explicar el método o las razones', 'Lo mira el que quiere aprender, no el que quiere resolverlo'],
             ['Tu historia antes de que se sienta nombrado', 'Habla de ti, no de él'],
           ]} />
           <Par tipo="si" items={[

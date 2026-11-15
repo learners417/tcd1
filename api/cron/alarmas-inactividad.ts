@@ -23,6 +23,8 @@ import {
   ENTREGAS, entregaPendiente, avisoAlCliente, tareaDelEquipo,
 } from '../../src/lib/entregasDelEquipo.js';
 import { leTocanLasEntregas } from '../../src/lib/topeDelEscalon.js';
+import { SEED_ROADMAP_V3 } from '../../src/lib/roadmapSeed.js';
+import { esPasoDelCliente } from '../../src/lib/diaPrograma.js';
 import { avisarAGHL, type EventoDeAviso } from '../_lib/avisar-a-ghl.js';
 
 /** La semana ISO, igual que en el resto de la app: '2026-W31'. */
@@ -35,49 +37,30 @@ function semanaISOde(d: Date): string {
   return `${f.getUTCFullYear()}-W${String(n).padStart(2, '0')}`;
 }
 
-// El calendario del Camino v4 (generado del seed — pilar, código, día asignado)
-const CAMINO: { p: number; c: string; d: number }[] = [
-  { p: 0, c: 'P0.0', d: 1 },
-  { p: 0, c: 'P0.2', d: 1 },
-  { p: 0, c: 'P0.4', d: 1 },
-  { p: 1, c: 'P1.1', d: 2 },
-  { p: 1, c: 'P1.2', d: 2 },
-  { p: 1, c: 'P1.2b', d: 3 },
-  { p: 1, c: 'P1.3', d: 4 },
-  { p: 1, c: 'P1.4', d: 5 },
-  { p: 1, c: 'P1.5', d: 8 },
-  { p: 1, c: 'P1.6', d: 9 },
-  { p: 2, c: 'P2.1', d: 10 },
-  { p: 2, c: 'P2.2', d: 10 },
-  { p: 2, c: 'P2.3', d: 11 },
-  { p: 2, c: 'P2.4', d: 12 },
-  { p: 2, c: 'P2.5', d: 12 },
-  { p: 3, c: 'P3.1', d: 15 },
-  { p: 3, c: 'P3.2', d: 16 },
-  { p: 3, c: 'P3.3', d: 15 },
-  { p: 3, c: 'P3.4', d: 17 },
-  { p: 3, c: 'P3.5', d: 18 },
-  { p: 4, c: 'P4.1', d: 19 },
-  { p: 4, c: 'P4.5', d: 22 },
-  { p: 4, c: 'P4.2', d: 19 },
-  { p: 4, c: 'P4.3', d: 23 },
-  { p: 4, c: 'P4.3b', d: 24 },
-  { p: 4, c: 'P4.3c', d: 25 },
-  { p: 4, c: 'P4.4', d: 29 },
-  { p: 4, c: 'P4.3d', d: 26 },
-  { p: 5, c: 'P5.1', d: 30 },
-  { p: 5, c: 'P5.2', d: 30 },
-  { p: 5, c: 'P5.3', d: 31 },
-  { p: 5, c: 'P5.5', d: 32 },
-  { p: 5, c: 'P5.4', d: 37 },
-  { p: 6, c: 'P6.1', d: 38 },
-  { p: 6, c: 'P6.4', d: 39 },
-  { p: 6, c: 'P6.2', d: 43 },
-  { p: 6, c: 'P6.3', d: 44 },
-  { p: 7, c: 'P7.1', d: 50 },
-  { p: 7, c: 'P7.2', d: 51 },
-  { p: 7, c: 'P7.3', d: 85 }
-];
+/*
+ * EL CALENDARIO DEL CAMINO — SALE DEL SEED, NO DE UNA COPIA A MANO.
+ *
+ * Acá había una tabla escrita a mano con cuarenta jornadas, copiada del seed
+ * «v4». Revisada el 15 de noviembre de 2026: TREINTA Y TRES de esos cuarenta
+ * códigos ya no existen en el seed de hoy. `CAMINO.find(m => !done.has(m.c))`
+ * devolvía siempre el mismo código imposible, así que el cron veía a TODOS los
+ * clientes atrasados —incluido el que cerró las noventa jornadas— y la cuenta
+ * de atraso crecía con el calendario:
+ *
+ *     cliente con todo hecho · día  5 → «4 días atrasado»
+ *                              día 90 → «64 días atrasado»
+ *
+ * Mientras eso solo encendía una alarma en el Admin, ensuciaba. Con los avisos
+ * que salen al cliente colgados del mismo cálculo, le escribe a todos.
+ *
+ * Derivado del seed no se puede desfasar: si el Camino cambia un día o un
+ * código, esto cambia con él.
+ */
+const CAMINO: { p: number; c: string; d: number }[] = SEED_ROADMAP_V3
+  .flatMap((pilar) => (pilar.metas ?? [])
+    .filter((m) => esPasoDelCliente(m) && (m.dia_asignado ?? 0) > 0)
+    .map((m) => ({ p: pilar.numero, c: m.codigo, d: m.dia_asignado as number })))
+  .sort((a, b) => a.d - b.d);
 
 // El descanso por CALENDARIO REAL: qué día de la semana ES el día N del
 // programa de ESTE cliente (no todos arrancan lunes). Espejo de la racha.
@@ -111,11 +94,24 @@ async function handler(req: any, res: any) {
     const adminIds: string[] = (admins ?? []).map((a: { id: string }) => a.id);
 
     // 3) las tareas completadas de todos (una query)
-    const { data: tareas } = await admin
-      .from('hoja_de_ruta')
-      .select('usuario_id, pilar_numero, meta_codigo, completada');
+    /*
+     * PAGINADA. Supabase devuelve 1.000 filas como máximo, y con 64 jornadas
+     * por cliente eso son quince clientes: del dieciseisavo en adelante el
+     * cron veía su progreso truncado, en silencio, y lo daba por atrasado.
+     * Nunca falla: solo trae de menos.
+     */
+    const tareas: Array<{ usuario_id: string; meta_codigo: string; completada: boolean }> = [];
+    for (let desde = 0; ; desde += 1000) {
+      const { data: pagina } = await admin
+        .from('hoja_de_ruta')
+        .select('usuario_id, pilar_numero, meta_codigo, completada')
+        .range(desde, desde + 999);
+      if (!pagina || pagina.length === 0) break;
+      tareas.push(...(pagina as typeof tareas));
+      if (pagina.length < 1000) break;
+    }
     const completadasPor = new Map<string, Set<string>>();
-    for (const t of tareas ?? []) {
+    for (const t of tareas) {
       if (!t.completada) continue;
       if (!completadasPor.has(t.usuario_id)) completadasPor.set(t.usuario_id, new Set());
       completadasPor.get(t.usuario_id)!.add(t.meta_codigo);
@@ -156,12 +152,24 @@ async function handler(req: any, res: any) {
       const id = `${n.usuario_id}|${n.clave}`;
       if (!yaAvisado.has(id) || n.created_at > (yaAvisado.get(id) as string)) yaAvisado.set(id, n.created_at);
     }
+    /*
+     * Y UN AVISO VIEJO NO SALE. El día que se pegue la dirección del flujo,
+     * todos los clientes que ya pasaron el día 5 cumplen la condición a la
+     * vez: sin esto, reciben de golpe la felicitación de algo que hicieron
+     * hace semanas. Cada aviso tiene su ventana, contada en días de programa.
+     */
+    const VENTANA: Record<EventoDeAviso, number> = {
+      sin_entrar_3_dias: 95,   // mientras siga atrasado, sigue valiendo
+      dia_5_hecho: 12,         // una semana después del día 5
+      camino_completo: 97,     // una semana después del final
+    };
     const avisarUnaVez = async (
       evento: EventoDeAviso,
       cli: { id: string; nombre?: string | null; email?: string | null },
       dia: number,
       cadaSemana = false,
     ) => {
+      if (dia > VENTANA[evento]) return;
       const clave = `ghl_${evento}`;
       const cuando = yaAvisado.get(`${cli.id}|${clave}`);
       if (cuando && (!cadaSemana || cuando > haceUnaSemana)) return;
@@ -212,24 +220,36 @@ async function handler(req: any, res: any) {
         ),
       );
       alarmas++;
-      await avisarUnaVez('sin_entrar_3_dias', cli, dia, true);
+      try { await avisarUnaVez('sin_entrar_3_dias', cli, dia, true); }
+      catch (e) { Sentry.captureException(e); }
     }
 
     /*
      * Y los dos de buenas noticias, que no dependen del atraso: se miran
      * aparte porque un cliente al día no entra nunca al bucle de arriba.
      */
-    for (const cli of clientes ?? []) {
-      if (!cli.fecha_inicio) continue;
-      if (cli.status && !['ACTIVE', 'activo', null].includes(cli.status)) continue;
-      const dia = Math.max(1, Math.min(95, Math.floor((Date.now() - new Date(cli.fecha_inicio).getTime()) / 86400000) + 1));
-      const done = completadasPor.get(cli.id) ?? new Set<string>();
-      if (DEL_DIA_5.length > 0 && DEL_DIA_5.every((c) => done.has(c))) {
-        await avisarUnaVez('dia_5_hecho', cli, dia);
+    /*
+     * Con su propio catch: este bloque escribe en `notificaciones` y hace un
+     * pedido de red. Si algo de eso lanza, el catch de afuera devuelve 500 y
+     * ese día no corren NI los avisos automáticos NI las entregas del equipo,
+     * que es lo que el cron vino a hacer. Un aviso que no sale se reintenta
+     * mañana; una entrega que no sale la espera un cliente.
+     */
+    try {
+      for (const cli of clientes ?? []) {
+        if (!cli.fecha_inicio) continue;
+        if (cli.status && !['ACTIVE', 'activo', null].includes(cli.status)) continue;
+        const dia = Math.max(1, Math.min(95, Math.floor((Date.now() - new Date(cli.fecha_inicio).getTime()) / 86400000) + 1));
+        const done = completadasPor.get(cli.id) ?? new Set<string>();
+        if (DEL_DIA_5.length > 0 && DEL_DIA_5.every((c) => done.has(c))) {
+          await avisarUnaVez('dia_5_hecho', cli, dia);
+        }
+        if (DEL_ULTIMO.length > 0 && DEL_ULTIMO.every((c) => done.has(c))) {
+          await avisarUnaVez('camino_completo', cli, dia);
+        }
       }
-      if (DEL_ULTIMO.length > 0 && DEL_ULTIMO.every((c) => done.has(c))) {
-        await avisarUnaVez('camino_completo', cli, dia);
-      }
+    } catch (e) {
+      Sentry.captureException(e);
     }
 
     // ── LOS AVISOS QUE LA APP MANDA SOLA ──
