@@ -14,7 +14,7 @@ def check(nombre, ok, detalle=''):
     if not ok: F += 1
 def rd(f): return open(f, encoding='utf-8', errors='replace').read()
 
-def rdc(f): return solo_codigo(rd(f))
+def rdc(f): return solo_codigo(rd(f), f)
 
 
 _SIN_COMENTARIOS: dict = {}
@@ -33,7 +33,7 @@ def cod(s: str) -> str:
     return _SIN_COMENTARIOS[s]
 
 
-def _sin_comentario_al_final(l: str) -> str:
+def _sin_comentario_al_final(l: str, marcas=('//',), exige_espacio=()) -> str:
     """Saca el `//` del final de UNA linea, sin tocar las barras que viven
     dentro de un texto, de una expresion regular o de una URL.
 
@@ -53,26 +53,86 @@ def _sin_comentario_al_final(l: str) -> str:
             i += 1; continue
         if c == '\\': i += 2; continue         # /\/\/ de una regex
         if c in '\'"`': q = c; i += 1; continue
-        if c == '/' and i + 1 < n and l[i+1] == '/':
-            if i > 0 and l[i-1] == ':': i += 2; continue   # https://
-            return l[:i]
+        for _mk in marcas:
+            if l.startswith(_mk, i):
+                # `https://` no es un comentario, y `a--b` tampoco: la URL es
+                # la unica excepcion medida, y solo vale para `//`.
+                if _mk == '//' and i > 0 and l[i-1] == ':': i += 1; break
+                # En el shell, `--` pegado a una letra es una BANDERA
+                # (`psql --quiet`); con un espacio detras es el comentario
+                # del SQL que el script lleva adentro. Medido: en todo el
+                # repo no hay un solo `-- ` que sea el fin de las opciones.
+                if _mk in exige_espacio and l[i+len(_mk):i+len(_mk)+1] not in ('', ' ', '\t'):
+                    i += len(_mk); break
+                return l[:i]
+        else:
+            i += 1
+            continue
         i += 1
     return l
 
 
-def solo_codigo(s: str) -> str:
+# El comentario NO se escribe igual en todos los lenguajes, y la bateria no
+# lee solo TypeScript: lee las migraciones (.sql), el medidor y el generador
+# del seed (.py) y el andamiaje de la prueba SQL (.sh). Medido el 15 de
+# noviembre: con la guarda de la carpeta del dueno comentada con `--` en
+# `20261025_el_veredicto_queda.sql`, la lente que dice medirla dio VERDE y
+# NADA MAS la vio —la bateria entera habria dejado pasar que un cliente
+# escriba el veredicto del archivo de otro—. Lo mismo con `#`: el tuteo del
+# generador comentado, y «el generador tutea antes de escribir el seed» en
+# verde.
+#
+# El `--` del .sh se saca solo cuando ocupa la linea entera: ahi es el
+# comentario del SQL que el script lleva adentro de un heredoc. En el medio
+# de la linea es una bandera (`psql --quiet`), y cortar ahi se llevaria
+# codigo de verdad.
+_MARCAS = {
+    '.ts': ('//',), '.tsx': ('//',), '.js': ('//',), '.jsx': ('//',),
+    '.mjs': ('//',), '.cjs': ('//',), '.css': (), '.json': (),
+    '.sql': ('--',), '.py': ('#',), '.sh': ('#',), '.bash': ('#',),
+    '.md': (), '.html': (), '.txt': (), '.yml': ('#',), '.yaml': ('#',),
+}
+_BLOQUE = {'.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.css', '.sql'}
+# El comentario de bloque tampoco se escribe igual: en Markdown y en HTML es
+# `<!-- -->`, y es el unico lugar donde un mecanismo puede esconderse sin
+# que se vea al abrir el archivo.
+_BLOQUE_XML = {'.md', '.html'}
+
+
+def _ext(archivo: str) -> str:
+    _i = archivo.rfind('.')
+    return archivo[_i:].lower() if _i > archivo.rfind('/') else ''
+
+
+def solo_codigo(s: str, archivo: str = '') -> str:
     """El archivo sin comentarios: los de bloque, los de linea entera y los
-    del final de la linea.
+    del final de la linea, EN EL LENGUAJE DE ESE ARCHIVO.
 
     Tres lentes dieron falso positivo por mirar el archivo crudo: contaban la
     palabra prohibida, el writeText viejo o el campo retirado dentro del
     comentario que explica POR QUE se saco. Una lente que marca en rojo al
     archivo que arreglo el problema ensena a borrar la explicacion.
+
+    Sin `archivo` se asume TypeScript, que es lo que lee el 95% de la
+    bateria; el bloque 16 obliga a pasar el nombre cuando la fuente no lo es.
     """
     import re as _r
-    s = _r.sub(r'/\*[\s\S]*?\*/', '', s)
-    s = _r.sub(r'^\s*//.*$', '', s, flags=_r.M)
-    return '\n'.join(_sin_comentario_al_final(l) for l in s.split('\n'))
+    _e = _ext(archivo)
+    _marcas = _MARCAS.get(_e, ('//',))
+    _exige = ('--',) if _e in ('.sh', '.bash') else ()
+    if not _e or _e in _BLOQUE:
+        s = _r.sub(r'/\*[\s\S]*?\*/', '', s)
+    if _e in _BLOQUE_XML:
+        s = _r.sub(r'<!--[\s\S]*?-->', '', s)
+    if _e in ('.sh', '.bash'):
+        s = _r.sub(r'^[ \t]*--.*$', '', s, flags=_r.M)
+        _marcas = _marcas + ('--',)
+    if not _marcas:
+        return s
+    for _m in _marcas:
+        s = _r.sub(r'^[ \t]*' + _r.escape(_m) + r'.*$', '', s, flags=_r.M)
+    return '\n'.join(_sin_comentario_al_final(l, _marcas, _exige)
+                     for l in s.split('\n'))
 
 # ── Ayudante: ¿una tab del Admin está en sus 5 superficies? ─────────────
 # Se comprueba PERTENENCIA al array, nunca una cadena con el corchete
@@ -93,8 +153,8 @@ def _tab_completa(tab: str) -> bool:
     _a = rd('src/pages/Admin.tsx')
     _m = re.search(r'VALID_MAIN_TABS: MainTab\[\] = \[(.*?)\]', cod(_a), re.S)
     en_array = bool(_m) and f"'{tab}'" in _m.group(1)
-    return (f"| '{tab}'" in _a and en_array and f"id: '{tab}'" in _a
-            and f"mainTab === '{tab}'" in _a)
+    return (f"| '{tab}'" in cod(_a) and en_array and f"id: '{tab}'" in cod(_a)
+            and f"mainTab === '{tab}'" in cod(_a))
 
 
 print('══ 1) COMPILACIÓN ══')
@@ -554,10 +614,10 @@ if _os68.path.exists('api/_lib/gasto-server.ts'):
     _g68 = rd('api/_lib/gasto-server.ts')
     _guard68 = rd('api/_lib/guardian.ts')
     check('el plan se lee de la base, no de lo que dice el navegador',
-          "from('profiles')" in _g68 and 'plan_comercial' in cod(_g68),
+          "from('profiles')" in cod(_g68) and 'plan_comercial' in cod(_g68),
           'el plan decide cuánto puede gastar: no puede venir del cliente')
     check('sin plan conocido se asume el más chico, nunca el más grande',
-          "PLAN_POR_DEFECTO: PlanComercial = 'blanco'" in _g68)
+          "PLAN_POR_DEFECTO: PlanComercial = 'blanco'" in cod(_g68))
     check('el techo de gasto se aplica antes que cualquier otro freno',
           rdc('api/_lib/guardian.ts').index('verificarTecho')
           < rdc('api/_lib/guardian.ts').index("freno === 'credito'"))
@@ -658,7 +718,7 @@ check('el crítico usa un modelo DISTINTO del que escribió la pieza',
       'un modelo aprueba su propio texto casi siempre')
 check('las correcciones se aplican DONDE van, no siempre al final',
       "posicion: 'inicio' | 'final'" in _cri
-      and "posicion === 'inicio'" in _con,
+      and "posicion === 'inicio'" in cod(_con),
       'un gancho pegado al final deja el anuncio al revés')
 # Antes se verificaba que el candado de los anuncios fuera el único que no se
 # tilda a mano. Ahora son SEIS los que no se tildan: cada uno se cierra porque
@@ -669,7 +729,7 @@ check('las correcciones se aplican DONDE van, no siempre al final',
 check('el candado de los anuncios se verifica solo, no se tilda a mano',
       'estadoDeLasPiezas' in cod(_mon)
       and "candadoCerrado(montaje, id)" in cod(_mon)
-      and "c.id === 'dm' || c.id === 'trabajo'" in _mon,
+      and "c.id === 'dm' || c.id === 'trabajo'" in cod(_mon),
       'detrás de esa casilla se enciende una campaña con dinero real')
 check('y los demás se cierran con su dato, no con un tilde',
       'guardarMontaje' in cod(_mon) and 'pixel_id' in cod(_mon) and 'url_pagina' in cod(_mon),
@@ -998,7 +1058,7 @@ if _os18.path.exists('src/lib/bitacoraCampana.ts'):
           'fuera.has' in _bit,
           'el viernes se carga, se corrige y se vuelve a cargar')
     check('la historia no se pisa: clave propia y separada',
-          "KEY_BIT = 'tcd_bitacora_campana_v1'" in _tab18
+          "KEY_BIT = 'tcd_bitacora_campana_v1'" in cod(_tab18)
           and 'KEY_SEM' in cod(_tab18))
     check('cada anuncio se compara contra SÍ MISMO, no contra los otros',
           'anterior.set(e.indice' in cod(_bit))
@@ -1047,7 +1107,7 @@ if _os19.path.exists('src/lib/mesaPlataStorage.ts'):
           'decía "elige un cliente arriba" y arriba no había nada que elegir')
     check('el total de la semana usa índice parcial, no unique con NULL',
           'sala_metricas_total_semana' in rdc('sala-de-mando.sql')
-          and 'where anuncio is null' in rd('sala-de-mando.sql'))
+          and 'where anuncio is null' in rdc('sala-de-mando.sql'))
 
 # ── 6.20 · La cola: ejecutar, no diagnosticar ──────────────────────────
 # Quien la trabaja empezó hace dos meses y no sabe de pauta. Si la app le
@@ -1072,7 +1132,7 @@ if _os20.path.exists('src/lib/colaExcepciones.ts'):
           'function quienAtiende' in cod(_cola) and 'SEMANAS_ANTES_DE_ESCALAR' in cod(_cola),
           'el de $1.000 tiene que costar cero minutos cuando todo va bien')
     check('lo que necesita persona va antes que lo que resuelve la app',
-          "a.quien === 'la app' ? 0 : 1" in _cola)
+          "a.quien === 'la app' ? 0 : 1" in cod(_cola))
     check('la tab Hoy está cableada en las 4 superficies del Admin',
           _tab_completa('hoy'))
     check('la cola es la PRIMERA tab del menú',
@@ -1146,7 +1206,7 @@ if _os22.path.exists('src/lib/avisosCliente.ts'):
     check('tras insistir sin resultado, escala en vez de repetir',
           'AVISOS_ANTES_DE_ESCALAR' in cod(_av) and 'aEscalar' in cod(_av))
     check('lo que ya atiende una persona no se le avisa al cliente',
-          "item.quien !== 'la app'" in _av,
+          "item.quien !== 'la app'" in cod(_av),
           'sería pedirle que se ocupe de algo de lo que ya se ocupa alguien')
     check('resuelto el problema, el contador vuelve a cero',
           'export function olvidarAviso' in cod(_av))
@@ -1195,7 +1255,7 @@ check('nada que el cliente escribe se guarda y se tira',
 # La puerta que elige el sanador tiene que llegar a la regla que lo mide.
 _th23 = rd('src/components/campanas/TableroCupos.tsx')
 check('la puerta elegida preselecciona la regla de medición',
-      "leer<string | null>('tcd_campana_objetivo'" in _th23,
+      "leer<string | null>('tcd_campana_objetivo'" in cod(_th23),
       'elegía una puerta y esa decisión no llegaba a ningún lado')
 check('el pacto que el sanador firma vuelve a su pantalla',
       'tcd_pacto' in rdc('src/pages/Dashboard.tsx'),
@@ -1220,7 +1280,7 @@ import os as _os24
 if _os24.path.exists('src/lib/conexion.ts'):
     _cx = rd('src/lib/conexion.ts')
     check('la app sabe cuándo no hay internet',
-          'useConexion' in cod(_cx) and "addEventListener('offline'" in _cx)
+          'useConexion' in cod(_cx) and "addEventListener('offline'" in cod(_cx))
     check('se distingue sin internet de servidor caído de sesión vencida',
           all(x in _cx for x in ("'sin_internet'", "'servidor'", "'permiso'")),
           'la acción es distinta: esperar, avisar o volver a entrar')
@@ -1444,7 +1504,7 @@ if _os29.path.exists('src/lib/roles.ts'):
     # permisos y este archivo lo re-exporta, así que la regla se mira allá.
     check('sin rol cargado se asume el más acotado, nunca dirección',
           "default: return 'acompanamiento'" in rd('src/lib/permisos.ts')
-          and "export { rolDe } from './permisos';" in _rl)
+          and "export { rolDe } from './permisos';" in cod(_rl))
     # El menú pasó a ser cuatro momentos con un orden fijo —el del día—, así
     # que ya no se ordena por rol. Lo que el rol decide es QUÉ VE, y eso lo
     # verifica la lente 6.38 sobre las categorías de dato.
@@ -1471,7 +1531,7 @@ if _os30.path.exists('src/lib/transcripcion.ts'):
           all(k in _tr for k in ('decisiones', 'pendientes', 'cambios')),
           'un resumen largo no se lee, y lo que no se lee no se hereda')
     check('cada pendiente sabe de quién es',
-          "'cliente' | 'equipo' | 'sin_asignar'" in _tr)
+          "'cliente' | 'equipo' | 'sin_asignar'" in cod(_tr))
     check('un dueño inventado cae en sin_asignar',
           'DUENOS.has(d)' in cod(_tr),
           'aceptar cualquier valor mete basura en las tareas')
@@ -1484,7 +1544,7 @@ if _os30.path.exists('src/lib/transcripcion.ts'):
           'Confirmar y guardar' in _cs and 'setFuera' in cod(_cs),
           'una transcripción mal leída que se guarda sola es un dato falso con cara de registro')
     check('lee el JSON aunque el modelo lo envuelva',
-          "indexOf('{')" in _tr and "lastIndexOf('}')" in _tr,
+          "indexOf('{')" in cod(_tr) and "lastIndexOf('}')" in cod(_tr),
           'perder una extracción por unas comillas sería tirar el trabajo de la sesión')
     check('una respuesta rota nunca revienta la pantalla',
           cod(_tr).count('return EXTRACCION_VACIA') >= 3)
@@ -1615,7 +1675,7 @@ check('ningún identificador inventado en todo el repo',
 # corresponde a ninguna pantalla, y la pantalla que falta no se mide nunca.
 # Es la peor clase de falso verde: el que da tranquilidad.
 _tabs33 = _re33.search(r"const VALID_MAIN_TABS: MainTab\[\] = \[(.*?)\];", rd('src/pages/Admin.tsx'), _re33.S)
-_mid33 = _re33.search(r"^ADMIN = \[(.*?)\]$", rd('scripts/medir-app.py'), _re33.S | _re33.M)
+_mid33 = _re33.search(r"^ADMIN = \[(.*?)\]$", rdc('scripts/medir-app.py'), _re33.S | _re33.M)
 _falla33b = []
 if not _tabs33 or not _mid33:
     _falla33b.append('no se pudo leer una de las dos listas de pestañas')
@@ -1647,7 +1707,7 @@ check('el medidor mide las pestañas que existen, y todas',
 # La regla que queda: los destinos de la barra de abajo son los que el cliente
 # pisa todos los días. Ninguno puede medirse sólo vacío.
 _barra33 = set(_re33.findall(r"\{\s*id:\s*'([a-zA-Z]+)'", rd('src/components/BottomTabBar.tsx')))
-_cd33 = _re33.search(r"^CON_DATOS = \[(.*?)\]$", rd('scripts/medir-app.py'), _re33.S | _re33.M)
+_cd33 = _re33.search(r"^CON_DATOS = \[(.*?)\]$", rdc('scripts/medir-app.py'), _re33.S | _re33.M)
 _falla33c = []
 if not _barra33 or not _cd33:
     _falla33c.append('no se pudo leer la barra de abajo o la lista CON_DATOS del medidor')
@@ -1673,8 +1733,8 @@ check('los destinos de la barra se miden con la cuenta llena, no vacíos',
 # columnas a tres, y un rótulo que allá entraba acá se parte en dos renglones
 # —con su ícono flotando en el hueco—. Son otras cajas, así que son otras
 # faltas, y el cliente trabaja en la computadora.
-_an33 = _re33.search(r"^ANCHAS = \[(.*?)\]$", rd('scripts/medir-app.py'), _re33.S | _re33.M)
-_anchoVal33 = _re33.search(r"^ANCHO_ANCHO = (\d+)$", rd('scripts/medir-app.py'), _re33.M)
+_an33 = _re33.search(r"^ANCHAS = \[(.*?)\]$", rdc('scripts/medir-app.py'), _re33.S | _re33.M)
+_anchoVal33 = _re33.search(r"^ANCHO_ANCHO = (\d+)$", rdc('scripts/medir-app.py'), _re33.M)
 _falla33d = []
 if not _an33 or not _anchoVal33:
     _falla33d.append('el medidor no declara una corrida de escritorio (ANCHAS / ANCHO_ANCHO)')
@@ -1686,7 +1746,7 @@ else:
         _falla33d.append(f"'{_x}' es un destino de la barra y nadie lo mide en la computadora")
     if 'diario' not in _anchas33:
         _falla33d.append("'diario' no se mide en la computadora")
-    if '>ancho' not in rd('scripts/medir-app.py'):
+    if '>ancho' not in rdc('scripts/medir-app.py'):
         _falla33d.append('ANCHAS está declarada pero ninguna vista sale con el sufijo >ancho')
 
 check('y se miden también en la computadora, no sólo en el teléfono',
@@ -1848,7 +1908,7 @@ if _os38.path.exists('src/lib/permisos.ts'):
     check('lo desconocido NUNCA cae en dirección',
           "default: return 'acompanamiento'" in _pm)
     check('El Negocio no depende del costo de la IA',
-          "requiere: ['dinero_tcd', 'motor_propio', 'rendimiento_equipo']" in _pm,
+          "requiere: ['dinero_tcd', 'motor_propio', 'rendimiento_equipo']" in cod(_pm),
           'si dependiera, desarrollo entraría a la pantalla donde están las ventas del dueño')
     check('son cuatro momentos, no dieciséis tabs',
           _pm.count("{ id: '") >= 4 and 'MOMENTOS' in cod(_pm))
@@ -1901,10 +1961,10 @@ if _os40.path.exists('src/lib/jornada.ts'):
           'trabasDelSistema > 0' in cod(_jo))
     # El texto pasó a usar el glosario: «¿Alguna <Termino p="traba" />?»
     check('el cierre pregunta qué trabó, no cuántas horas',
-          'Termino p="traba"' in _js and 'se mira el viernes' in _js)
+          'Termino p="traba"' in cod(_js) and 'se mira el viernes' in cod(_js))
     check('el dinero y el rendimiento se ocultan POR DATO en La Semana',
-          "puedeVer(rol, 'dinero_tcd')" in _ls
-          and "puedeVer(rol, 'rendimiento_equipo')" in _ls,
+          "puedeVer(rol, 'dinero_tcd')" in cod(_ls)
+          and "puedeVer(rol, 'rendimiento_equipo')" in cod(_ls),
           'si se ocultara la pantalla entera, un número nuevo se filtraría')
     check('se verifica que el dinero NO viaje al navegador del empleado',
           'el dinero NO viaja al navegador' in rd('scripts/prueba-pantallas.tsx'),
@@ -1919,7 +1979,7 @@ if _os40.path.exists('src/lib/jornada.ts'):
 import os as _os41
 if _os41.path.exists('src/lib/jornadaStorage.ts'):
     _jst = rd('src/lib/jornadaStorage.ts')
-    _sql41 = rd('sala-de-mando.sql')
+    _sql41 = rdc('sala-de-mando.sql')
     _jp41 = rd('src/components/admin/Jornada.tsx')
     _adm41 = rd('src/pages/Admin.tsx')
     check('las jornadas viven en la base, no en el navegador',
@@ -1946,7 +2006,7 @@ if _os41.path.exists('src/lib/jornadaStorage.ts'):
           'jornadas={jornadasEquipo}' in cod(_adm41)
           and 'clientesQueVendieron={semanaClientes.vendieron}' in cod(_adm41))
     check('las jornadas se cargan solo cuando hacen falta',
-          "mainTab !== 'semana' && mainTab !== 'hoy'" in _adm41,
+          "mainTab !== 'semana' && mainTab !== 'hoy'" in cod(_adm41),
           'son dos consultas que no le sirven a quien está mirando otra cosa')
 
 # ── 6.42 · El menú son CUATRO momentos ─────────────────────────────────
@@ -2006,14 +2066,14 @@ if _os43.path.exists('src/lib/mercados.ts'):
           and 'mercados?: string[]' not in solo_codigo(_vc43),
           'un campo que nadie puebla es peor que no tenerlo: el default miente en silencio')
     check('la banda del CPM sale del mercado',
-          "add('cpm'" in _vc43 and 'banda.cpmMin' in cod(_vc43))
+          "add('cpm'" in cod(_vc43) and 'banda.cpmMin' in cod(_vc43))
     check('con varios países se toma el rango que abarca a todos',
           'Math.min(min' in cod(_mk) and 'Math.max(max' in cod(_mk))
     check('y el poder de compra, del MÁS BAJO',
           'poder = Math.min' in cod(_mk),
           'si la mitad de la audiencia no puede pagar, eso ya explica una conversión floja')
     check('existe la frecuencia y dice que NO es el creativo',
-          "add('frecuencia'" in _vc43 and 'No es el creativo' in _vc43,
+          "add('frecuencia'" in cod(_vc43) and 'No es el creativo' in cod(_vc43),
           'sin ese número parece que la pieza se gastó cuando el público es angosto')
     check('la app acumula sus propios datos desde el día uno',
           'export function aprenderDeSemana' in cod(_mk))
@@ -2028,7 +2088,7 @@ if _os43.path.exists('src/lib/mercados.ts'):
           'export function situacionDe' in cod(_sm43) and 'EstadoCampana' in cod(_sm43))
     check('al que no encendió NUNCA se le habla de sus números',
           'export function sePuedeDiagnosticar' in cod(_sm43)
-          and "estado !== 'instalando'" in _sm43,
+          and "estado !== 'instalando'" in cod(_sm43),
           'no tiene conversaciones: se le dice qué le falta para encender')
     check('la ficha abre en la conversación que corresponde',
           "conversacion: 'activacion'" in _sm43 and "conversacion: 'metricas'" in _sm43)
@@ -2042,7 +2102,7 @@ if _os43.path.exists('src/lib/mercados.ts'):
 import os as _os44
 if _os44.path.exists('src/lib/cargaCompartida.ts'):
     _cc = rd('src/lib/cargaCompartida.ts')
-    _sql44 = rd('sala-de-mando.sql')
+    _sql44 = rdc('sala-de-mando.sql')
     _wh44 = rd('api/ghl-agenda.ts')
     check('cada campo sabe quién lo cargó y cuándo',
           'ValorConFirma' in cod(_cc) and 'export function firmaDe' in cod(_cc),
@@ -2323,7 +2383,7 @@ import os as _os50
 if _os50.path.exists('src/lib/respuestasSesion.ts'):
     _rs = rd('src/lib/respuestasSesion.ts')
     _pl = rd('src/components/SesionGuiadaPlayer.tsx')
-    _sq = rd('sala-de-mando.sql')
+    _sq = rdc('sala-de-mando.sql')
     check('lo que el cliente escribe se guarda en la base',
           'create table if not exists sesion_respuestas' in _sq
           and 'guardarEnLaBase' in cod(_rs))
@@ -2536,7 +2596,7 @@ import os as _os56
 if _os56.path.exists('src/lib/cerebro.ts'):
     _cb = rd('src/lib/cerebro.ts')
     _cs = rd('src/lib/cerebroStorage.ts')
-    _sq56 = rd('sala-de-mando.sql')
+    _sq56 = rdc('sala-de-mando.sql')
     check('la cola CREA tareas, no las muestra y las olvida',
           'crear_tarea_del_sistema' in _sq56 and 'crearDesdeElSistema' in cod(_cs))
     check('una causa, una tarea: no se duplica',
@@ -2557,7 +2617,7 @@ if _os56.path.exists('src/lib/cerebro.ts'):
           'vencido ? 100_000' in cod(_cb),
           'una cuenta rota se destraba mañana; una persona esperando se va hoy')
     check('lo técnico y lo de criterio NO se resuelven con un mensaje al cliente',
-          "esTecnico || esCriterio ? 'escalar'" in _cb)
+          "esTecnico || esCriterio ? 'escalar'" in cod(_cb))
     check('la lista de Hoy es LA MISMA que la de Tareas',
           'mi_lista_de_hoy' in _sq56 and 'miListaDeHoy' in cod(_cs),
           'tener dos listas es lo que hizo que nadie entendiera su día')
@@ -2565,7 +2625,7 @@ if _os56.path.exists('src/lib/cerebro.ts'):
     # EL BOTÓN QUE MENTÍA.
     check('«Mandárselo» manda de verdad',
           'export async function mandarleAlCliente' in cod(_cs)
-          and "from('mensajes').insert" in _cs,
+          and "from('mensajes').insert" in cod(_cs),
           'antes solo tachaba el ítem: el botón prometía algo y quien lo tocaba creía que pasó')
     # Pedía un insert directo a `notificaciones`, y es justo lo que NO funciona:
     # esa tabla tiene políticas de leer y de marcar leído, y ninguna de
@@ -2574,7 +2634,7 @@ if _os56.path.exists('src/lib/cerebro.ts'):
     # que el mensaje entraba en la bandeja y la campanita no sonaba nunca. La
     # lente pedía exactamente la forma que no andaba.
     check('y el cliente se entera aunque no tenga la app abierta',
-          "rpc('crear_notificacion'" in _cs
+          "rpc('crear_notificacion'" in cod(_cs)
           and "from('notificaciones').insert" not in _cs,
           'el insert directo lo rechaza la RLS sin decir nada')
     check('el cerebro está probado',
@@ -2722,7 +2782,7 @@ if _os61.path.exists('src/components/campanas/MontajeCupos.tsx'):
     check('y pausar también',
           'marcarPausada' in cod(_mc61))
     check('encender pasa por el freno de escribir la palabra',
-          "frenoDe('encender_campana'" in _mc61 and 'confirmando' in cod(_mc61),
+          "frenoDe('encender_campana'" in cod(_mc61) and 'confirmando' in cod(_mc61),
           'es lo más caro que hace la app: el gasto empieza en ese momento')
     check('el freno se usa de verdad en algún lado',
           'from \'../Freno\'' in _mc61 or "from '../Freno'" in _mc61,
@@ -2918,7 +2978,7 @@ if _os67.path.exists('src/components/admin/NumerosDeLaSemana.tsx'):
 import os as _os66
 if _os66.path.exists('src/components/admin/BandejaSoporte.tsx'):
     _bs66 = rd('src/components/admin/BandejaSoporte.tsx')
-    _sql66 = rd('sala-de-mando.sql')
+    _sql66 = rdc('sala-de-mando.sql')
     _adm66 = rd('src/pages/Admin.tsx')
     check('los mensajes sin responder se ven',
           'mensajesQueEsperan' in cod(_bs66) and 'respondido_en' in _sql66)
@@ -2991,7 +3051,7 @@ check('y lo que el aviso no resuelve pasa a una persona',
       'plan.aEscalar' in cod(_cron68) and 'el aviso automático no alcanzó' in _cron68,
       'dos avisos sin cambio no es un cliente que no leyó: es un aviso que no alcanza')
 check('el historial sale de lo ya enviado, sin tabla nueva',
-      "select('usuario_id, clave, created_at')" in _cron68 and 'claveDeTitulo' not in _cron68,
+      "select('usuario_id, clave, created_at')" in cod(_cron68) and 'claveDeTitulo' not in _cron68,
       'una segunda copia del mismo historial es una segunda copia que se desincroniza')
 # Por CLAVE y no por título: el aviso se reconocía comparando su texto, así que
 # mejorar la redacción de uno dejaba su historial en cero para todos y volvía a
@@ -3006,11 +3066,11 @@ check('si fallan los avisos, las alarmas del equipo igual salieron',
       'No tumba el cron' in _cron68,
       'perder las alarmas por un fallo de los avisos sería cambiar un problema por dos')
 check('sin datos no se opina: se le pide que cargue',
-      ": 'no_cargo'" in _cron68)
+      ": 'no_cargo'" in cod(_cron68))
 # El candado que faltaba: `crear_notificacion` corría con permisos de
 # administrador y no miraba quién la llamaba. Cualquier cliente podía
 # escribirle a otro un aviso con el título y el enlace que quisiera.
-_mig68 = rd('supabase/migrations/20261019_los_avisos_salen.sql')
+_mig68 = rdc('supabase/migrations/20261019_los_avisos_salen.sql')
 check('nadie puede escribir un aviso en nombre de otro',
       'es_del_equipo(auth.uid())' in _mig68 and 'p_usuario_id = auth.uid()' in _mig68,
       'era SECURITY DEFINER sin mirar quién llamaba: un «te dejó una nota» falso con el link que quisiera')
@@ -3188,11 +3248,12 @@ _mig_nc = rd('supabase/migrations/20261002_numeros_del_cliente.sql')
 check('los cruces se prueban solos (no tocan la base)',
       "from './supabase'" not in _nc and 'costoPorAgenda' in cod(_nc))
 check('sin denominador no se inventa un número', 'b > 0 ? a / b : null' in cod(_nc))
+_mig_nc_c = rdc('supabase/migrations/20261002_numeros_del_cliente.sql')
 check('el equipo puede leer las métricas de todos',
-      "rol = 'admin'" in _mig_nc and 'for select' in _mig_nc)
+      "rol = 'admin'" in _mig_nc_c and 'for select' in _mig_nc_c)
 check('pero la carga sigue siendo del cliente',
       'for insert' not in _mig_nc and 'for update' not in _mig_nc)
-check('se traen todos en una sola consulta', ".in('user_id', userIds)" in _nd)
+check('se traen todos en una sola consulta', ".in('user_id', userIds)" in cod(_nd))
 check('el panel está en la ficha del cliente', 'NumerosDelCliente' in cod(_adm_nc))
 check('el semáforo marca a quien no mira sus números',
       'SEMANAS_SIN_NUMEROS' in cod(_sem_nc) and 'DIA_EN_QUE_YA_MIDE' in cod(_sem_nc))
@@ -4082,7 +4143,7 @@ check('y solo dos archivos escriben la semana, los dos con la fila entera',
 
 # Los mensajes en vivo: seis suscripciones escuchaban una tabla sin publicar.
 check('la tabla de mensajes está en la publicación de tiempo real',
-      'mensajes' in rd('supabase/migrations/20261024_los_mensajes_en_vivo.sql'))
+      'mensajes' in rdc('supabase/migrations/20261024_los_mensajes_en_vivo.sql'))
 
 # El aviso del equipo salía con un insert que la RLS rechaza en silencio.
 check('el aviso del equipo al cliente sale por el RPC, no por un insert',
@@ -4126,7 +4187,7 @@ check('la revisión final tiene su prueba de escenario',
 print()
 print('══ 13) EL VEREDICTO DE LA EVIDENCIA ══')
 
-_ver_mig = rd('supabase/migrations/20261025_el_veredicto_queda.sql')
+_ver_mig = rdc('supabase/migrations/20261025_el_veredicto_queda.sql')
 _coach31 = solo_codigo(rd('src/components/tasks/TaskCoach.tsx'))
 _ver_lib = solo_codigo(rd('src/lib/veredictoEvidencia.ts'))
 
@@ -4175,24 +4236,25 @@ check('y la fila de la cola se monta de verdad, con datos',
 # Dos pruebas en verde que no miraban lo que decían mirar. Es el patrón
 # peor: una lente en verde protegiendo algo que el producto ya cambió.
 _psql = rd('scripts/prueba-sql.sh')
+_psqlc = rdc('scripts/prueba-sql.sh')
 check('el andamiaje de la prueba SQL declara hoja_de_ruta con sus columnas reales',
-      'usuario_id uuid, pilar_numero int, meta_codigo text' in _psql,
+      'usuario_id uuid, pilar_numero int, meta_codigo text' in _psqlc,
       'declaraba (user_id, codigo, estado), que no existen en ninguna parte')
 check('los nombres de los RPC a verificar salen del código, no de una lista a mano',
-      'rpc-que-llama-la-app.py' in _psql
+      'rpc-que-llama-la-app.py' in _psqlc
       and 'for PAR in "guardar_semana_cliente' not in _psql,
       'la lista tenía cuatro de las cincuenta y seis llamadas que hace la app')
 check('las cuentas de prueba existen en auth.users, no solo en profiles',
-      "insert into auth.users (id, email) values" in _psql,
+      "insert into auth.users (id, email) values" in _psqlc,
       'un insert correcto en una tabla con clave foránea a auth.users fallaba '
       'por una cuenta que en producción sí existe')
 check('y el andamiaje da los permisos que Supabase da por defecto',
-      'alter default privileges in schema public' in _psql
-      and 'set role authenticated;' in _psql,
+      'alter default privileges in schema public' in _psqlc
+      and 'set role authenticated;' in _psqlc,
       'sin permiso, una prueba de RLS da verde porque falta el permiso y no '
       'porque la política funcione: dos razones para el mismo resultado')
 check('las funciones plpgsql del veredicto se EJECUTAN contra Postgres',
-      'select guardar_veredicto_ia(' in _psql and 'select decidir_evidencia(' in _psql,
+      'select guardar_veredicto_ia(' in _psqlc and 'select decidir_evidencia(' in _psqlc,
       'plpgsql no valida el cuerpo al crearlo: un error de tipo aparece la '
       'primera vez que corre, que es cuando el cliente sube su foto')
 # ── 14) QUE SE MIGREN SOLOS, DESDE EL ALTA ─────────────────────────────
@@ -4230,7 +4292,7 @@ check('apagada por defecto: no todo el que entra trae trabajo hecho',
       'traeSuTrabajo: false,' in cod(_adm14))
 check('y la lista de migraciones deja fuera al equipo',
       'and not public.es_del_equipo(p.id)' in
-      rd('supabase/migrations/20261026_la_lista_de_migraciones_son_clientes.sql'),
+      rdc('supabase/migrations/20261026_la_lista_de_migraciones_son_clientes.sql'),
       'mostraba a Lupe con cero de cinco piezas y un botón para migrarla')
 check('el alta y la migración tienen su prueba de escenario',
       _os31.path.exists('scripts/prueba-alta-y-migracion.ts'))
@@ -4240,7 +4302,7 @@ check('el alta y la migración tienen su prueba de escenario',
 # disparador prohíbe tocar `migrado_en`, que es justo la columna que escribe
 # `cerrar_mi_migracion()`. Desde el 18, el cliente pegaba su material, su ADN
 # se guardaba, el cierre fallaba, y la tarjeta le seguía apareciendo.
-_cierre14 = rd('supabase/migrations/20261027_el_cliente_puede_cerrar_su_migracion.sql')
+_cierre14 = rdc('supabase/migrations/20261027_el_cliente_puede_cerrar_su_migracion.sql')
 check('el cliente puede cerrar su propia migración',
       "perform set_config('app.cerrando_migracion', 'si', true)" in _cierre14,
       'el disparador bloqueaba a la función oficial que él mismo señala')
@@ -4251,8 +4313,8 @@ check('el disparador se recrea entero, con sus nueve columnas',
       _cierre14.count('raise exception') >= 8,
       'dos versiones de la misma lista es cómo se pierde una')
 check('y el cierre del cliente se prueba contra Postgres, con su candado',
-      'select cerrar_mi_migracion();' in _psql
-      and 'update profiles set migrado_en = now()' in _psql)
+      'select cerrar_mi_migracion();' in _psqlc
+      and 'update profiles set migrado_en = now()' in _psqlc)
 
 # ── 15) LA REVISIÓN EXHAUSTIVA ANTES DE DAR ACCESO A TODOS ─────────────
 # Siete cosas que fallaban en silencio. Se buscaron por la clase de falla de
@@ -4307,15 +4369,15 @@ check('y la facturación muestra lo que contrató, no un código interno',
 
 # Y la base de prueba se parece a la de verdad.
 check('la prueba SQL carga la RLS real de profiles',
-      'alter table profiles enable row level security' in _psql,
+      'alter table profiles enable row level security' in _psqlc,
       'sin ella, «un cliente no lee la ficha de otro» salía verde por falta '
       'de RLS, no porque la política funcionara')
 check('y lee el SQL de la raíz, no solo las migraciones',
-      "f.startswith('supabase/migrations/') and os.path.basename(f) >= '20261009'" in _psql,
+      "f.startswith('supabase/migrations/') and os.path.basename(f) >= '20261009'" in _psqlc,
       'el corte por fecha descartaba pais-migration.sql: una letra es mayor '
       'que un dígito en una comparación de texto')
 check('y hace el recorrido completo del primer día, como cliente',
-      'el primer día de un cliente nuevo' in _psql)
+      'el primer día de un cliente nuevo' in _psqlc)
 check('la revisión exhaustiva tiene su prueba de escenario',
       _os31.path.exists('scripts/prueba-revision-exhaustiva.ts'))
 
@@ -4435,7 +4497,7 @@ check('la cuenta de los 10 sale de la cadena, no escrita a mano',
 # El puente que no debe volver: traducir un plan de acceso a un ticket.
 _ofs72 = rd('src/lib/laOfertaQueSigue.ts')
 check('un plan de acceso NO se traduce a un ticket de venta',
-      "valor === 'base' || valor === 'ascenso' || valor === 'instalacion'" in _ofs72,
+      "valor === 'base' || valor === 'ascenso' || valor === 'instalacion'" in cod(_ofs72),
       'ese puente ya existió en cuadroTickets: un cliente de $497 figuraba '
       'con $5.000 de instalación contratada')
 check('y el candado nunca queda sin salida si falta el link de pago',
@@ -4546,7 +4608,7 @@ check('el que paga la entrada entra, y el que sube recibe lo que pagó',
 # por el que el comprador del escalón de entrada se llevaba los noventa días.
 _alta = rd('api/alta-numero.ts')
 check('el alta mira si el usuario es nuevo, no qué dice su columna plan',
-      'recienCreado' in cod(_alta) and "estado === 'invitado'" in _alta,
+      'recienCreado' in cod(_alta) and "estado === 'invitado'" in cod(_alta),
       "preguntar '¿ya tiene plan?' da siempre sí: el trigger "
       "on_auth_user_created escribe 'DWY' al crear el usuario")
 check('y el perfil que crea guarda su email',
@@ -4726,10 +4788,33 @@ check('y el token sale de la sesión, no del localStorage',
 # interna (camelCase), `_`, `$` o un dígito. Una palabra capitalizada del
 # castellano —«Prefiero», «Cliente»— NO lo es: vive en un comentario con
 # todo derecho, igual que una frase con espacios.
-_FUENTE16 = ('.ts', '.tsx', '.js', '.jsx')
+# La fuente no es solo TypeScript: la batería también lee las migraciones
+# (.sql), el medidor y el generador del seed (.py) y el andamiaje de la
+# prueba SQL (.sh). Medido el 15 de noviembre: con la guarda de la carpeta
+# del dueño comentada con `--`, «y la función comprueba que el archivo esté
+# en la carpeta de su dueño» dio VERDE y ninguna otra lente la vio.
+_FUENTE16 = ('.ts', '.tsx', '.js', '.jsx', '.sql', '.py', '.sh')
+# En SQL y en el shell, el mecanismo no se escribe en camello ni lleva
+# guión bajo: `for select`, `where anuncio is null` y `alter table … enable
+# row level security` son todas minúsculas con espacios, que es justo la
+# forma que `_mecanismo16` reserva para el idioma. Así que en esos dos
+# lenguajes el mecanismo se reconoce por su palabra.
+_PALABRAS16 = (
+    'create ', 'alter ', 'drop ', 'select', 'insert', 'update ', 'delete ',
+    'policy', 'grant ', 'revoke ', 'using', 'conflict', 'exception',
+    'perform ', 'function', 'trigger', 'index', 'security', 'not like',
+    'set_config', 'current_setting', 'returns', 'execute', 'values',
+    'column', ' from ', 'where ', 'enable ', 'auth.uid', 'set role',
+    'row level', '::', '||',
+)
 _ASIG16 = _re16.compile(r'([A-Za-z_][A-Za-z0-9_]*)\s*=\s*rd\(\s*'
                         r'(f?[\'"][^\'"\n]*[\'"]|[A-Za-z_][A-Za-z0-9_]*)\s*\)')
-_PRES_VAR16 = _re16.compile(r'([\'"])((?:[^\'"\\\n]|\\.){2,200})\1\s+in\s+([A-Za-z_][A-Za-z0-9_]*)\b')
+# El octavo agujero, medido el 15 de noviembre: el cuerpo de la cadena
+# excluía LAS DOS comillas, así que una afirmación escrita con comilla doble
+# y una comilla simple adentro —`"rol = 'admin'" in _mig_nc`, que es
+# EXACTAMENTE como estaba escrita la lente de las métricas del equipo— no la
+# veía ninguna de las cuatro formas. Ahora se excluye sólo la que delimita.
+_PRES_VAR16 = _re16.compile(r'([\'"])((?:(?!\1)[^\\\n]|\\.){2,200})\1\s+in\s+([A-Za-z_][A-Za-z0-9_]*)\b')
 _PRES_DIR16 = _re16.compile(r'([\'"])((?:[^\'"\\\n]|\\.){2,200})\1\s+in\s+rd\(\s*f?[\'"]([^\'"\n]+)[\'"]')
 _CUENTA16 = _re16.compile(r'\b([A-Za-z_][A-Za-z0-9_]*)\.count\(\s*([\'"])((?:[^\'"\\\n]|\\.){1,200})\2')
 _CUENTA_DIR16 = _re16.compile(r'\brd\(\s*(f?[\'"][^\'"\n]*[\'"])\s*\)\.count\(')
@@ -4747,11 +4832,13 @@ _BUCLE16 = _re16.compile(r'\bfor\s+([A-Za-z_]\w*)\s*(?:,\s*([A-Za-z_]\w*)\s*)?in
 _PRES_GET16 = _re16.compile(r'([\'"])((?:[^\'"\\\n]|\\.){2,200})\1\s+in\s+([A-Za-z_]\w*)\.get\(')
 
 
-def _mecanismo16(frag: str, solo_nombres: bool = False) -> bool:
+def _mecanismo16(frag: str, solo_nombres: bool = False, ext: str = '') -> bool:
     """`solo_nombres` es para una EXPRESIÓN REGULAR: ahí los paréntesis y los
     corchetes son del lenguaje de la regex, no del código, así que juzgar por
     puntuación marcaría el buscador de voseo —`\\b\\w+(?:ás|és|ís)\\b`— que mide
     el idioma y lee crudo con todo derecho."""
+    if ext in ('.sql', '.sh') and any(_p16 in frag.lower() for _p16 in _PALABRAS16):
+        return True
     if not solo_nombres and any(_c16 in frag for _c16 in '(){}[]<>=;'): return True
     for _t16 in _re16.findall(r'[A-Za-z_$][A-Za-z0-9_$]*', frag):
         if len(_t16) < 4: continue
@@ -4770,13 +4857,15 @@ def _fugas16(lineas):
     """Toda afirmación de PRESENCIA de un mecanismo sobre un archivo fuente
     crudo, en las cuatro formas. La AUSENCIA (`not in`, `not re.search`) se
     queda en crudo a propósito: más estricto, no menos."""
-    crudas, cols = {}, set()
+    crudas, cols, lengua = {}, set(), {}
     for _n, _l in enumerate(lineas, 1):
         if _l.lstrip().startswith('#'): continue
         for _m in _ASIG16.finditer(_l):
             _arg = _m.group(2)
             if _arg[0] in '\'"' or _arg[:2] in ('f"', "f'"):
-                if not _arg.rstrip('\'"').endswith(_FUENTE16): continue
+                _lim = _arg.rstrip('\'"')
+                if not _lim.endswith(_FUENTE16): continue
+                lengua[_m.group(1)] = _lim[_lim.rfind('.'):].lower()
             crudas[_m.group(1)] = _n
         for _m in _COL16.finditer(_l): cols.add(_m.group(1))
         for _m in _PEGOTE16.finditer(_l): crudas[_m.group(1)] = _n
@@ -4790,16 +4879,19 @@ def _fugas16(lineas):
     for _n, _l in enumerate(lineas, 1):
         if _l.lstrip().startswith('#'): continue
         for _m in _PRES_VAR16.finditer(_l):
-            if _m.group(3) in crudas and _mecanismo16(_m.group(2)):
+            if _m.group(3) in crudas and _mecanismo16(
+                    _m.group(2), ext=lengua.get(_m.group(3), '')):
                 fugas.append(f'línea {_n}: {_m.group(2)!r} sobre {_m.group(3)} crudo')
         for _m in _PRES_DIR16.finditer(_l):
-            if _m.group(3).endswith(_FUENTE16) and _mecanismo16(_m.group(2)):
+            if _m.group(3).endswith(_FUENTE16) and _mecanismo16(
+                    _m.group(2), ext=_m.group(3)[_m.group(3).rfind('.'):].lower()):
                 fugas.append(f'línea {_n}: {_m.group(2)!r} sobre rd({_m.group(3)})')
         for _m in _PRES_GET16.finditer(_l):
             if _m.group(3) in cols and _mecanismo16(_m.group(2)):
                 fugas.append(f'línea {_n}: {_m.group(2)!r} sobre {_m.group(3)}.get(…) crudo')
         for _m in _CUENTA16.finditer(_l):
-            if _m.group(1) in crudas and _mecanismo16(_m.group(3)):
+            if _m.group(1) in crudas and _mecanismo16(
+                    _m.group(3), ext=lengua.get(_m.group(1), '')):
                 fugas.append(f'línea {_n}: .count({_m.group(3)!r}) sobre {_m.group(1)} crudo')
         for _m in _CUENTA_DIR16.finditer(_l):
             if _m.group(1).rstrip('\'"').endswith(_FUENTE16):
@@ -4807,7 +4899,8 @@ def _fugas16(lineas):
         for _m in _REGEX16.finditer(_l):
             if _m.group(3) not in crudas: continue
             if _l[:_m.start()].rstrip().endswith('not'): continue
-            if _mecanismo16(_m.group(2), solo_nombres=True):
+            if _mecanismo16(_m.group(2), solo_nombres=True,
+                             ext=lengua.get(_m.group(3), '')):
                 fugas.append(f'línea {_n}: re.…({_m.group(2)[:40]!r}) sobre {_m.group(3)} crudo')
     return fugas
 
@@ -4865,6 +4958,11 @@ _ROJO16 = [
     ("_C = {f: rd(f) for f in gl}", "for _p, _q in _C.items(): _b = 'guardarLlamada' in _q"),
     ("_C = {f: rd(f) for f in gl}", "'bloqueConsultorio' in _C.get('src/a.ts', '')"),
     ("_P = ''.join(rd(f) for f in gl)", "'setFamiliaActual' in _P"),
+    ("_q = rd('supabase/migrations/20261025_x.sql')", "'for select to authenticated' in _q"),
+    ("_g = rd('supabase/migrations/20261002_y.sql')", "\"rol = 'admin'\" in _g"),
+    ("_h = rd('scripts/medir-app.py')", "'DIA_DEL_TUTORIAL' in _h"),
+    ("_i = rd('scripts/prueba-sql.sh')", "'alter table profiles enable row level security' in _i"),
+    ("", "'where anuncio is null' in rd('sala-de-mando.sql')"),
 ]
 _VERDE16 = [
     ("_x = rd('src/a.ts')", "'marcarEncendida' in cod(_x)"),
@@ -4879,11 +4977,15 @@ _VERDE16 = [
     ("_C = {f: rd(f) for f in gl}", "for _p, _q in _C.items(): _b = 'guardarLlamada' in cod(_q)"),
     ("_C = {f: rd(f) for f in gl}", "'bloqueConsultorio' in cod(_C.get('src/a.ts', ''))"),
     ("_P = ''.join(rd(f) for f in gl)", "'setFamiliaActual' in cod(_P)"),
+    ("_q = rdc('supabase/migrations/20261025_x.sql')", "'for select to authenticated' in _q"),
+    ("_g = rd('supabase/migrations/20261002_y.sql')", "'for insert' not in _g"),
+    ("_i = rd('scripts/prueba-sql.sh')", "'el primer dia de un cliente nuevo' in _i"),
+    ("", "'where anuncio is null' in rdc('sala-de-mando.sql')"),
 ]
 #.LENTE16.PRUEBAS.FIN
 _sin_rojo16 = [_c16[1] for _c16 in _ROJO16 if not _fugas16(list(_c16))]
 _mal_rojo16 = [_c16[1] for _c16 in _VERDE16 if _fugas16(list(_c16))]
-check('la lente 16 se pone roja con cada una de las 11 fugas puestas',
+check(f'la lente 16 se pone roja con cada una de las {len(_ROJO16)} fugas puestas',
       not _sin_rojo16, '; '.join(_sin_rojo16))
 check('y deja pasar la ausencia en crudo, la frase y lo ya medido en código',
       not _mal_rojo16, '; '.join(_mal_rojo16))
@@ -5134,6 +5236,82 @@ check('y no se lleva la URL, la regex ni el código de al lado',
       'https://x.dev//y' in _limpio16 and 'https?:' in _limpio16
       and 'marcarEncendida' in _limpio16,
       'una barra dentro de un texto o de una regex no es un comentario')
+
+
+# ── 16.b · EL COMENTARIO DE CADA LENGUAJE ──────────────────────────────
+#
+# Todo lo de arriba cuidaba UN comentario: el `//` de TypeScript. Y la
+# batería no lee solo TypeScript. Medido el 15 de noviembre, con el defecto
+# puesto en el archivo de verdad y la batería entera corrida:
+#
+#   | el mecanismo comentado                      | la lente que lo mide  |
+#   |---------------------------------------------|-----------------------|
+#   | la guarda de la carpeta del dueño, con `--` | VERDE, y nadie más la |
+#   |   (20261025_el_veredicto_queda.sql)         |   vio                 |
+#   | `out = tutear_todo(out)`, con `#`           | VERDE                 |
+#   | la RLS del andamiaje, con `#`               | VERDE                 |
+#
+# La primera es la peor: con esa línea comentada, un cliente puede guardar
+# el veredicto de un archivo que no es suyo, y la batería entera decía que
+# el ZIP podía salir. Las otras dos las cazó otra lente por carambola —el
+# seed difiere, la RLS se ejecuta—, pero las tres lentes que dicen medir el
+# mecanismo mentían.
+_LENG16 = {
+    '.sql': ("  if x not like ('evidencias/' || id) then", '--'),
+    '.py':  ('out = tutear_todo(out)', '#'),
+    '.sh':  ("salida = ['alter table profiles enable row level security;']", '#'),
+    '.ts':  ('const vivo = marcarEncendida(id);', '//'),
+}
+_ciegos16 = []
+for _e16, (_linea16, _marca16) in _LENG16.items():
+    _nombre16 = _re16.search(r'[a-zA-Z_][a-zA-Z_0-9]{5,}', _linea16).group(0)
+    if _nombre16 not in solo_codigo(_linea16, 'x' + _e16):
+        _ciegos16.append(f'{_e16}: se llevó el código vivo')
+    if _nombre16 in solo_codigo(f'{_marca16} {_linea16}', 'x' + _e16):
+        _ciegos16.append(f'{_e16}: el comentario de línea entera ({_marca16}) sigue contando')
+    if _nombre16 in solo_codigo(f'x = 1  {_marca16} {_linea16}', 'x' + _e16):
+        _ciegos16.append(f'{_e16}: el comentario del final de la línea ({_marca16}) sigue contando')
+check('solo_codigo saca el comentario de CADA lenguaje que la batería lee',
+      not _ciegos16, '; '.join(_ciegos16))
+
+# Y lo que NO puede comerse: en el shell, `--` en el medio de la línea es
+# una bandera; en SQL vive dentro de un texto; en Python, un color.
+_COME16 = [
+    ('.sh', 'psql --quiet -f x.sql', '--quiet'),
+    ('.sql', "select '--no es comentario--' as t;", '--no es comentario--'),
+    ('.py', "FONDO = '#080808'", '#080808'),
+    ('.sql', "comment on function f is 'el -- de adentro';", 'el -- de adentro'),
+]
+_comidos16 = [f'{_e}: {_q}' for _e, _l, _q in _COME16
+              if _q not in solo_codigo(_l, 'x' + _e)]
+check('y no se lleva la bandera del shell, el texto del SQL ni el color',
+      not _comidos16, '; '.join(_comidos16))
+
+# Y que ningún lenguaje nuevo entre sin que nadie le sepa el comentario: se
+# listan por el ÁRBOL las extensiones que la batería lee de verdad.
+_LEIDAS16 = set()
+for _n16 in _ast16.walk(_ARB16):
+    if isinstance(_n16, _ast16.Call) and isinstance(_n16.func, _ast16.Name) \
+       and _n16.func.id in ('rd', 'rdc') and _n16.args \
+       and isinstance(_n16.args[0], _ast16.Constant):
+        _a16 = str(_n16.args[0].value)
+        if '.' in _a16.split('/')[-1]:
+            _LEIDAS16.add(_a16[_a16.rfind('.'):].lower())
+_sin_marca16 = sorted(_e16 for _e16 in _LEIDAS16 if _e16 not in _MARCAS)
+check('la batería no lee ningún lenguaje cuyo comentario no sepa escribir',
+      not _sin_marca16,
+      f'{_sin_marca16} — declararlo en _MARCAS, con su marca de línea')
+
+# Y la prueba de que sirve, corrida sobre los archivos de verdad: el
+# mecanismo se comenta en memoria con la marca de SU lenguaje, en las dos
+# formas (línea entera y final de línea), y el limpiador de hoy tiene que
+# dejarlo afuera en las catorce mientras el de ayer —que solo sabía `//`—
+# seguía viéndolo.
+_pc16 = subprocess.run([sys.executable, 'scripts/probar-el-comentario-de-cada-lenguaje.py'],
+                       capture_output=True, text=True)
+check('el comentario de cada lenguaje: ciego ayer, rojo hoy (probado ejecutando)',
+      _pc16.returncode == 0,
+      (_pc16.stdout + _pc16.stderr).strip().split('\n')[-1][:170])
 
 
 print()

@@ -247,12 +247,14 @@ esta tabla y que siga sola. Los tres se tocan solo desde tu teléfono: la sesió
 no puede ni apagarla ni espaciarla. No se inventan turnos acá: la cola es tuya.
 
 **Y si quieres escribir uno, quedan tres candidatos con el trabajo ya medido,
-y los tres esperan tu clic.** El frente de la auditoría de la auditoría quedó
-**cerrado entero** el 14 a las 19:30 (abajo, en «El 14 de noviembre a las
-19:30»): el recorrido por AST de la ausencia era lo último que faltaba, y
-encontró tres ausencias vivas en un recolector —dos lentes ciegas hoy— más la
-lente del catch mudo, que conocía una sola manera de escribir «mudo». El
-primero de los tres que quedan es
+y los tres esperan tu clic.** El frente de la auditoría de la auditoría se dio
+por **cerrado entero** el 14 a las 19:30, y el 15 a las 03:25 **esa premisa se
+cayó también**: estaba cerrado para **un** idioma. El `//` de TypeScript era el
+único comentario que la batería sabía leer, y con la guarda de la carpeta del
+dueño comentada con `--` la lente que dice medirla daba verde y ninguna otra la
+veía (abajo, en «El 15 de noviembre a las 03:25»). Cerrado ahora para `.sql`,
+`.py`, `.sh` y el `.gitignore` de MCD, con 33 fugas vivas más que salieron por
+el camino. El primero de los tres que quedan es
 **cerrar `/api/mcd-bridge`**, la última ruta sin llave, con su botón abajo en
 «El 14 de noviembre a las 03:30». Los otros dos son
 del 13: subir el `next` de MCD, y subir el editor de TCD (las dos
@@ -323,7 +325,97 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 
 | **14 nov, 15:25** · `da98ce6` | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`93c3961` en TCD, `a76e8e7` en MCD), los dos árboles limpios y `HEAD` suelto en los dos—, `node_modules` en cero. Esta despertada tomó el candidato que el mapa daba por **mecánico y preventivo** («ninguna de las 183 miente hoy») y la premisa se cayó dos veces: la lente del bloque 16 **estaba verde por un punto y coma** —veía la asignación cruda solo al principio de la línea, así que once presencias con forma de nombre vivían hoy en la forma exacta que la lente prohíbe—, y había **cuatro ausencias que eran el defecto**, donde un comentario escondía al endpoint que cobra sin poder devolver el crédito. Seis formas cerradas, 225 medidas pasadas al código, y una lente que medía la cadena vacía (abajo) |
 
+| **15 nov, 03:25** · `PENDIENTE` + `0c49ffb` (MCD) | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`480fb2b` en TCD, `a76e8e7` en MCD)—, `node_modules` en cero en los dos y el `HEAD` suelto en TCD. Con el frente de la auditoría de la auditoría dado por **cerrado de los dos lados**, esta despertada preguntó lo único que ese frente nunca había preguntado: **¿y el comentario de los otros lenguajes?** Todo lo cerrado entre el 13 y el 14 cuidaba el `//` de TypeScript, y la batería lee además `.sql`, `.py` y `.sh`. **Con la guarda de la carpeta del dueño comentada con `--`, la lente que dice medirla dio VERDE y ninguna otra la vio.** Y al endurecer la lente aparecieron **33 fugas vivas en main** que ninguna de las cuatro formas podía ver: la comilla de adentro. En MCD, lo mismo con `#`: `.env.local` comentado del `.gitignore` y las 57 en verde (abajo) |
 | **14 nov, 19:30** · `d5ead99` | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`dc8dc42` en TCD, `a76e8e7` en MCD)—, `node_modules` en cero en los dos y la trampa del `HEAD` suelto con la **`main` local de TCD 31 commits atrás** (un `git checkout main` a secas la hubiera dejado ahí: se arregló antes de medir). Esta despertada tomó el último candidato de este frente —**el recorrido por AST de la ausencia**— y la premisa se cayó otra vez: de las 46 ausencias de mecanismo que hay de verdad, **tres seguían en un recolector**, y las dos lentes que las usan estaban **ciegas hoy**, probado sacando el mecanismo del código. Y de paso, la lente del catch mudo conocía **una sola manera de escribir «mudo»**: las dos que están mudas de verdad en main se escriben distinto y nunca se vieron (abajo) |
+
+### El 15 de noviembre a las 03:25: el `//` era el único comentario que la batería sabía leer
+
+El mapa dejaba el frente de la auditoría de la auditoría **cerrado de los dos
+lados y en las dos direcciones** —la presencia y la ausencia, TCD y MCD—. Era
+cierto para un idioma. Todo lo que se cerró entre el 13 y el 14 de noviembre
+—las seis formas del crudo, la ausencia-como-defecto, el `;`, el `.count`, el
+catch mudo— mira el comentario de **TypeScript**. Y la batería de TCD no lee
+solo TypeScript: lee las **migraciones** (`.sql`), el **medidor** y el
+**generador del seed** (`.py`) y el **andamiaje de la prueba SQL** (`.sh`). Ahí
+el comentario se escribe `--` y `#`, y `solo_codigo` no los conocía.
+
+**Medido antes de construir**, con el defecto puesto en los archivos de verdad
+y la batería entera corrida (889 miradas):
+
+| el mecanismo comentado, con la marca de su lenguaje | la lente que dice medirlo | ¿lo cazó otra? |
+|---|---|---|
+| la guarda de la carpeta del dueño, con `--` (`20261025_el_veredicto_queda.sql`) | **verde** | **nadie** |
+| `out = tutear_todo(out)`, con `#` (`generar_seed.py`) | **verde** | sí, el seed difiere |
+| la RLS del andamiaje, con `#` (`prueba-sql.sh`) | **verde** | sí, se ejecuta |
+
+**La primera es la que importa.** Esa línea es lo único que impide que un
+cliente guarde el veredicto de un archivo que no es suyo; comentada, la batería
+entera decía «el ZIP puede salir». Eran **55 afirmaciones de presencia** sobre
+archivo crudo en los tres lenguajes —37 en `.sql`, 12 en `.sh`, 6 en `.py`—, y
+entre ellas las políticas de RLS, el candado del cierre de la migración y el
+aviso que sale adentro del RPC.
+
+Y la lente del bloque 16, que existe justo para esto, no podía verlas: su
+`_FUENTE16` era `('.ts', '.tsx', '.js', '.jsx')`. En SQL y en el shell el
+mecanismo además no se escribe en camello ni lleva guión bajo —`for select`,
+`where anuncio is null`, `alter table … enable row level security` son todas
+minúsculas con espacios, que es la forma que la lente reserva para el idioma—,
+así que se reconoce por su palabra.
+
+#### Y de paso, el octavo agujero: la comilla de adentro
+
+Al extender la lente apareció algo que no era del plan y que estaba **vivo en
+main**: el cuerpo de la cadena excluía **las dos** comillas, así que una
+afirmación escrita con comilla doble y una simple adentro no la veía **ninguna**
+de las cuatro formas. Es exactamente como estaba escrita la lente de las
+métricas del equipo: `"rol = 'admin'" in _mig_nc`. Corregido el delimitador,
+salieron **33 fugas vivas**, todas de esa forma y todas sobre TypeScript crudo:
+las tres superficies de cada pestaña del Admin (`"| '{tab}'"`,
+`"id: '{tab}'"`, `"mainTab === '{tab}'"`), `"from('profiles')"` del webhook,
+`"rpc('crear_notificacion'"`, `"frenoDe('encender_campana'"`,
+`".in('user_id', userIds)"`. Las 33 pasaron a medirse sobre el código.
+
+#### En MCD, la misma forma, y lo que tapaba eran las claves
+
+MCD ya tenía `solo_sql` desde el 14. Lo que no tenía es el `#`, y su lente del
+`.gitignore` **excluía ese archivo a propósito** —decía «package.json,
+.gitignore»—. El `.gitignore` también lleva comentarios. Medido: con
+`# .env.local` en lugar de `.env.local`, **las 57 lentes en verde** y «el
+entorno con las claves no entra al repo» entre ellas. `git ls-files` solo lo
+caza **después**, con el archivo ya subido, que es tarde.
+
+#### Las pruebas contra su propio fallo
+
+| el defecto reintroducido | antes | ahora |
+|---|---|---|
+| la guarda del dueño comentada con `--` (línea entera y final de línea) | **verde** | **roja** |
+| la política del equipo comentada con `--` | **verde** | **roja** |
+| el candado del cierre de la migración, con `--` | **verde** | **roja** |
+| `tutear_todo(out)` comentado con `#` | **verde** | **roja** |
+| la RLS del andamiaje, con `#` | **verde** | **roja** |
+| `set role authenticated;` con el `--` del heredoc | **verde** | **roja** |
+| `marcarEncendida` con `//` (que TypeScript no se rompa) | roja | **roja** |
+| `.env.local` comentado del `.gitignore` (MCD) | **verde** | **roja** |
+| una presencia nueva sobre `.sql`, `.py` o `.sh` crudo | no existía | **roja**, con línea |
+| un lenguaje nuevo sin su marca declarada | no existía | **roja**, y lo nombra |
+
+Las catorce de los lenguajes se prueban **ejecutando**, sobre los archivos de
+verdad, en las dos formas del comentario: el que ocupa la línea entera y el que
+queda al final de una línea que sigue siendo código
+(`scripts/probar-el-comentario-de-cada-lenguaje.py`). Y lo que el limpiador
+**no** puede comerse se mide igual: la bandera del shell (`psql --quiet`, que
+es una bandera y no un comentario: en todo el repo no hay un solo `-- ` que sea
+el fin de las opciones), el `--` que vive dentro de un texto de SQL, y el
+`'#080808'` del color.
+
+TCD cierra con **893 miradas, cero faltas** («el ZIP puede salir»), `tsc` y
+`npm run build` limpios y las **133** pruebas en verde. MCD, con **64** en
+verde, `tsc` y `next build` limpios.
+
+**Lo que queda de este frente:** `.md` y `.html` entraron a la tabla de marcas
+con su `<!--  -->`, pero ninguna lente afirma hoy un mecanismo sobre ellos. Si
+mañana alguna lo hace, la lente «la batería no lee ningún lenguaje cuyo
+comentario no sepa escribir» la obliga a declararlo antes.
 
 ### El 14 de noviembre a las 19:30: tres ausencias seguían en un recolector
 
