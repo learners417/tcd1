@@ -32,12 +32,20 @@ export default function Dia45Banner({ validacion, onIrAPilar }: Dia45BannerProps
         <div className="flex-1 min-w-0">
           {/* 20px es el piso del serif de display: por debajo su altura de x es tan
               chica que el italic se lee como una mancha. Medido a 18. */}
+          {/*
+            «La Fase 4» era el sexto mapa para el mismo viaje. Afuera el
+            cliente tiene tres —paisaje, libertad y sistema— y las fases son
+            de adentro: nombran un tramo que él no ve en ningún otro lado.
+            Dice el sistema, que es el que compró y el que está en su libro.
+            Medido el 15 de noviembre: era una de las dos únicas palabras de
+            mapa interno que quedaban en una pantalla del cliente.
+          */}
           <h3 className="text-xl font-medium text-cream tracking-tight mb-1">
-            La Fase 4 se abre con tu ADN completo
+            Tu propia app se abre con tu ADN completo
           </h3>
           <p className="text-base text-cream/75">
             Te {n === 1 ? 'falta' : 'faltan'} <span className="text-cream font-semibold">{n}</span> {n === 1 ? 'dato clave' : 'datos clave'}.
-            Con ellos tus anuncios salen escritos desde tu historia. Tócalos y los completas en su pilar.
+            Con ellos tus anuncios salen escritos desde tu historia. Tócalos y los completas en su día.
           </p>
         </div>
       </div>

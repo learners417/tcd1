@@ -440,7 +440,7 @@ export default function Biblioteca({ userId, diaActual = null, bibliotecaAbierta
              lo que sí agrega: qué hay acá adentro. Y en 17 px, que es el
              mínimo de la app: estaba en 14. */}
       <p className="text-[17px] text-cream/75">
-        Los libros y los videos del Método C·L·I·N·I·C·A.
+        Los libros y los videos del Método.
       </p>
 
       {/* LOS LIBROS. Van primero porque son la fuente: Sanadores Libres

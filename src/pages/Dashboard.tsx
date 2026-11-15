@@ -515,6 +515,10 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
             descripcion: data.tareasHoy[0].descripcion,
             tiempo: data.tareasHoy[0].tiempo_estimado,
             salesCon: data.tareasHoy[0].evidencia_requerida?.nombre ?? null,
+            /* El paso de diez minutos y su día: la tarjeta los necesita para
+               mostrarlo y para guardar la marca con la que cuenta la racha. */
+            pasoAfuera: data.tareasHoy[0].paso_afuera ?? null,
+            dia: data.tareasHoy[0].dia_asignado ?? null,
           }}
           esFinde={[0, 6].includes(new Date().getDay())}
           onEmpezar={() => { try { localStorage.setItem('tcd_abrir_pilar', String(data.tareasHoy[0].pilarNumero ?? '')); } catch { /* noop */ } setCurrentPage('roadmap'); }}

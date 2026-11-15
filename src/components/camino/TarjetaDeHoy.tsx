@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { leerPasosAfuera, marcarPasoAfuera } from '../../lib/elJuegoDelSur';
 /**
  * TarjetaDeHoy — "La única que importa" (10-DISENO §5 "Tarjeta de hoy").
  * La usan Hoy y El Camino: la misma tarjeta, el mismo botón, el mismo paso.
@@ -13,6 +15,17 @@ export interface PasoDeHoy {
   descripcion?: string | null;
   tiempo?: string | null;
   salesCon?: string | null;
+  /**
+   * AFUERA · el paso de diez minutos de este día, si lo tiene.
+   *
+   * Va acá y no solo dentro de la sesión porque el día que vale es justo el
+   * día en que no va a hacer la sesión de setenta y cinco minutos: el que
+   * abre la app con diez minutos cierra la app sin ver lo único que podía
+   * hacer. Es el mismo paso, con la misma marca: no son dos cosas.
+   */
+  pasoAfuera?: string | null;
+  /** El día del camino, que es con lo que se guarda la marca. */
+  dia?: number | null;
 }
 
 /** Primera oración, para que la descripción entre en una o dos líneas. */
@@ -31,6 +44,10 @@ interface Props {
 }
 
 export default function TarjetaDeHoy({ hoy, esFinde, onEmpezar }: Props) {
+  const dia = hoy.dia ?? null;
+  const [afueraHecho, setAfueraHecho] = useState<boolean>(
+    () => (dia ? leerPasosAfuera().includes(dia) : false),
+  );
   return (
         <section className="card-panel p-5 sm:p-6" aria-label="Tu paso de hoy">
           <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-goldhi">
@@ -85,6 +102,40 @@ export default function TarjetaDeHoy({ hoy, esFinde, onEmpezar }: Props) {
           <button type="button" onClick={onEmpezar} className="btn-ios-primary mt-5 w-full sm:w-[280px]">
             Empezar
           </button>
+          {/*
+            Y debajo del botón, el paso de diez minutos. Debajo y no arriba:
+            lo primero sigue siendo el trabajo del día. Pero queda a la vista
+            sin entrar, que es de lo que se trata — el que tiene diez minutos
+            cerraba la app sin enterarse de que había algo para él.
+          */}
+          {hoy.pasoAfuera && dia ? (
+            <div className="mt-5 pt-4 border-t border-[var(--line2,#DFD3BC)] space-y-1.5">
+              <p className="rotulo-libro">Afuera · tu paso</p>
+              <p className="text-[17px] leading-snug text-cream">{hoy.pasoAfuera}</p>
+              <button
+                type="button"
+                aria-pressed={afueraHecho}
+                onClick={() => {
+                  const lista = marcarPasoAfuera(dia, !afueraHecho);
+                  setAfueraHecho(lista.includes(dia));
+                }}
+                className="min-h-[44px] inline-flex items-center gap-2 text-[17px] font-semibold text-goldhi"
+              >
+                <span
+                  className="w-6 h-6 rounded-full grid place-items-center border"
+                  style={afueraHecho
+                    ? { background: 'var(--tilde, #4A7C59)', borderColor: 'var(--tilde, #4A7C59)' }
+                    : { borderColor: 'var(--line2, #DFD3BC)' }}
+                >
+                  {afueraHecho && <Check className="w-4 h-4" style={{ color: '#FFFDF7' }} />}
+                </span>
+                {afueraHecho ? 'Lo hiciste' : 'Lo hice'}
+              </button>
+              <p className="text-[15px] leading-snug text-cream/70">
+                Diez minutos. El día cierra igual.
+              </p>
+            </div>
+          ) : null}
         </section>
   );
 }

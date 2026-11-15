@@ -164,7 +164,7 @@ export default function PilarUnlockedModal({
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--accent-gold)]/15 border border-[var(--accent-gold)]/30 mb-4">
                 <Sparkles className="w-4 h-4 text-gold" />
                 <span className="text-xs font-bold uppercase tracking-widest text-gold">
-                  Pilar completado
+                  Parte completada
                 </span>
               </div>
 
@@ -238,7 +238,7 @@ export default function PilarUnlockedModal({
               ) : (
                 <div className="mb-6">
                   <p className="text-sm text-[var(--green-success)] font-medium">
-                    Completaste todos los pilares del programa
+                    Completaste todas las partes del programa
                   </p>
                 </div>
               )}
@@ -249,7 +249,7 @@ export default function PilarUnlockedModal({
               >
                 {pilarDesbloqueado ? (
                   <>
-                    Continuar al siguiente pilar
+                    Continuar a la siguiente
                     <ChevronRight className="w-5 h-5" />
                   </>
                 ) : (
@@ -271,7 +271,7 @@ export default function PilarUnlockedModal({
                 className="text-2xl font-medium text-cream mb-2"
                 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}
               >
-                ¿Cómo te pareció este pilar?
+                ¿Cómo te pareció esta parte?
               </h2>
               <p className="text-sm text-cream/65 mb-5">
                 Tu valoración nos ayuda a mejorar el programa

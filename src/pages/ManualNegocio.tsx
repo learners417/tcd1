@@ -522,7 +522,7 @@ export default function ManualNegocio({ perfil, userId, setCurrentPage, onProfil
           ADN del Negocio
         </h1>
         <p className="text-sm text-cream/55 mt-1">
-          Tu estrategia completa documentada con el método CLINICA
+          Tu estrategia completa, escrita con tu método
         </p>
 
         <div className="mt-5">

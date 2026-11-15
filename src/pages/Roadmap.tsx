@@ -1757,7 +1757,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                 </div>
                 <button
                   onClick={() => setPilarAbierto(null)}
-                  aria-label="Cerrar el pilar"
+                  aria-label="Cerrar esta parte"
                   className="w-11 h-11 -mr-2 flex items-center justify-center text-cream/55 hover:text-cream transition-colors"
                 >
                   <ChevronUp className="w-5 h-5" />

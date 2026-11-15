@@ -86,7 +86,7 @@ export default function EspejoIdentidadModal({
             <Sparkles className="w-6 h-6 text-gold" />
           </div>
           <p className="text-sm uppercase tracking-widest text-gold font-bold mb-2">
-            Cierre de Fase 1 · Identidad
+            Cierre de Tu reset · Identidad
           </p>
           <h2
             id="espejo-titulo"
@@ -179,7 +179,7 @@ export default function EspejoIdentidadModal({
             onClick={() => handleClose(onConfirmar)}
             className="flex-1 btn-primary flex items-center justify-center gap-2"
           >
-            Confirmar y seguir a Fase 2
+            Confirmar y seguir
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
