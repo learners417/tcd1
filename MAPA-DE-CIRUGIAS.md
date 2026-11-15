@@ -258,7 +258,11 @@ el camino. **Y el 15 a las 06:30 se cayó una tercera vez, por otro lado:** no
 la marca del comentario sino **la puerta** —`index.html` y `src/index.css` se
 leían con `open(...)`, fuera de `rd()`, y tres lentes vivían de ese lado—, más
 el décimo agujero y sus 14 fugas vivas (abajo, en «El 15 de noviembre a las
-06:30»). El primero de los tres que quedan es
+06:30»). **Y el 15 a las 07:25, una cuarta, en otro cuerpo:** las cuatro
+anteriores auditaron `auditoria.py`, y nadie había auditado nunca **las 133
+`prueba-*.ts`**, que el bloque 10 juzga solo por el código de salida.
+`prueba-cadena.ts` no tenía ninguno (abajo, en «El 15 de noviembre a las
+07:25»). El primero de los tres que quedan es
 **cerrar `/api/mcd-bridge`**, la última ruta sin llave, con su botón abajo en
 «El 14 de noviembre a las 03:30». Los otros dos son
 del 13: subir el `next` de MCD, y subir el editor de TCD (las dos
@@ -331,7 +335,69 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 
 | **15 nov, 03:25** · `eb59091` + `0c49ffb` (MCD) | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`480fb2b` en TCD, `a76e8e7` en MCD)—, `node_modules` en cero en los dos y el `HEAD` suelto en TCD. Con el frente de la auditoría de la auditoría dado por **cerrado de los dos lados**, esta despertada preguntó lo único que ese frente nunca había preguntado: **¿y el comentario de los otros lenguajes?** Todo lo cerrado entre el 13 y el 14 cuidaba el `//` de TypeScript, y la batería lee además `.sql`, `.py` y `.sh`. **Con la guarda de la carpeta del dueño comentada con `--`, la lente que dice medirla dio VERDE y ninguna otra la vio.** Y al endurecer la lente aparecieron **33 fugas vivas en main** que ninguna de las cuatro formas podía ver: la comilla de adentro. En MCD, lo mismo con `#`: `.env.local` comentado del `.gitignore` y las 57 en verde (abajo) |
 | **15 nov, 06:30** · `f8fb28b` + `d7b905a` (MCD) | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`6e77528` en TCD, `0c49ffb` en MCD), los dos repos en `origin/main`—, `node_modules` en cero en los dos. El frente de los comentarios estaba cerrado en los cuatro idiomas, así que esta despertada preguntó por **la puerta**, no por la marca: `index.html` y `src/index.css` se leían con `open(...).read()`, por donde no pasa `_MARCAS`, no se llama `solo_codigo` y el bloque 16 no mira. **Tres lentes vivían de ese lado, y a dos de las tres no las vio nadie** (abajo, en «El 15 de noviembre a las 06:30»). Y al probar las fugas puestas salió el décimo agujero: el arreglo de la comilla de adentro había entrado en UNA de las cuatro formas, con **14 fugas vivas más** detrás |
+| **15 nov, 07:25** · `65f7ac2` | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`edd97d2` en TCD, `d7b905a` en MCD), los dos repos en `origin/main`—, `node_modules` en cero y la `main` local de los dos atrás con el `HEAD` suelto. Las cuatro despertadas anteriores auditaron la batería de TCD contra sí misma; esta preguntó por **el otro cuerpo de afirmaciones que la batería ni mira: las 133 `prueba-*.ts`**, que el bloque 10 juzga SOLO por el código de salida. **Una de las 133 no tenía ninguno**: `prueba-cadena.ts` imprimía `✗` por escenario y terminaba en 0. Probado con el defecto puesto: cinco de sus seis escenarios decían «La cadena está sana» a un cliente que no cobra, y la batería daba las 133 en verde y «el ZIP puede salir» (abajo) |
 | **14 nov, 19:30** · `d5ead99` | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`dc8dc42` en TCD, `a76e8e7` en MCD)—, `node_modules` en cero en los dos y la trampa del `HEAD` suelto con la **`main` local de TCD 31 commits atrás** (un `git checkout main` a secas la hubiera dejado ahí: se arregló antes de medir). Esta despertada tomó el último candidato de este frente —**el recorrido por AST de la ausencia**— y la premisa se cayó otra vez: de las 46 ausencias de mecanismo que hay de verdad, **tres seguían en un recolector**, y las dos lentes que las usan estaban **ciegas hoy**, probado sacando el mecanismo del código. Y de paso, la lente del catch mudo conocía **una sola manera de escribir «mudo»**: las dos que están mudas de verdad en main se escriben distinto y nunca se vieron (abajo) |
+
+### El 15 de noviembre a las 07:25: la prueba que no podía ponerse roja
+
+Cuatro despertadas seguidas auditaron **la batería contra sí misma**: la
+presencia sobre crudo, la ausencia, el comentario de los cuatro idiomas, la
+puerta de lectura. Todas miran `auditoria.py`, que son 896 miradas. Esta
+preguntó por el otro cuerpo, el que nadie había auditado nunca: **las 133
+`prueba-*.ts`**, que son otras tantas afirmaciones y entran a la batería por
+una sola línea del bloque 10.
+
+**Y el bloque 10 las juzga por una sola cosa: el código de salida.** Nada más.
+Así que una prueba que no sabe terminar en rojo está en verde para siempre.
+
+**Una de las 133 era exactamente eso.** `prueba-cadena.ts` —la que diagnostica
+el eslabón que gobierna la semana del cliente, seis escenarios— imprime `✗` por
+cada escenario mal diagnosticado, imprime `4/6 escenarios diagnosticados bien`
+y **no tiene `process.exit`**. Medido con el defecto puesto en el mecanismo de
+verdad (`encontrarDomino` ignorando el primer eslabón roto):
+
+| con el defecto puesto | lo que imprimió | lo que dijo la batería |
+|---|---|---|
+| 5 de 6 escenarios mal | `1/6 escenarios diagnosticados bien`, cinco renglones `✗` | **las 133 en verde** · «el ZIP puede salir» |
+
+Lo que decía en los cinco: **«La cadena está sana»** al cliente que vende y no
+cobra, al que no cierra y al que paga $25 por conversación. El diagnóstico que
+la app le muestra, al revés, con la batería dando el visto.
+
+**Y la lección ya estaba escrita dos veces en el mismo archivo.** El `.sh` del
+SQL y `prueba-movil.py` se juzgan por el código **y** por sus renglones `✗`
+—«lo que no vale es que falle y nadie lo mire»—. No estaba aplicada a las 133.
+
+**Cerrado por los dos lados:**
+
+- **el rojo que faltaba** — `prueba-cadena.ts` termina en un código que depende
+  de sus seis escenarios. Probado: con el defecto puesto sale 1, sin el defecto
+  sale 0;
+- **el bloque 10** — una prueba está roja si termina en rojo **o** si imprime un
+  renglón que empieza con `✗`, sea cual sea su código. Corridas las 133 antes de
+  ponerlo: ninguna imprime un `✗` informativo, así que no hay falso rojo;
+- **la lente nueva**, para la prueba que nazca así mañana y pase meses sin que
+  nadie la rompa: cada `scripts/prueba-*.ts` tiene que tener un `process.exit(`
+  cuyo argumento no sea el cero literal. Se mide sobre `rdc()` —el código, no el
+  texto— así que comentar la salida no la salva, y la que delega su rojo en otro
+  proceso (`process.exit(r.status ?? 1)`) sigue valiendo.
+
+Las dos guardas se prueban contra su propio fallo, ejecutando, en
+`scripts/probar-que-la-prueba-puede-ponerse-roja.py`: el veredicto del bloque 10
+y la lente se **sacan de esta misma batería**, no se copian, y el defecto se
+pone en memoria sobre el contenido de los archivos de verdad. Ocho casos, los
+ocho en verde, y el primer intento de cablearla dejó la batería en rojo porque
+el trozo que corta llegaba hasta la línea que la corre: ahora eso avisa con
+nombre en vez de un `NameError`.
+
+**Lo que se midió y NO era un agujero.** Las otras 132 tienen su código atado a
+un contador (115 con `fallas === 0 ? 0 : 1`, 13 con `fallas ? 1 : 0`, cuatro con
+su propia forma). Los scripts `.py` y `.sh` que la batería corre por código de
+salida tienen todos su `sys.exit` —y el único sin salida roja,
+`generar-plan-90-dias.py`, se juzga además comparando su salida con el archivo
+escrito, así que un 0 vacío no lo salva—. Y en MCD no hay espejo que cerrar:
+**su batería no corre ninguna prueba propia**, solo `tsc` y `next build`, que
+terminan en rojo por sí mismos. Quedó en sus 75 en verde, sin tocar.
 
 ### El 15 de noviembre a las 06:30: no era la marca, era la puerta
 
