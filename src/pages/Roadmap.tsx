@@ -60,6 +60,7 @@ import { supabase, isSupabaseReady, guardarFila } from '../lib/supabase';
 import type { HojaDeRutaItem, VentaRegistrada, ProfileV2 } from '../lib/supabase';
 import {
   SEED_ROADMAP_V2,
+  NOMBRE_DEL_LIBRO,
   roadmap,
   FASES_ROADMAP,
   calcularNivel,
@@ -1049,6 +1050,32 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
   }, [enRevision]);
 
   /**
+   * LOS TRES HILOS DE HOY, listos para la pantalla.
+   *
+   * El hilo del sistema ya estaba —son los `pasos` de arriba—; estos son los
+   * otros dos: la lección del libro con su logro, la pausa de 5 con su marca
+   * y el paso afuera. Se arman acá y no en `SesionViva` por la misma razón
+   * que `teLlevas`: el vocabulario se aplica en la salida del dato, y esa
+   * pantalla no conoce la familia profesional del cliente.
+   *
+   * Devuelve null cuando el día no trae ninguno de los dos, que hoy son 63
+   * de los 91: la app no anuncia lo que falta.
+   */
+  const hilosDeHoy = useCallback((meta: RoadmapMeta) => {
+    const lecciones = (meta.leccion ?? []).map((l) => ({
+      clave: `${l.libro}-${l.numero}`,
+      texto: VOC(`${NOMBRE_DEL_LIBRO[l.libro] ?? l.libro} · lección ${l.numero} · ${l.titulo}`),
+      logro: VOC(l.logro),
+    }));
+    const pausa = meta.pausa
+      ? { texto: VOC(meta.pausa.dicha || meta.pausa.nombre), marca: meta.pausa.marca }
+      : null;
+    const pasoAfuera = meta.paso_afuera ? VOC(meta.paso_afuera) : null;
+    if (lecciones.length === 0 && !pausa && !pasoAfuera) return null;
+    return { lecciones, pausa, pasoAfuera };
+  }, []);
+
+  /**
    * EL PUNTO DE PARTIDA: SE GUARDA LO QUE YA TIENE, NO SE MUEVE SU FECHA.
    *
    * Acá estaba `const fechaInicio = proximoLunes();`, y escribía esa fecha en
@@ -1882,6 +1909,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                             pide={VOC(meta.evidencia_requerida?.pide ?? '')}
                             seAbre={[meta.veredicto ? VOC(meta.veredicto) : '', meta.cinturon ? 'Ganaste un grado nuevo: míralo en tu Camino.' : ''].filter(Boolean).join(' ') || undefined}
                             base={baseDeHoy(meta)}
+                            hilos={hilosDeHoy(meta)}
                             tiempoEstimado={enRevision.has(meta.codigo) ? '20 min' : meta.tiempo_estimado}
                             isCompleted={estaCompletada}
                             userId={userId}
@@ -1946,6 +1974,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                             pide={VOC(meta.evidencia_requerida?.pide ?? '')}
                             seAbre={[meta.veredicto ? VOC(meta.veredicto) : '', meta.cinturon ? 'Ganaste un grado nuevo: míralo en tu Camino.' : ''].filter(Boolean).join(' ') || undefined}
                             base={baseDeHoy(meta)}
+                            hilos={hilosDeHoy(meta)}
                             tiempoEstimado={enRevision.has(meta.codigo) ? '20 min' : meta.tiempo_estimado}
                             isCompleted={estaCompletada}
                             userId={userId}

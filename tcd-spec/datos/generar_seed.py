@@ -914,6 +914,15 @@ if _huerfanos:
         + ", ".join(_huerfanos)
         + ". Agregarlos a la jornada que corresponde en hoja_de_ruta.py.")
 
+# ── los tres hilos de cada día ──────────────────────────────────────────────
+# Adentro (la lección y la pausa de 5), afuera (el paso afuera) y sistema (los
+# `pasos`, que ya estaban). Las tablas las pasa LIBROS y viven en
+# `tres_hilos.py`, con su fuente anotada: acá solo se cuelgan de su día. Si
+# una lección cae en un día que no existe, o una pausa no está en el
+# repertorio, el generador se cae en vez de escribir un seed mudo.
+from tres_hilos import colgar_los_hilos, pausas_del_seed
+colgar_los_hilos(J)
+
 out = {
   "version":"2026.09","idioma":"es-neutro","dias":90,
   "promesa":{"consultantes":10,"jornada_horas":4,"dias_semana":5},
@@ -964,6 +973,9 @@ out = {
               "se_abre_con":k}
              for i,n,r,d,k in AGENTES],
   "frenos":[{"id":i,"regla":r,"apertura":a,"mensaje":m} for i,r,a,m in FRENOS],
+  # El repertorio de pausas de 5, con su marca de evidencia. Vive una sola
+  # vez: la lección nombra su pausa por id y la app lee el nombre de acá.
+  "pausas":pausas_del_seed(),
   "jornadas":[J[d] for d in sorted(J)]
 }
 
@@ -981,5 +993,9 @@ print("piezas:",len(out["piezas"]),"| tutoriales:",len(out["tutoriales"]),
       "| cinturones:",len(out["cinturones"]),"| agentes:",len(out["agentes"]),
       "| frenos:",len(out["frenos"]))
 print("evidencias totales:",sum(len(j["evidencias"]) for j in out["jornadas"]))
+print("lecciones:",sum(len(j["leccion"]) for j in out["jornadas"]),
+      "en",sum(1 for j in out["jornadas"] if j["leccion"]),"días |",
+      "pausas:",sum(1 for j in out["jornadas"] if j["pausa"]),"|",
+      "pasos afuera:",sum(1 for j in out["jornadas"] if j["paso_afuera"]))
 print("minutos de trabajo del cliente:",sum(j["minutos"] for j in out["jornadas"]),
       "≈",round(sum(j["minutos"] for j in out["jornadas"])/60,1),"horas")

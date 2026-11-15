@@ -844,6 +844,92 @@
       "mensaje": "Hoy escribes las doce. Se graban en un solo día, después del 90."
     }
   ],
+  "pausas": [
+    {
+      "id": "seis-por-minuto",
+      "nombre": "Seis por minuto",
+      "marca": "●",
+      "base": "Lehrer y Gevirtz 2014 (revisión); Marchant y otros 2025"
+    },
+    {
+      "id": "suspiro-ciclico",
+      "nombre": "Suspiro cíclico",
+      "marca": "◐",
+      "base": "Balban y otros, Cell Reports Medicine 2023 (ensayo aleatorizado)"
+    },
+    {
+      "id": "tararear",
+      "nombre": "Tararear",
+      "marca": "◐",
+      "base": "Weitzberg y Lundberg 2002; Hatha Yoga Pradipika, s. XV (bhramari)"
+    },
+    {
+      "id": "hablarte-por-tu-nombre",
+      "nombre": "Hablarte por tu nombre",
+      "marca": "●",
+      "base": "Kross y otros 2014 (seis estudios con metaanálisis interno)"
+    },
+    {
+      "id": "sonreir-al-espejo",
+      "nombre": "Sonreír al espejo un minuto",
+      "marca": "◐",
+      "base": "Many Smiles Collaboration 2022: 3.878 personas, 19 países; efecto chico"
+    },
+    {
+      "id": "caminata-de-asombro",
+      "nombre": "Caminata de asombro",
+      "marca": "◐",
+      "base": "Sturm y otros 2020: 60 adultos mayores, 8 semanas"
+    },
+    {
+      "id": "bailar-tu-cancion",
+      "nombre": "Bailar tu canción",
+      "marca": "◐",
+      "base": "Noetel y otros, BMJ 2024; Salimpoor y otros 2011"
+    },
+    {
+      "id": "moverte-fuerte",
+      "nombre": "Moverte fuerte",
+      "marca": "●",
+      "base": "Noetel 2024: el efecto crece con la intensidad"
+    },
+    {
+      "id": "gratitud",
+      "nombre": "Gratitud de tres líneas",
+      "marca": "●",
+      "base": "Emmons y McCullough 2003"
+    },
+    {
+      "id": "escribirle-a-alguien",
+      "nombre": "Escribirle a alguien que te importa",
+      "marca": "●",
+      "base": "Holt-Lunstad y otros 2010; Harvard Study of Adult Development"
+    },
+    {
+      "id": "gastar-en-otro",
+      "nombre": "Gastar en otro",
+      "marca": "◐",
+      "base": "Dunn, Aknin y Norton, Science 2008"
+    },
+    {
+      "id": "pies-en-la-tierra",
+      "nombre": "Pies descalzos en la tierra",
+      "marca": "○",
+      "base": "Evidencia débil: va como ritual de pausa, no como terapia"
+    },
+    {
+      "id": "reirte-solo",
+      "nombre": "Reírte solo",
+      "marca": "○",
+      "base": "Ritual; sin dato firme"
+    },
+    {
+      "id": "protocolo-777",
+      "nombre": "Tu protocolo 7-7-7",
+      "marca": "○",
+      "base": "Práctica de Javo"
+    }
+  ],
   "jornadas": [
     {
       "dia": 0,
@@ -877,7 +963,10 @@
       "nota": "Lo ejecuta el equipo. Subcuenta, número nuevo de WhatsApp, permisos solo de pagos y calendario.",
       "paso_esencial": null,
       "avanza_sin_evidencia": false,
-      "checklist": []
+      "checklist": [],
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 1,
@@ -956,7 +1045,35 @@
         "Suma lo que cobraste el último mes y las horas que trabajaste de verdad",
         "Divide: esa es tu hora real neta",
         "Escríbela donde la veas"
-      ]
+      ],
+      "leccion": [
+        {
+          "libro": "lago",
+          "numero": 1,
+          "titulo": "Te ves cuando te calmas",
+          "freno": "El ruido",
+          "pausa": "seis-por-minuto",
+          "pausa_dicha": "Seis por minuto",
+          "logro": "Tu foto de partida: tu cara, tu número y lo que sientes hoy."
+        },
+        {
+          "libro": "lago",
+          "numero": 2,
+          "titulo": "Tu hora real",
+          "freno": "«Trabajo mucho y gano bien»",
+          "pausa": null,
+          "pausa_dicha": null,
+          "logro": "Tu hora real neta del último mes, pegada donde la veas."
+        }
+      ],
+      "pausa": {
+        "id": "seis-por-minuto",
+        "nombre": "Seis por minuto",
+        "marca": "●",
+        "base": "Lehrer y Gevirtz 2014 (revisión); Marchant y otros 2025",
+        "dicha": "Seis por minuto"
+      },
+      "paso_afuera": "Cambia una línea de tu perfil."
     },
     {
       "dia": 2,
@@ -1000,7 +1117,35 @@
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 5,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [
+        {
+          "libro": "lago",
+          "numero": 9,
+          "titulo": "Lo que crees está más hondo de lo que piensas",
+          "freno": "La frase de abajo",
+          "pausa": "tararear",
+          "pausa_dicha": "Tararear",
+          "logro": "Tu frase del dinero de abajo, en una línea."
+        },
+        {
+          "libro": "lago",
+          "numero": 13,
+          "titulo": "Tu cuenca",
+          "freno": "Lo heredado",
+          "pausa": "gratitud",
+          "pausa_dicha": "Gratitud de tres líneas",
+          "logro": "Quién te dijo qué del dinero, con nombre y edad."
+        }
+      ],
+      "pausa": {
+        "id": "tararear",
+        "nombre": "Tararear",
+        "marca": "◐",
+        "base": "Weitzberg y Lundberg 2002; Hatha Yoga Pradipika, s. XV (bhramari)",
+        "dicha": "Tararear"
+      },
+      "paso_afuera": "Graba una historia con tu cara y publícala."
     },
     {
       "dia": 3,
@@ -1044,7 +1189,35 @@
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 5,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [
+        {
+          "libro": "lago",
+          "numero": 16,
+          "titulo": "Mírate sin castigarte",
+          "freno": "El juez interno",
+          "pausa": "hablarte-por-tu-nombre",
+          "pausa_dicha": "Hablarte por tu nombre",
+          "logro": "Tu rueda en ocho números, sin un solo adjetivo."
+        },
+        {
+          "libro": "lago",
+          "numero": 18,
+          "titulo": "Corta la ola cuando es chica",
+          "freno": "El disparador",
+          "pausa": "suspiro-ciclico",
+          "pausa_dicha": "Suspiro cíclico",
+          "logro": "Tus tres disparadores, con dónde los sientes en el cuerpo."
+        }
+      ],
+      "pausa": {
+        "id": "hablarte-por-tu-nombre",
+        "nombre": "Hablarte por tu nombre",
+        "marca": "●",
+        "base": "Kross y otros 2014 (seis estudios con metaanálisis interno)",
+        "dicha": "Hablarte por tu nombre"
+      },
+      "paso_afuera": "Escríbele a un ex consultante."
     },
     {
       "dia": 4,
@@ -1101,7 +1274,35 @@
         "Elige un gesto físico chico que lo arranque. Ejemplo: apoyar las dos manos en la mesa y respirar hondo una vez",
         "Escribe tu protocolo en tres líneas: si pasa X, hago Y, y empiezo con este gesto",
         "Pégalo donde trabajas y pruébalo esta semana"
-      ]
+      ],
+      "leccion": [
+        {
+          "libro": "lago",
+          "numero": 21,
+          "titulo": "Respira antes de abrir la puerta",
+          "freno": "El piloto automático",
+          "pausa": "protocolo-777",
+          "pausa_dicha": "Tu protocolo (el 7-7-7 de Javo)",
+          "logro": "Tu protocolo en tres líneas, con su gesto, pegado."
+        },
+        {
+          "libro": "lago",
+          "numero": 22,
+          "titulo": "Tu cuerpo va en la agenda",
+          "freno": "«No tengo tiempo»",
+          "pausa": "moverte-fuerte",
+          "pausa_dicha": "Moverte fuerte",
+          "logro": "Tu cuerpo con hora fija, agendado cuatro semanas."
+        }
+      ],
+      "pausa": {
+        "id": "protocolo-777",
+        "nombre": "Tu protocolo 7-7-7",
+        "marca": "○",
+        "base": "Práctica de Javo",
+        "dicha": "Tu protocolo (el 7-7-7 de Javo)"
+      },
+      "paso_afuera": "Responde con una pregunta."
     },
     {
       "dia": 5,
@@ -1180,7 +1381,35 @@
         "Sella el precio y crea tu link de pago",
         "Ordena a quienes atiendes en tres grupos: siguen, suben, sueltas",
         "Si recién empiezas: escribe a quién no vas a atender"
-      ]
+      ],
+      "leccion": [
+        {
+          "libro": "lago",
+          "numero": 26,
+          "titulo": "Tu precio nuevo, por escrito",
+          "freno": "El número que da vergüenza",
+          "pausa": "seis-por-minuto",
+          "pausa_dicha": "Seis por minuto, antes de escribirlo",
+          "logro": "Tu precio en una servilleta, con fecha y firma, y tu link de pago creado."
+        },
+        {
+          "libro": "lago",
+          "numero": 28,
+          "titulo": "Lo que sueltas",
+          "freno": "La culpa de soltar",
+          "pausa": "gratitud",
+          "pausa_dicha": "Gratitud",
+          "logro": "Tu cartera en tres grupos: siguen, suben, sueltas."
+        }
+      ],
+      "pausa": {
+        "id": "seis-por-minuto",
+        "nombre": "Seis por minuto",
+        "marca": "●",
+        "base": "Lehrer y Gevirtz 2014 (revisión); Marchant y otros 2025",
+        "dicha": "Seis por minuto, antes de escribirlo"
+      },
+      "paso_afuera": null
     },
     {
       "dia": 6,
@@ -1207,7 +1436,35 @@
       ],
       "nota": null,
       "paso_esencial": null,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [
+        {
+          "libro": "lago",
+          "numero": 7,
+          "titulo": "Tu para qué, en una frase",
+          "freno": "El sentido perdido",
+          "pausa": "caminata-de-asombro",
+          "pausa_dicha": "Caminata de asombro",
+          "logro": "Tu para qué en menos de quince palabras."
+        },
+        {
+          "libro": "lago",
+          "numero": 15,
+          "titulo": "Tu techo se puede mover",
+          "freno": "El techo heredado",
+          "pausa": "bailar-tu-cancion",
+          "pausa_dicha": "Bailar tu canción",
+          "logro": "Tu permiso nuevo, escrito y dicho en voz alta."
+        }
+      ],
+      "pausa": {
+        "id": "caminata-de-asombro",
+        "nombre": "Caminata de asombro",
+        "marca": "◐",
+        "base": "Sturm y otros 2020: 60 adultos mayores, 8 semanas",
+        "dicha": "Caminata de asombro"
+      },
+      "paso_afuera": null
     },
     {
       "dia": 7,
@@ -1234,7 +1491,10 @@
       ],
       "nota": null,
       "paso_esencial": null,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 8,
@@ -1294,7 +1554,10 @@
         "Escribe qué quería lograr y qué ya había probado",
         "Arma tu lista de veinte: nombres, no categorías",
         "Al lado de cada nombre, su canal"
-      ]
+      ],
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": "Pide una devolución."
     },
     {
       "dia": 9,
@@ -1342,7 +1605,10 @@
         "Define con qué entra la persona y con qué sale",
         "Define cómo se mide: qué número miras al empezar y al terminar",
         "Arma las siglas con una letra por etapa y ponle nombre"
-      ]
+      ],
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": "Cambia una línea de tu perfil."
     },
     {
       "dia": 10,
@@ -1395,7 +1661,26 @@
         "Entregables: lo que la persona recibe, no lo que tú haces",
         "Precio con número, nunca menor al que sellaste el día 5",
         "Para cada palanca, una acción tuya: más resultado, más certeza, menos tiempo, menos esfuerzo"
-      ]
+      ],
+      "leccion": [
+        {
+          "libro": "lago",
+          "numero": 5,
+          "titulo": "Lo que sanaste primero",
+          "freno": "El impostor",
+          "pausa": "hablarte-por-tu-nombre",
+          "pausa_dicha": "Hablarte por tu nombre",
+          "logro": "Tu programa leído entero en voz alta, grabado, sin pedir perdón ni una vez."
+        }
+      ],
+      "pausa": {
+        "id": "hablarte-por-tu-nombre",
+        "nombre": "Hablarte por tu nombre",
+        "marca": "●",
+        "base": "Kross y otros 2014 (seis estudios con metaanálisis interno)",
+        "dicha": "Hablarte por tu nombre"
+      },
+      "paso_afuera": "Graba una historia con tu cara y publícala."
     },
     {
       "dia": 11,
@@ -1457,7 +1742,10 @@
         "Escribe tres piezas que abren distinto y terminan igual",
         "Dibuja la W de tu llamada",
         "Arma la lista de lo que grabas el lunes"
-      ]
+      ],
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 12,
@@ -1508,7 +1796,26 @@
         "Examen 2: el qué y el cómo, separados",
         "Examen 3: ¿importa el orden de las etapas?",
         "Corrige lo que te devuelva y vuelve a presentarlo. Puedes reprobar las veces que haga falta"
-      ]
+      ],
+      "leccion": [
+        {
+          "libro": "lago",
+          "numero": 11,
+          "titulo": "Las capas se leen de a una",
+          "freno": "La perfección: el ego como falso centro",
+          "pausa": "suspiro-ciclico",
+          "pausa_dicha": "Suspiro cíclico",
+          "logro": "Tu método enviado hoy, con lo que todavía no te convence anotado aparte."
+        }
+      ],
+      "pausa": {
+        "id": "suspiro-ciclico",
+        "nombre": "Suspiro cíclico",
+        "marca": "◐",
+        "base": "Balban y otros, Cell Reports Medicine 2023 (ensayo aleatorizado)",
+        "dicha": "Suspiro cíclico"
+      },
+      "paso_afuera": "Escríbele a un ex consultante."
     },
     {
       "dia": 13,
@@ -1535,7 +1842,26 @@
       ],
       "nota": null,
       "paso_esencial": null,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [
+        {
+          "libro": "lago",
+          "numero": 27,
+          "titulo": "Tu tono llega antes que tus palabras",
+          "freno": "Exponerte",
+          "pausa": "tararear",
+          "pausa_dicha": "Tararear y sonreír al espejo",
+          "logro": "Una historia con tu cara publicada hoy."
+        }
+      ],
+      "pausa": {
+        "id": "tararear",
+        "nombre": "Tararear",
+        "marca": "◐",
+        "base": "Weitzberg y Lundberg 2002; Hatha Yoga Pradipika, s. XV (bhramari)",
+        "dicha": "Tararear y sonreír al espejo"
+      },
+      "paso_afuera": null
     },
     {
       "dia": 14,
@@ -1562,7 +1888,10 @@
       ],
       "nota": null,
       "paso_esencial": null,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 15,
@@ -1610,7 +1939,10 @@
         "Al final, el de preparación para la llamada",
         "No revises nada hasta terminar el día: mirar en el medio es la forma más eficiente de no grabar el resto",
         "Sube los cinco archivos"
-      ]
+      ],
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 16,
@@ -1673,7 +2005,10 @@
         "Frase: tu promesa, no tu profesión. Ejemplo: ayudo a X a lograr Y",
         "Enlace a tu página",
         "Cierra y no toques nada más hoy"
-      ]
+      ],
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 17,
@@ -1742,7 +2077,10 @@
         "Arma el calendario en dos pasos y conéctalo a tu correo",
         "Arma la página de preparación que ve después de agendar",
         "Agéndate a ti mismo desde el teléfono, de punta a punta, como si fueras un desconocido"
-      ]
+      ],
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 18,
@@ -1798,7 +2136,26 @@
         "Marca en la app a quién le escribiste",
         "Abre la plantilla del grupo uno y escríbela con tu voz",
         "Escribe desde cuándo rige el precio nuevo. Ejemplo: desde el 1 del mes que viene"
-      ]
+      ],
+      "leccion": [
+        {
+          "libro": "lago",
+          "numero": 10,
+          "titulo": "Lo que crees tiene un origen",
+          "freno": "El juicio ajeno",
+          "pausa": "caminata-de-asombro",
+          "pausa_dicha": "Caminata de asombro",
+          "logro": "Tus mensajes enviados y la respuesta que más miedo te daba, anotada al lado de la que llegó."
+        }
+      ],
+      "pausa": {
+        "id": "caminata-de-asombro",
+        "nombre": "Caminata de asombro",
+        "marca": "◐",
+        "base": "Sturm y otros 2020: 60 adultos mayores, 8 semanas",
+        "dicha": "Caminata de asombro"
+      },
+      "paso_afuera": "Responde con una pregunta."
     },
     {
       "dia": 19,
@@ -1856,7 +2213,26 @@
         "Escucha la primera y la veinte, una después de la otra",
         "Dibuja tu W sobre la plantilla",
         "Escribe tus preguntas de cada tramo"
-      ]
+      ],
+      "leccion": [
+        {
+          "libro": "lago",
+          "numero": 31,
+          "titulo": "Ensaya antes de la llamada",
+          "freno": "El miedo escénico",
+          "pausa": "hablarte-por-tu-nombre",
+          "pausa_dicha": "Hablarte por tu nombre",
+          "logro": "Tu llamada ensayada dos veces en voz alta."
+        }
+      ],
+      "pausa": {
+        "id": "hablarte-por-tu-nombre",
+        "nombre": "Hablarte por tu nombre",
+        "marca": "●",
+        "base": "Kross y otros 2014 (seis estudios con metaanálisis interno)",
+        "dicha": "Hablarte por tu nombre"
+      },
+      "paso_afuera": "Pide una devolución."
     },
     {
       "dia": 20,
@@ -1883,7 +2259,10 @@
       ],
       "nota": null,
       "paso_esencial": null,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 21,
@@ -1910,7 +2289,10 @@
       ],
       "nota": null,
       "paso_esencial": null,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 22,
@@ -1961,7 +2343,26 @@
         "Haz la llamada",
         "Escribe qué objeción apareció",
         "Escribe tu mensaje previo"
-      ]
+      ],
+      "leccion": [
+        {
+          "libro": "lago",
+          "numero": 30,
+          "titulo": "Tu Guardián",
+          "freno": "El rechazo",
+          "pausa": "suspiro-ciclico",
+          "pausa_dicha": "Suspiro cíclico al colgar",
+          "logro": "Tu primera llamada hecha y su objeción con las palabras exactas, junto a tu respuesta escrita."
+        }
+      ],
+      "pausa": {
+        "id": "suspiro-ciclico",
+        "nombre": "Suspiro cíclico",
+        "marca": "◐",
+        "base": "Balban y otros, Cell Reports Medicine 2023 (ensayo aleatorizado)",
+        "dicha": "Suspiro cíclico al colgar"
+      },
+      "paso_afuera": null
     },
     {
       "dia": 23,
@@ -2019,7 +2420,10 @@
         "Sube o elige una llamada real",
         "Escúchala entera: la app no deja saltar",
         "Anota los cuatro números"
-      ]
+      ],
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 24,
@@ -2060,7 +2464,26 @@
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 5,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [
+        {
+          "libro": "lago",
+          "numero": 25,
+          "titulo": "Lo que pides, hazlo tú primero",
+          "freno": "Merecer",
+          "pausa": "gratitud",
+          "pausa_dicha": "Gratitud",
+          "logro": "Tu preventa enviada a tres, sin «perdón por molestar»."
+        }
+      ],
+      "pausa": {
+        "id": "gratitud",
+        "nombre": "Gratitud de tres líneas",
+        "marca": "●",
+        "base": "Emmons y McCullough 2003",
+        "dicha": "Gratitud"
+      },
+      "paso_afuera": null
     },
     {
       "dia": 25,
@@ -2116,7 +2539,10 @@
         "A cada 'no ahora' ponle fecha de vuelta",
         "Arma las respuestas automáticas",
         "Protocolo: escribe la lista de lo que te deben y táchala"
-      ]
+      ],
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": "Cambia una línea de tu perfil."
     },
     {
       "dia": 26,
@@ -2181,7 +2607,26 @@
         "Escribe al lado quién viene después, con nombre y fecha. Eso evita que lo bajes",
         "Arma la vista con cuatro columnas y nada más: gasto, entradas, agendas y costo por agenda",
         "Anota tu costo por agenda de hoy"
-      ]
+      ],
+      "leccion": [
+        {
+          "libro": "lago",
+          "numero": 32,
+          "titulo": "Celebrarte también se entrena",
+          "freno": "«No fue para tanto»",
+          "pausa": "bailar-tu-cancion",
+          "pausa_dicha": "Bailar tu canción",
+          "logro": "Tu primera venta celebrada en voz alta con una persona."
+        }
+      ],
+      "pausa": {
+        "id": "bailar-tu-cancion",
+        "nombre": "Bailar tu canción",
+        "marca": "◐",
+        "base": "Noetel y otros, BMJ 2024; Salimpoor y otros 2011",
+        "dicha": "Bailar tu canción"
+      },
+      "paso_afuera": null
     },
     {
       "dia": 27,
@@ -2208,7 +2653,10 @@
       ],
       "nota": null,
       "paso_esencial": null,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 28,
@@ -2235,7 +2683,10 @@
       ],
       "nota": null,
       "paso_esencial": null,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 29,
@@ -2288,7 +2739,10 @@
         "Crea tu cuenta publicitaria dentro de tu business",
         "Carga tu forma de pago",
         "Instala el pixel en tu página y pruébalo abriéndola desde el teléfono"
-      ]
+      ],
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 30,
@@ -2330,7 +2784,10 @@
         "Edita corto: sin música, sin intro y sin logo animado",
         "Ponles subtítulos quemados: la mayoría los mira sin sonido",
         "Súbelos al banco de creativos y márcalos como listos"
-      ]
+      ],
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": "Graba una historia con tu cara y publícala."
     },
     {
       "dia": 31,
@@ -2386,7 +2843,10 @@
         "Reparte el presupuesto mitad y mitad",
         "Los tres anuncios adentro del mismo conjunto, para que compitan entre ellos",
         "Enciende y anota la fecha y la hora"
-      ]
+      ],
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 32,
@@ -2442,7 +2902,26 @@
         "Carga las fechas de cierre en tu agenda",
         "Escribe qué recibe tu consultante a cambio del dinero",
         "Escribe qué se libera él al pagar. Ejemplo: deja de deberse a sí mismo empezar"
-      ]
+      ],
+      "leccion": [
+        {
+          "libro": "lago",
+          "numero": 6,
+          "titulo": "Tu consultante inolvidable",
+          "freno": "La culpa de decir no",
+          "pausa": "seis-por-minuto",
+          "pausa_dicha": "Seis por minuto",
+          "logro": "Tu primer derivado, con el mensaje guardado, y tu consultante inolvidable descrito en tres líneas."
+        }
+      ],
+      "pausa": {
+        "id": "seis-por-minuto",
+        "nombre": "Seis por minuto",
+        "marca": "●",
+        "base": "Lehrer y Gevirtz 2014 (revisión); Marchant y otros 2025",
+        "dicha": "Seis por minuto"
+      },
+      "paso_afuera": "Escríbele a un ex consultante."
     },
     {
       "dia": 33,
@@ -2488,7 +2967,26 @@
         "Mira tu tablero una vez. Anota el costo por agenda de hoy",
         "No toques nada de la campaña. Al tercer día vas a querer: por eso a la mayoría no le funciona",
         "Sigue escribiendo a tu red: dos mensajes nuevos"
-      ]
+      ],
+      "leccion": [
+        {
+          "libro": "lago",
+          "numero": 20,
+          "titulo": "Deja que el agua se asiente",
+          "freno": "La ansiedad de tocar",
+          "pausa": "tararear",
+          "pausa_dicha": "Tararear",
+          "logro": "Tres días sin tocar la campaña; lo que querías cambiar, escrito."
+        }
+      ],
+      "pausa": {
+        "id": "tararear",
+        "nombre": "Tararear",
+        "marca": "◐",
+        "base": "Weitzberg y Lundberg 2002; Hatha Yoga Pradipika, s. XV (bhramari)",
+        "dicha": "Tararear"
+      },
+      "paso_afuera": null
     },
     {
       "dia": 34,
@@ -2515,7 +3013,10 @@
       ],
       "nota": null,
       "paso_esencial": null,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 35,
@@ -2542,7 +3043,10 @@
       ],
       "nota": null,
       "paso_esencial": null,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 36,
@@ -2600,7 +3104,10 @@
         "Nombra tus estaciones, en orden",
         "Define tu línea base",
         "Haz la cuenta: horas para uno, horas para diez"
-      ]
+      ],
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 37,
@@ -2649,7 +3156,26 @@
         "Escribe tus tres límites",
         "Ordena tus siete pasos del alta",
         "Conecta la línea base al triage"
-      ]
+      ],
+      "leccion": [
+        {
+          "libro": "lago",
+          "numero": 17,
+          "titulo": "Sanarte es el requisito técnico",
+          "freno": "El miedo a molestar",
+          "pausa": "hablarte-por-tu-nombre",
+          "pausa_dicha": "Hablarte por tu nombre",
+          "logro": "Tus tres límites dentro de tu mensaje de bienvenida."
+        }
+      ],
+      "pausa": {
+        "id": "hablarte-por-tu-nombre",
+        "nombre": "Hablarte por tu nombre",
+        "marca": "●",
+        "base": "Kross y otros 2014 (seis estudios con metaanálisis interno)",
+        "dicha": "Hablarte por tu nombre"
+      },
+      "paso_afuera": null
     },
     {
       "dia": 38,
@@ -2705,7 +3231,10 @@
         "La app se publica sola en tu dirección",
         "Ábrela desde tu teléfono y mírala como la va a ver tu consultante",
         "Guarda tus dos accesos: el del código y el de la publicación"
-      ]
+      ],
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 39,
@@ -2751,7 +3280,10 @@
         "Revisa que haya llegado bien y corrige",
         "Arma cuatro semanas con lo que desbloquea cada una",
         "Carga cuatro, no doce"
-      ]
+      ],
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 40,
@@ -2806,7 +3338,26 @@
         "Invita a tu primer consultante y mándale la frase exacta",
         "Cambia un texto de tu app con Claude: pídeselo en una línea y publica",
         "Sácale captura a lo que cambiaste"
-      ]
+      ],
+      "leccion": [
+        {
+          "libro": "lago",
+          "numero": 4,
+          "titulo": "Lo que buscas con las herramientas justas, aparece",
+          "freno": "Pedir ayuda",
+          "pausa": "escribirle-a-alguien",
+          "pausa_dicha": "Escribirle a alguien que te importa",
+          "logro": "Una ayuda pedida y aceptada esta semana."
+        }
+      ],
+      "pausa": {
+        "id": "escribirle-a-alguien",
+        "nombre": "Escribirle a alguien que te importa",
+        "marca": "●",
+        "base": "Holt-Lunstad y otros 2010; Harvard Study of Adult Development",
+        "dicha": "Escribirle a alguien que te importa"
+      },
+      "paso_afuera": null
     },
     {
       "dia": 41,
@@ -2833,7 +3384,10 @@
       ],
       "nota": null,
       "paso_esencial": null,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 42,
@@ -2860,7 +3414,10 @@
       ],
       "nota": null,
       "paso_esencial": null,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 43,
@@ -2907,7 +3464,10 @@
         "Mira tu costo por agenda de los catorce días",
         "La app habilita un solo botón según tu número",
         "Escribe la decisión y el número que la justifica"
-      ]
+      ],
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": "Responde con una pregunta."
     },
     {
       "dia": 44,
@@ -2953,7 +3513,10 @@
         "Uno por etapa, de tres a siete minutos",
         "Una sola toma por video",
         "Sin edición: se sube como salió"
-      ]
+      ],
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 45,
@@ -3001,7 +3564,26 @@
         "Abre tus números y mira de dónde vino cada consulta de esta semana",
         "Si alguien pagó y no te conocía, regístralo con su origen",
         "Contesta las conversaciones sin responder, y no toques la campaña"
-      ]
+      ],
+      "leccion": [
+        {
+          "libro": "lago",
+          "numero": 29,
+          "titulo": "Tu empresa de uno, en una página",
+          "freno": "«Fue suerte»",
+          "pausa": "gratitud",
+          "pausa_dicha": "Gratitud",
+          "logro": "Tu empresa de uno en una página, y lo que sentiste al ver ese cobro, contado a alguien."
+        }
+      ],
+      "pausa": {
+        "id": "gratitud",
+        "nombre": "Gratitud de tres líneas",
+        "marca": "●",
+        "base": "Emmons y McCullough 2003",
+        "dicha": "Gratitud"
+      },
+      "paso_afuera": null
     },
     {
       "dia": 46,
@@ -3057,7 +3639,10 @@
         "Diseña los cinco niveles, de la puerta de entrada al acompañamiento más completo",
         "Marca el tercero: es el único que vendes hoy",
         "Elige qué nivel ofreces primero después de tu programa"
-      ]
+      ],
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 47,
@@ -3104,7 +3689,26 @@
         "Escribe la cadena: conversaciones, agendas, llamadas, ventas",
         "Tradúcelo a lo que tiene que pasar cada semana",
         "Marca cuál de los tres cuellos tienes"
-      ]
+      ],
+      "leccion": [
+        {
+          "libro": "lago",
+          "numero": 8,
+          "titulo": "Diez de 1.000, en 90 días",
+          "freno": "El miedo a los números",
+          "pausa": "suspiro-ciclico",
+          "pausa_dicha": "Suspiro cíclico",
+          "logro": "Tus cuatro números cargados, sin un adjetivo."
+        }
+      ],
+      "pausa": {
+        "id": "suspiro-ciclico",
+        "nombre": "Suspiro cíclico",
+        "marca": "◐",
+        "base": "Balban y otros, Cell Reports Medicine 2023 (ensayo aleatorizado)",
+        "dicha": "Suspiro cíclico"
+      },
+      "paso_afuera": null
     },
     {
       "dia": 48,
@@ -3131,7 +3735,10 @@
       ],
       "nota": null,
       "paso_esencial": null,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 49,
@@ -3158,7 +3765,10 @@
       ],
       "nota": null,
       "paso_esencial": null,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 50,
@@ -3211,7 +3821,10 @@
         "Da las llamadas de la semana con tu W adelante",
         "Atiende a tus consultantes activos: marca quién está en su semana 2 y quién en la 7",
         "Carga tus cuatro números: conversaciones, agendas, llamadas y ventas"
-      ]
+      ],
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 51,
@@ -3250,7 +3863,10 @@
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 3,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": "Pide una devolución."
     },
     {
       "dia": 52,
@@ -3287,7 +3903,26 @@
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 3,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [
+        {
+          "libro": "lago",
+          "numero": 12,
+          "titulo": "Lo que entró de afuera se puede revisar",
+          "freno": "La crítica",
+          "pausa": "sonreir-al-espejo",
+          "pausa_dicha": "Sonreír al espejo",
+          "logro": "Tres devoluciones pedidas y agradecidas por escrito."
+        }
+      ],
+      "pausa": {
+        "id": "sonreir-al-espejo",
+        "nombre": "Sonreír al espejo un minuto",
+        "marca": "◐",
+        "base": "Many Smiles Collaboration 2022: 3.878 personas, 19 países; efecto chico",
+        "dicha": "Sonreír al espejo"
+      },
+      "paso_afuera": "Cambia una línea de tu perfil."
     },
     {
       "dia": 53,
@@ -3326,7 +3961,10 @@
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 3,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 54,
@@ -3363,7 +4001,10 @@
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 3,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 55,
@@ -3390,7 +4031,10 @@
       ],
       "nota": null,
       "paso_esencial": null,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 56,
@@ -3417,7 +4061,10 @@
       ],
       "nota": null,
       "paso_esencial": null,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 57,
@@ -3470,7 +4117,10 @@
         "Da las llamadas de la semana con tu W adelante",
         "Atiende a tus consultantes activos: marca quién está en su semana 2 y quién en la 7",
         "Carga tus cuatro números: conversaciones, agendas, llamadas y ventas"
-      ]
+      ],
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 58,
@@ -3509,7 +4159,26 @@
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 3,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [
+        {
+          "libro": "lago",
+          "numero": 23,
+          "titulo": "Saca a tu cuerpo de la alerta",
+          "freno": "Pedir más",
+          "pausa": "seis-por-minuto",
+          "pausa_dicha": "Seis por minuto",
+          "logro": "Tu conversación de renovación hecha con uno."
+        }
+      ],
+      "pausa": {
+        "id": "seis-por-minuto",
+        "nombre": "Seis por minuto",
+        "marca": "●",
+        "base": "Lehrer y Gevirtz 2014 (revisión); Marchant y otros 2025",
+        "dicha": "Seis por minuto"
+      },
+      "paso_afuera": null
     },
     {
       "dia": 59,
@@ -3546,7 +4215,26 @@
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 3,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [
+        {
+          "libro": "lago",
+          "numero": 19,
+          "titulo": "Lo que consumes te tiñe",
+          "freno": "Lo que entra sin filtro",
+          "pausa": "pies-en-la-tierra",
+          "pausa_dicha": "Pies en la tierra",
+          "logro": "Una semana sin lo que más te tiñe, y lo que entra en su lugar."
+        }
+      ],
+      "pausa": {
+        "id": "pies-en-la-tierra",
+        "nombre": "Pies descalzos en la tierra",
+        "marca": "○",
+        "base": "Evidencia débil: va como ritual de pausa, no como terapia",
+        "dicha": "Pies en la tierra"
+      },
+      "paso_afuera": "Graba una historia con tu cara y publícala."
     },
     {
       "dia": 60,
@@ -3583,7 +4271,26 @@
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 3,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [
+        {
+          "libro": "lago",
+          "numero": 24,
+          "titulo": "Descansar es parte del trabajo",
+          "freno": "La culpa de parar",
+          "pausa": "caminata-de-asombro",
+          "pausa_dicha": "Caminata de asombro",
+          "logro": "Tu medio día libre agendado y cuidado."
+        }
+      ],
+      "pausa": {
+        "id": "caminata-de-asombro",
+        "nombre": "Caminata de asombro",
+        "marca": "◐",
+        "base": "Sturm y otros 2020: 60 adultos mayores, 8 semanas",
+        "dicha": "Caminata de asombro"
+      },
+      "paso_afuera": "Escríbele a un ex consultante."
     },
     {
       "dia": 61,
@@ -3622,7 +4329,10 @@
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 3,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 62,
@@ -3649,7 +4359,10 @@
       ],
       "nota": null,
       "paso_esencial": null,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 63,
@@ -3676,7 +4389,10 @@
       ],
       "nota": null,
       "paso_esencial": null,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 64,
@@ -3729,7 +4445,10 @@
         "Da las llamadas de la semana con tu W adelante",
         "Atiende a tus consultantes activos: marca quién está en su semana 2 y quién en la 7",
         "Carga tus cuatro números: conversaciones, agendas, llamadas y ventas"
-      ]
+      ],
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 65,
@@ -3766,7 +4485,10 @@
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 3,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": "Responde con una pregunta."
     },
     {
       "dia": 66,
@@ -3808,7 +4530,26 @@
       "checklist": [
         "Escribe tu día completo con el ingreso siguiente, en detalle físico",
         "En presente, no en condicional"
-      ]
+      ],
+      "leccion": [
+        {
+          "libro": "lago",
+          "numero": 14,
+          "titulo": "El tamaño de tu vaso",
+          "freno": "El vaso chico",
+          "pausa": "gastar-en-otro",
+          "pausa_dicha": "Gastar en otro",
+          "logro": "Tu vaso más grande, dibujado en una página."
+        }
+      ],
+      "pausa": {
+        "id": "gastar-en-otro",
+        "nombre": "Gastar en otro",
+        "marca": "◐",
+        "base": "Dunn, Aknin y Norton, Science 2008",
+        "dicha": "Gastar en otro"
+      },
+      "paso_afuera": "Pide una devolución."
     },
     {
       "dia": 67,
@@ -3847,7 +4588,10 @@
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 3,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 68,
@@ -3886,7 +4630,10 @@
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 3,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 69,
@@ -3913,7 +4660,10 @@
       ],
       "nota": null,
       "paso_esencial": null,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 70,
@@ -3940,7 +4690,10 @@
       ],
       "nota": null,
       "paso_esencial": null,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 71,
@@ -3993,7 +4746,10 @@
         "Da las llamadas de la semana con tu W adelante",
         "Atiende a tus consultantes activos: marca quién está en su semana 2 y quién en la 7",
         "Carga tus cuatro números: conversaciones, agendas, llamadas y ventas"
-      ]
+      ],
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 72,
@@ -4030,7 +4786,10 @@
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 3,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 73,
@@ -4069,7 +4828,10 @@
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 3,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": "Cambia una línea de tu perfil."
     },
     {
       "dia": 74,
@@ -4108,7 +4870,26 @@
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 3,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [
+        {
+          "libro": "lago",
+          "numero": 3,
+          "titulo": "Tu hora y tu búnker",
+          "freno": "Compararte",
+          "pausa": "seis-por-minuto",
+          "pausa_dicha": "Seis por minuto",
+          "logro": "Tu hora real de hoy al lado de la del día 1, y tu búnker armado."
+        }
+      ],
+      "pausa": {
+        "id": "seis-por-minuto",
+        "nombre": "Seis por minuto",
+        "marca": "●",
+        "base": "Lehrer y Gevirtz 2014 (revisión); Marchant y otros 2025",
+        "dicha": "Seis por minuto"
+      },
+      "paso_afuera": "Graba una historia con tu cara y publícala."
     },
     {
       "dia": 75,
@@ -4135,7 +4916,10 @@
       ],
       "nota": null,
       "paso_esencial": null,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 76,
@@ -4162,7 +4946,10 @@
       ],
       "nota": null,
       "paso_esencial": null,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 77,
@@ -4189,7 +4976,10 @@
       ],
       "nota": null,
       "paso_esencial": null,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 78,
@@ -4242,7 +5032,10 @@
         "Da las llamadas de la semana con tu W adelante",
         "Atiende a tus consultantes activos: marca quién está en su semana 2 y quién en la 7",
         "Carga tus cuatro números: conversaciones, agendas, llamadas y ventas"
-      ]
+      ],
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 79,
@@ -4281,7 +5074,10 @@
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 3,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 80,
@@ -4321,7 +5117,10 @@
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 4,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 81,
@@ -4348,7 +5147,10 @@
       ],
       "nota": null,
       "paso_esencial": null,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 82,
@@ -4388,7 +5190,10 @@
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 4,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": "Escríbele a un ex consultante."
     },
     {
       "dia": 83,
@@ -4415,7 +5220,10 @@
       ],
       "nota": null,
       "paso_esencial": null,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 84,
@@ -4442,7 +5250,10 @@
       ],
       "nota": null,
       "paso_esencial": null,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 85,
@@ -4487,7 +5298,10 @@
       "checklist": [
         "Saca tus tres enfoques de la Matriz ABC",
         "Para cada enfoque, escribe a quién filtra y a quién atrae"
-      ]
+      ],
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": "Responde con una pregunta."
     },
     {
       "dia": 86,
@@ -4538,7 +5352,10 @@
         "Para cada semana, el gancho y el ángulo",
         "Marca cuáles son de filtro y cuáles de autoridad",
         "No grabes nada todavía"
-      ]
+      ],
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": null
     },
     {
       "dia": 87,
@@ -4584,7 +5401,10 @@
         "Contesta las mismas preguntas del día 3",
         "Recalcula tu hora real neta con los datos de Mi Clínica",
         "Recién ahí la app destapa el número del día 3"
-      ]
+      ],
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": "Pide una devolución."
     },
     {
       "dia": 88,
@@ -4628,7 +5448,10 @@
         "La app arma el borrador de tu plan de 180",
         "Edítalo, apruébalo y descárgalo",
         "Te lo llevas lo tomes o no lo tomes"
-      ]
+      ],
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": "Cambia una línea de tu perfil."
     },
     {
       "dia": 89,
@@ -4670,7 +5493,10 @@
       "checklist": [
         "Mira cuántas ventas tienes y cuántas te faltan",
         "Escribe qué puedes cerrar esta semana con lo que ya está en la bandeja"
-      ]
+      ],
+      "leccion": [],
+      "pausa": null,
+      "paso_afuera": "Graba una historia con tu cara y publícala."
     },
     {
       "dia": 90,
@@ -4705,7 +5531,26 @@
       "acciones_campo": [],
       "nota": null,
       "paso_esencial": 1,
-      "avanza_sin_evidencia": false
+      "avanza_sin_evidencia": false,
+      "leccion": [
+        {
+          "libro": "lago",
+          "numero": 33,
+          "titulo": "Tu calma llega más lejos",
+          "freno": "Terminar sin celebrar",
+          "pausa": "bailar-tu-cancion",
+          "pausa_dicha": "Bailar tu canción",
+          "logro": "Tres cartas de gracias enviadas a quienes te sostuvieron."
+        }
+      ],
+      "pausa": {
+        "id": "bailar-tu-cancion",
+        "nombre": "Bailar tu canción",
+        "marca": "◐",
+        "base": "Noetel y otros, BMJ 2024; Salimpoor y otros 2011",
+        "dicha": "Bailar tu canción"
+      },
+      "paso_afuera": "Escríbele a un ex consultante."
     }
   ]
 }

@@ -47,6 +47,24 @@ interface Props {
   seAbre?: string;
   /** Lo que ya contestó en el onboarding para esta jornada. */
   base?: { etiqueta: string; valor: string } | null;
+  /**
+   * LOS TRES HILOS DE ESTE DÍA · adentro, afuera y sistema.
+   *
+   * El tercero —el sistema— ya estaba: son los `pasos`. Lo que faltaba era
+   * lo de adentro (la lección del libro y la pausa de 5) y lo de afuera (el
+   * paso afuera, diez minutos, opcional y solo los días en que la app no
+   * pide nada visible). Llegan ya traducidos por el vocabulario: esta
+   * pantalla muestra, no deduce.
+   *
+   * Nada de esto se anuncia cuando no está: la lección de Montaña, Viento,
+   * Río y Bosque todavía no la pasó LIBROS, así que en la mayoría de los
+   * días el bloque no existe.
+   */
+  hilos?: {
+    lecciones: { clave: string; texto: string; logro: string }[];
+    pausa: { texto: string; marca: string } | null;
+    pasoAfuera: string | null;
+  } | null;
   tiempoEstimado?: string | null;
   isCompleted: boolean;
   userId?: string;
@@ -67,7 +85,7 @@ const ROTULO: Record<PantallaSesion, string> = {
 
 export default function SesionViva({
   metaKey, metaCodigo, metaTitulo, teLlevas, pasos, pide, seAbre, base,
-  tiempoEstimado, isCompleted, userId, children, video, evidencia, onIr,
+  tiempoEstimado, isCompleted, userId, children, video, evidencia, onIr, hilos,
 }: Props) {
   const orden = useMemo<PantallaSesion[]>(
     () => ['llevas', ...(video ? (['mira'] as PantallaSesion[]) : []), 'haz', 'sube', 'listo'],
@@ -152,6 +170,62 @@ export default function SesionViva({
             <p className="mt-3 text-[17px] leading-relaxed text-cream/75">
               {base.etiqueta}: <span className="text-cream font-semibold">{base.valor}</span>. Hoy lo trabajamos desde ahí.
             </p>
+          )}
+          {/*
+            ─── LOS DOS HILOS QUE NO ESTABAN ───────────────────────────────
+
+            El día mostraba el título, lo que se lleva, los minutos y los
+            pasos: los tres el hilo del SISTEMA. Lo de adentro —la lección y
+            la pausa— y lo de afuera no tenían dónde aparecer.
+
+            Van acá, en la primera pantalla, porque es donde el día se abre:
+            el cliente lee qué se lleva y con qué se acompaña ANTES de
+            empezar, no al final. Cada hilo, una línea; el logro de la
+            lección en la línea de abajo, más suave, porque es lo que la
+            lección le deja, no la orden de hoy.
+          */}
+          {hilos && (hilos.lecciones.length > 0 || hilos.pausa || hilos.pasoAfuera) && (
+            <div className="mt-5 space-y-4">
+              {hilos.lecciones.length > 0 && (
+                <div>
+                  <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-goldhi">
+                    Tu lección
+                  </p>
+                  {hilos.lecciones.map((l) => (
+                    <div key={l.clave} className="mt-1">
+                      <p className="text-[17px] leading-snug text-cream">{l.texto}</p>
+                      <p className="text-[15px] leading-snug text-cream/70">{l.logro}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {hilos.pausa && (
+                <div>
+                  <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-goldhi">
+                    Tu pausa de 5
+                  </p>
+                  {/*
+                    La marca va PEGADA al nombre, nunca el nombre solo: es la
+                    regla de los libros —● sólido, ◐ prometedor, ○ juego o
+                    tradición— y lo que no tiene marca no es un dato.
+                  */}
+                  <p className="mt-1 text-[17px] leading-snug text-cream">
+                    {hilos.pausa.texto} {hilos.pausa.marca}
+                  </p>
+                </div>
+              )}
+              {hilos.pasoAfuera && (
+                <div>
+                  <p className="text-[15px] font-bold uppercase tracking-[0.16em] text-goldhi">
+                    Tu paso afuera · 10 min
+                  </p>
+                  <p className="mt-1 text-[17px] leading-snug text-cream">{hilos.pasoAfuera}</p>
+                  <p className="text-[15px] leading-snug text-cream/70">
+                    Es opcional y no traba tu día.
+                  </p>
+                </div>
+              )}
+            </div>
           )}
           <div className="mt-4 flex flex-wrap gap-2">
             {tiempoEstimado && (

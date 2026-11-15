@@ -336,8 +336,99 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 | **15 nov, 03:25** · `eb59091` + `0c49ffb` (MCD) | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`480fb2b` en TCD, `a76e8e7` en MCD)—, `node_modules` en cero en los dos y el `HEAD` suelto en TCD. Con el frente de la auditoría de la auditoría dado por **cerrado de los dos lados**, esta despertada preguntó lo único que ese frente nunca había preguntado: **¿y el comentario de los otros lenguajes?** Todo lo cerrado entre el 13 y el 14 cuidaba el `//` de TypeScript, y la batería lee además `.sql`, `.py` y `.sh`. **Con la guarda de la carpeta del dueño comentada con `--`, la lente que dice medirla dio VERDE y ninguna otra la vio.** Y al endurecer la lente aparecieron **33 fugas vivas en main** que ninguna de las cuatro formas podía ver: la comilla de adentro. En MCD, lo mismo con `#`: `.env.local` comentado del `.gitignore` y las 57 en verde (abajo) |
 | **15 nov, 06:30** · `f8fb28b` + `d7b905a` (MCD) | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`6e77528` en TCD, `0c49ffb` en MCD), los dos repos en `origin/main`—, `node_modules` en cero en los dos. El frente de los comentarios estaba cerrado en los cuatro idiomas, así que esta despertada preguntó por **la puerta**, no por la marca: `index.html` y `src/index.css` se leían con `open(...).read()`, por donde no pasa `_MARCAS`, no se llama `solo_codigo` y el bloque 16 no mira. **Tres lentes vivían de ese lado, y a dos de las tres no las vio nadie** (abajo, en «El 15 de noviembre a las 06:30»). Y al probar las fugas puestas salió el décimo agujero: el arreglo de la comilla de adentro había entrado en UNA de las cuatro formas, con **14 fugas vivas más** detrás |
 | **15 nov, 11:30** · `a91274d` | la cola vieja seguía con sus 17 filas cerradas, pero el plan de la piel —los siete turnos que Javo pidió el 15— tenía su T1 cerrado (`f6f2ea8`) y el T2 abierto, así que se tomó ése. **La premisa se cayó por los dos lados**: las «206 reglas» eran 206 apariciones del prefijo y 15 de las 76 con clase estaban muertas; y la capa oscura no era herencia dormida sino **un interruptor en el Admin**, a un clic de volver. Por el camino salieron diez usos del naranja prohibido escritos en `rgba()` dentro del `.css` —que la lente de «en todo el repo» no podía ver—, un `hover` casi negro que el medidor no mira porque mide la pantalla quieta, y dos paletas más debajo (abajo, en «El 15 de noviembre a las 11:30») |
+| **15 nov, 16:30** | la cola vieja seguía con sus 17 filas cerradas y el plan de la piel tenía su T1 y su T2 cerrados, así que se tomó el **T3: los tres hilos del día**. **La premisa se cayó tres veces**: el seed no se escribe a mano —lo escribe `generar_seed.py`, y la batería ya lo medía—; los «28 días en que la app no pide nada visible» no salen del dato (59 jornadas no piden acciones de campo, así que los 28 son criterio de LIBROS); y la tercera es el hallazgo: **la lección escrita ya existía en el código y su pantalla no podía dibujarla nunca** —la `esencia` de 37 guiones, bajo el rótulo «La lección de hoy», en una rama que solo corre sin video dentro de un componente que solo se monta con video— (abajo, en «El 15 de noviembre a las 16:30») |
 | **15 nov, 07:25** · `65f7ac2` | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`edd97d2` en TCD, `d7b905a` en MCD), los dos repos en `origin/main`—, `node_modules` en cero y la `main` local de los dos atrás con el `HEAD` suelto. Las cuatro despertadas anteriores auditaron la batería de TCD contra sí misma; esta preguntó por **el otro cuerpo de afirmaciones que la batería ni mira: las 133 `prueba-*.ts`**, que el bloque 10 juzga SOLO por el código de salida. **Una de las 133 no tenía ninguno**: `prueba-cadena.ts` imprimía `✗` por escenario y terminaba en 0. Probado con el defecto puesto: cinco de sus seis escenarios decían «La cadena está sana» a un cliente que no cobra, y la batería daba las 133 en verde y «el ZIP puede salir» (abajo) |
 | **14 nov, 19:30** · `d5ead99` | la cola seguía igual —las 17 filas cerradas, cero commits de Javo (`dc8dc42` en TCD, `a76e8e7` en MCD)—, `node_modules` en cero en los dos y la trampa del `HEAD` suelto con la **`main` local de TCD 31 commits atrás** (un `git checkout main` a secas la hubiera dejado ahí: se arregló antes de medir). Esta despertada tomó el último candidato de este frente —**el recorrido por AST de la ausencia**— y la premisa se cayó otra vez: de las 46 ausencias de mecanismo que hay de verdad, **tres seguían en un recolector**, y las dos lentes que las usan estaban **ciegas hoy**, probado sacando el mecanismo del código. Y de paso, la lente del catch mudo conocía **una sola manera de escribir «mudo»**: las dos que están mudas de verdad en main se escriben distinto y nunca se vieron (abajo) |
+
+### El 15 de noviembre a las 16:30: la lección ya estaba escrita, y su pantalla no podía dibujarla
+
+Turno **T3 de los siete** del plan de la piel. El plan lo escribía como tres
+campos nuevos en el JSON. **Medido antes de tocar, la premisa se cayó tres
+veces, y la tercera es la que importa.**
+
+**Uno · el seed no se escribe a mano.** `roadmap.seed.json` lo produce
+`tcd-spec/datos/generar_seed.py` —lo dice el encabezado de `roadmapSeed.ts`, y
+la batería ya tenía la lente: «el seed de la app es exactamente el que genera
+hoy generar_seed.py»—. Editar el JSON, que es lo que el plan pedía, habría
+puesto la batería roja en la corrida siguiente. Las tablas entraron en
+`tcd-spec/datos/tres_hilos.py`, el generador las cuelga, y las dos copias del
+JSON (la de la app y la del spec) se regeneran.
+
+**Dos · los 28 días «en que la app no pide nada visible» no salen del dato.**
+Medido: **59** de las 91 jornadas no piden ninguna acción de campo, así que los
+28 son un criterio de LIBROS y no una cuenta. Lo que sí se midió —y ahora es la
+lente— es que **ninguno de los 28 pisa un día de campo**: los 28 de 28 están
+limpios. Y queda una contradicción para LIBROS, chica y sin tocar: **dos de los
+28 ya piden escribirle a alguien hoy** —el día 32 («A quien termina, escríbele
+cuándo cierra su proceso») y el día 51 («Escríbele hoy a cada uno que no
+pagó»)—, así que en esos dos el paso afuera se suma a algo que ya expone.
+
+**Tres, y es el hallazgo: la lección escrita ya existía, y nadie podía
+leerla.** `guionesVideos.ts` trae la `esencia` de 37 guiones —la versión corta
+de la lección— y `TaskVideo.tsx` la dibuja bajo el rótulo «La lección de hoy».
+Nunca se vio en el Camino. Su rama corre **solo cuando NO hay video**, y
+`Roadmap.tsx` monta `TaskVideo` **solo cuando SÍ lo hay**
+(`meta.video_youtube_id && !…startsWith('PLACEHOLDER')`), y ningún enlace de
+`VIDEOS_POR_JORNADA` es un marcador. O sea: rama muerta desde el día que se
+escribió. Lo único que lee esa esencia hoy es el Mentor, por `coachPrompt.ts`.
+Son **11 los días** en que el cliente habría leído ahí su lección si la rama
+estuviera viva. Por eso la lección del libro entró por el seed y no colgada de
+ahí: el camino que parecía existir no llegaba a la pantalla.
+
+**Lo que se hizo:**
+
+- **`tcd-spec/datos/tres_hilos.py`**, con las tres tablas de LIBROS y su
+  fuente anotada: el repertorio de **14 pausas** con su marca (● sólido · ◐
+  prometedor · ○ juego o tradición) y su base, las **33 lecciones del Lago**
+  con su día, su freno, su pausa y su logro, y los cinco pasos afuera. El
+  generador las cuelga de su día y **se cae a propósito** —con el nombre de lo
+  que falta— si una lección cae en un día que no existe, si dos comparten
+  número, si una pausa no está en el repertorio o si un paso afuera pisa un día
+  de campo;
+- **tres campos nuevos por jornada**, puramente aditivos: ninguno de los 23
+  campos viejos cambió un solo valor, verificado campo por campo contra el seed
+  de `HEAD`. **33 lecciones en 27 días**, 27 pausas y **28 pasos afuera**; los
+  otros 63 días vienen vacíos y la pantalla no anuncia lo que falta;
+- **la pantalla del día los dibuja**, en su primera pantalla («Te llevas»),
+  antes de empezar: tu lección —con su libro y su número, porque el número lo
+  nombran 19 videos del rodaje— y el logro de cada una debajo; tu pausa de 5
+  **con su marca pegada**, nunca el nombre solo; y tu paso afuera con sus diez
+  minutos y su «es opcional y no traba tu día». Los dos montajes de
+  `SesionViva` —el de video y el de entrenador— reciben los hilos;
+- **el reparto de los cinco pasos afuera es una rotación por día**, no una
+  tabla: cuando LIBROS pase el paso de cada día se reemplaza esa lista y nada
+  más cambia.
+
+**Cinco lentes nuevas, las cinco probadas contra su propio fallo** en
+`scripts/probar-los-tres-hilos.py` (19 casos, los 19 en verde; el veredicto se
+saca de `auditoria.py` entre las marcas `#.HILOS.*`, no se copia): los tres
+campos en las 91 jornadas, las 33 del Lago sin repetir número ni quedarse sin
+título, ninguna pausa fuera del repertorio, el paso afuera solo donde la app no
+pide nada visible, y —la que importa— **que la pantalla los muestre**: los dos
+montajes pasándolos y los tres rótulos dibujados. Esa última se probó con el
+defecto que este repo ya tuvo cuatro veces: **el rótulo escondido dentro de un
+comentario**, que deja la palabra en el archivo y no dibuja nada. Se pone roja.
+Y `scripts/prueba-los-tres-hilos.ts` mide el tramo del medio —que los hilos
+lleguen a `RoadmapMeta`, que es lo único que la pantalla recibe—, probada roja
+sacándole una de las 33.
+
+**Una palabra se escribe distinto a propósito.** El paso afuera dice «Graba una
+historia con tu cara y **publícala**» y no «Publica una historia»: el medidor de
+pantallas marca `publica` como palabra sin su tilde —su regla no distingue el
+verbo en imperativo de «pública», el adjetivo— y lo cazó con una falta en
+`roadmap>jornada`. Queda anotado en `tres_hilos.py` para que nadie lo
+«arregle» de vuelta.
+
+**Lo que NO se tocó, y es tuyo:** las tablas de Montaña, Viento, Río y Bosque
+(64 días sin lección hasta que LIBROS las pase), el paso afuera de cada día,
+qué hacer con los días 32 y 51, y la rama muerta de `TaskVideo` —si algún día
+revive, dos cosas distintas se van a llamar «lección» en la misma pantalla—.
+
+**Medido en pantalla y en verde antes de subir:** la jornada del día 4 abierta
+en un teléfono de 390 px muestra sus dos lecciones del lago, su pausa con la
+marca y su paso afuera; el medidor da **0 faltas** en las vistas del Camino.
+`tsc` y `npm run build` limpios, las **134** pruebas de escenario en verde y
+`auditoria.py` con **905 miradas, cero faltas** («el ZIP puede salir»).
 
 ### El 15 de noviembre a las 11:30: la piel pintada ya era la buena; debajo seguía la otra
 
@@ -3079,6 +3170,15 @@ nueva y se reapuntan las lentes de `medir-app.py` —el contraste se mide contra
 el fondo nuevo— porque si no, el medidor sigue aprobando la piel vieja.
 Capturas de todas las pantallas del cliente.
 
+**T3 · Los tres hilos del día.** — **CERRADO el 15 de noviembre** (abajo, en
+«El 15 de noviembre a las 16:30»). Los tres campos entraron, pero no donde el
+plan decía: el seed no se escribe a mano, lo escribe
+`tcd-spec/datos/generar_seed.py`, y la batería ya medía que los dos sean el
+mismo. Y la premisa de que el día no mostraba «nada de lo de adentro» era
+cierta por otra razón: la lección escrita YA existía en el código y su
+pantalla no podía dibujarla nunca.
+
+El plan decía:
 **T3 · Los tres hilos del día.** Campos nuevos en `roadmap.seed.json` —
 `leccion`, `pausa`, `paso_afuera`— sin tocar días, nombres ni pasos. El día
 pasa a mostrar: tu lección · tu pausa de 5 · tu paso afuera · lo que pide la

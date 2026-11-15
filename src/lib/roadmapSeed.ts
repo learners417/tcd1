@@ -113,6 +113,64 @@ export interface Evidencia {
   pide: string
 }
 
+/**
+ * LA PAUSA DE 5 · una práctica de cinco minutos con su nivel de evidencia.
+ *
+ * La marca es la del libro y no es decoración: ● sólido (metaanálisis o
+ * ensayos grandes), ◐ prometedor (estudios chicos o uno solo), ○ juego o
+ * tradición. Lo que no tiene marca no es un dato, así que la app muestra la
+ * marca junto al nombre y nunca el nombre solo.
+ */
+export interface Pausa {
+  id: string
+  nombre: string
+  marca: '●' | '◐' | '○'
+  base: string
+}
+
+/**
+ * LA LECCIÓN DEL DÍA · el hilo de adentro.
+ *
+ * Es la lección del libro de la estación que se lee ese día. El número y el
+ * título no cambian nunca —19 videos del rodaje los nombran y muestran el
+ * libro abierto en esa página—: lo único que cambia es el día en que cae.
+ * Un día puede traer dos: la semana 1 lee dos por día, y los sábados 6 y 13
+ * también.
+ */
+export interface LeccionDelDia {
+  /** El libro de la estación: hoy solo el lago; las otras cuatro llegan. */
+  libro: string
+  numero: number
+  titulo: string
+  /** El freno que esa lección trabaja. */
+  freno: string
+  /** Id de la pausa en el repertorio, o null si esa lección no trae. */
+  pausa: string | null
+  /** La pausa como la dice esa lección («Seis por minuto, antes de escribirlo»). */
+  pausa_dicha: string | null
+  logro: string
+}
+
+/**
+ * El libro de cada estación, como lo nombran los libros y la home.
+ *
+ * Hoy el seed solo trae lecciones del lago: las otras cuatro tablas las pasa
+ * LIBROS cuando cierre cada libro. Si llega un id que no está acá, la
+ * pantalla muestra el id tal cual en vez de quedarse muda.
+ */
+export const NOMBRE_DEL_LIBRO: Record<string, string> = {
+  lago: 'El lago',
+  montana: 'La montaña',
+  viento: 'El viento',
+  rio: 'El río',
+  bosque: 'El bosque',
+}
+
+/** La pausa de un día: la del repertorio, más cómo la dice su lección. */
+export interface PausaDelDia extends Pausa {
+  dicha: string
+}
+
 export interface Jornada {
   dia: number
   tipo: TipoJornada
@@ -144,6 +202,12 @@ export interface Jornada {
   veredicto?: string | null
   /** Modo 15 minutos: qué paso produce la evidencia. Base 1. */
   paso_esencial: number | null
+  /** Adentro · la lección del libro de ese día. Vacío mientras LIBROS no la pase. */
+  leccion: LeccionDelDia[]
+  /** Adentro · la pausa de 5 de ese día, con su marca. */
+  pausa: PausaDelDia | null
+  /** Afuera · la micro-tarea opcional de 10 min, solo los días sin nada visible. */
+  paso_afuera: string | null
 }
 
 export interface Roadmap {
@@ -157,6 +221,8 @@ export interface Roadmap {
   cinturones: Cinturon[]
   agentes: Agente[]
   frenos: Freno[]
+  /** El repertorio de pausas, una sola vez. */
+  pausas: Pausa[]
   jornadas: Jornada[]
 }
 
@@ -306,6 +372,10 @@ export interface RoadmapMeta {
   video_youtube_id: string | null
   /** Sin origen en el seed. Queda vacío hasta que el generador lo produzca. */
   requiere_datos_de: string[]
+  /** Los dos hilos de adentro y el de afuera. El del sistema son los `pasos`. */
+  leccion: LeccionDelDia[]
+  pausa: PausaDelDia | null
+  paso_afuera: string | null
 }
 
 export interface RoadmapPilar {
@@ -399,6 +469,11 @@ const comoMeta = (
   coach_instruccion: j.manual ?? '',
   video_youtube_id: null,
   requiere_datos_de: [],
+  // Los tres hilos viajan con la jornada hasta la pantalla: el día los
+  // muestra, no los deduce.
+  leccion: j.leccion ?? [],
+  pausa: j.pausa ?? null,
+  paso_afuera: j.paso_afuera ?? null,
 })
 
 /** El camino agrupado por pilar. Fuente única: el mismo JSON. */

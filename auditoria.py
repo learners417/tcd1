@@ -186,6 +186,64 @@ m = re.search(r"export type MetaCodigo\s*=([\s\S]{0,5000}?);", cod(sup))
 falt = set(cods) - set(re.findall(r"'(P[\w\.]+)'", m.group(1)))
 check('MetaCodigo completo', not falt, str(sorted(falt)))
 
+# ── LOS TRES HILOS DE CADA DÍA ──────────────────────────────────────────
+#
+# El día mostraba el título, lo que se lleva, los minutos y los pasos: los
+# cuatro son el hilo del SISTEMA. Los otros dos —adentro (la lección del
+# libro y la pausa de 5) y afuera (el paso afuera)— entraron el 15 de
+# noviembre, y lo que estas cinco lentes cuidan es que no se queden a mitad
+# de camino: que estén en el dato, que la pausa salga del repertorio, que el
+# paso afuera no caiga en un día que ya pide salir al mundo y —la que
+# importa, porque es la forma en que esto se rompe acá— que la PANTALLA los
+# muestre. Un dato que nadie dibuja es lo mismo que no tenerlo: la lección
+# escrita de los 37 guiones vivía en el código desde antes y la pantalla del
+# día no la mostró nunca.
+import json as _jh
+#.HILOS.DATO.INICIO
+_sd = _jh.loads(rd('src/lib/roadmap.seed.json'))
+_js = _sd['jornadas']
+_sin = [j['dia'] for j in _js
+        if 'leccion' not in j or 'pausa' not in j or 'paso_afuera' not in j]
+check('los tres hilos están en las 91 jornadas del seed', not _sin,
+      f'{len(_sin)} jornada(s) sin los campos: {_sin[:6]}')
+
+_lec = [l for j in _js for l in j.get('leccion') or []]
+_lago = sorted(l['numero'] for l in _lec if l['libro'] == 'lago')
+check('las 33 lecciones del lago están, numeradas del 1 al 33 y sin repetirse',
+      _lago == list(range(1, 34)) and all(l['titulo'] for l in _lec),
+      f'{len(_lago)} lecciones: {_lago}')
+
+_rep = {p['id'] for p in _sd.get('pausas') or []}
+_fuera = sorted({l['pausa'] for l in _lec if l['pausa'] and l['pausa'] not in _rep}
+                | {j['pausa']['id'] for j in _js
+                   if j.get('pausa') and j['pausa']['id'] not in _rep})
+check('ninguna pausa del día está fuera del repertorio', not _fuera and bool(_rep),
+      f'{len(_rep)} en el repertorio; fuera: {_fuera}')
+
+_pa = [j['dia'] for j in _js if j.get('paso_afuera')]
+_pisa = [j['dia'] for j in _js if j.get('paso_afuera') and j['acciones_campo']]
+check('el paso afuera va solo los días en que la app no pide nada visible',
+      len(_pa) == 28 and not _pisa,
+      f'{len(_pa)} días con paso afuera; pisan un día de campo: {_pisa}')
+#.HILOS.DATO.FIN
+
+#.HILOS.PANTALLA.INICIO
+# La pantalla del día es una sola —`SesionViva`— y se monta dos veces en
+# `Roadmap.tsx`: la jornada de video y la de entrenador. Las dos tienen que
+# pasarle los hilos, y la pantalla tiene que dibujar los tres rótulos. Se
+# mide sobre el código sin comentarios: un rótulo dentro de un comentario no
+# dibuja nada.
+_rm = rdc('src/pages/Roadmap.tsx')
+_sv = rdc('src/components/sesion/SesionViva.tsx')
+_montajes = _rm.count('<SesionViva')
+_pasados = _rm.count('hilos={hilosDeHoy(meta)}')
+_rotulos = [r for r in ('Tu lección', 'Tu pausa de 5', 'Tu paso afuera') if r not in _sv]
+check('la pantalla del día muestra los tres hilos, en los dos montajes',
+      _montajes > 0 and _pasados == _montajes and not _rotulos
+      and 'hilos.lecciones' in _sv and 'hilos.pausa' in _sv and 'hilos.pasoAfuera' in _sv,
+      f'{_pasados} de {_montajes} montajes reciben los hilos; rótulos que faltan: {_rotulos}')
+#.HILOS.PANTALLA.FIN
+
 print('══ 3) HERRAMIENTAS ══')
 # El catálogo salió del código el 1 de nov: ninguna jornada apuntaba a una
 # herramienta. Antes acá se comparaba lo usado contra `herramientas.ts`, que ya
@@ -5553,6 +5611,19 @@ check('la prueba que no puede ponerse roja: verde ayer, roja hoy (probado ejecut
 # `@theme`, el naranja prohibido escrito en rgba() dentro del `.css` —que es
 # como estaba de verdad— y una clase con el color adentro. Los cuatro
 # veredictos se SACAN de esta batería, entre las marcas `#.PIEL.*`.
+# Y las cinco lentes de los tres hilos, probadas contra su propio defecto:
+# una jornada sin los campos, una de las 33 del lago caída, dos con el mismo
+# número, una pausa que no está en el repertorio, un paso afuera en un día
+# que ya pide salir al mundo, y la pantalla sin pasar los hilos o con el
+# rótulo escondido dentro de un comentario. Van también las tres guardas del
+# generador, que se caen con la tabla mal en vez de escribir un seed mudo.
+# Los veredictos se SACAN de esta batería, entre las marcas `#.HILOS.*`.
+_philos = subprocess.run([sys.executable, 'scripts/probar-los-tres-hilos.py'],
+                         capture_output=True, text=True)
+check('los tres hilos del día, y sus cinco lentes sabiendo ponerse rojas (probado ejecutando)',
+      _philos.returncode == 0,
+      (_philos.stdout + _philos.stderr).strip().split('\n')[-1][:170])
+
 _ppiel = subprocess.run([sys.executable, 'scripts/probar-que-la-piel-es-una-sola.py'],
                         capture_output=True, text=True)
 check('la piel es una sola, y sus cuatro lentes saben ponerse rojas (probado ejecutando)',
