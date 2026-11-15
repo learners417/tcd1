@@ -427,31 +427,32 @@ const LENTES: Lente[] = [
 
   /* ── 7 · EL PAGO SELLA LA FECHA DEL ESCALÓN, NO SOLO EL ESCALÓN ──
    *
-   * `topeDelEscalon` apaga el tope entero cuando no hay fecha —a propósito,
-   * para no cerrarle los días 13 al 90 a los clientes de hoy, que están en
-   * 'base' sólo porque nadie los marcó—. El webhook escribía
-   * `servicio_contratado` y no `servicio_marcado_el`, así que el de La Base
-   * abría los 90 días y la puerta de su primera etapa no aparecía nunca.
+   * El webhook escribía `servicio_contratado` y no `servicio_marcado_el`, y
+   * sin esa fecha el escalón queda a medio registrar.
+   *
+   * 15 nov 2026: lo que la fecha enciende ya no es un tope del Camino —los
+   * tres escalones abren los 90 días— sino las ENTREGAS del equipo. Sin ella,
+   * el que paga La Instalación, el ticket más caro, no le genera al equipo
+   * ni una tarea. La prueba pasa a medir eso, que es lo que sigue vivo.
    */
   {
-    nombre: 'el pago sella la fecha del escalón, que es lo que enciende el tope',
+    nombre: 'el pago sella la fecha del escalón, que es lo que dispara las entregas',
     mira: async () => {
       desdeCero();
       await cobraLaEntrada(EMAIL);
       await cobra(EMAIL, 'base');
       const f = fichaDe(EMAIL);
       return Boolean(f.servicio_marcado_el)
-        && entraEnElEscalon(ULTIMO_DIA_DE_BASE, 2, f.servicio_contratado, f.servicio_marcado_el)
-        && !entraEnElEscalon(ULTIMO_DIA_DE_BASE + 1, 3, f.servicio_contratado, f.servicio_marcado_el)
-        && puertaDelEscalon(f.servicio_contratado, f.servicio_marcado_el) !== null;
+        && servicioDe(f.servicio_contratado) === 'base'
+        && entraEnElEscalon(90, 5, f.servicio_contratado, f.servicio_marcado_el);
     },
+    // El defecto: el webhook que escribía el escalón y se olvidaba la fecha.
     conSuFallo: async () => {
       desdeCero();
       await cobraLaEntrada(EMAIL);
       webhookComoEstaba(EMAIL, 'amarillo', 'base');
       const f = fichaDe(EMAIL);
-      return Boolean(f.servicio_marcado_el)
-        && !entraEnElEscalon(ULTIMO_DIA_DE_BASE + 1, 3, f.servicio_contratado, f.servicio_marcado_el);
+      return Boolean(f.servicio_marcado_el);
     },
   },
 
@@ -536,14 +537,13 @@ const LENTES: Lente[] = [
 
   /* ── 11 · Y un cobro que no le abre nada tampoco le cierra nada ──
    *
-   * Sellar `servicio_marcado_el` ENCIENDE el tope del escalón. Al cliente de
-   * siempre —'completo'— le entra un cobro de La Base por un order bump mal
-   * apuntado: su acceso no se mueve, pero si se le sellara el escalón 'base'
-   * el Camino se le cortaría en el día 12 y perdería los días 13 al 90 que ya
-   * tenía.
+   * Al cliente de siempre —'completo'— le entra un cobro de La Base por un
+   * order bump mal apuntado. Su acceso no se mueve, y tampoco se le sella un
+   * escalón que no compró: la fecha es la que le dispararía al equipo tres
+   * entregas de un servicio que nadie pagó.
    */
   {
-    nombre: 'un cobro que no le mueve el acceso no le enciende el tope',
+    nombre: 'un cobro que no le mueve el acceso no le sella el escalón',
     mira: async () => {
       desdeCero();
       base.usuarios.push({ id: 'uuid-de-siempre', email: EMAIL });
@@ -555,18 +555,17 @@ const LENTES: Lente[] = [
       const f = fichaDe(EMAIL);
       return f.plan_comercial === 'completo'
         && !f.servicio_marcado_el
-        && entraEnElEscalon(90, 5, f.servicio_contratado, f.servicio_marcado_el)
-        && puertaDelEscalon(f.servicio_contratado, f.servicio_marcado_el) === null;
+        && !leTocanLasEntregas(f.servicio_contratado, f.servicio_marcado_el);
     },
     // El defecto: sellar la fecha por el solo hecho de que vino un ticket.
     conSuFallo: async () => {
       desdeCero();
       base.profiles.push({
         id: 'uuid-de-siempre', email: EMAIL, plan_comercial: 'completo',
-        servicio_contratado: 'base', servicio_marcado_el: new Date().toISOString(),
+        servicio_contratado: 'instalacion', servicio_marcado_el: new Date().toISOString(),
       });
       const f = fichaDe(EMAIL);
-      return f.plan_comercial === 'completo' && entraEnElEscalon(90, 5, f.servicio_contratado, f.servicio_marcado_el);
+      return f.plan_comercial === 'completo' && !f.servicio_marcado_el;
     },
   },
 
@@ -614,8 +613,8 @@ const LENTES: Lente[] = [
       await cobra(EMAIL, oferta.ticket);
       const f = fichaDe(EMAIL);
       return servicioDe(f.servicio_contratado) === oferta.ticket
-        && oferta.abre.includes(String(ULTIMO_DIA_DE_BASE))
-        && !entraEnElEscalon(ULTIMO_DIA_DE_BASE + 1, 3, f.servicio_contratado, f.servicio_marcado_el);
+        && oferta.abre.includes('90 días')
+        && entraEnElEscalon(90, 5, f.servicio_contratado, f.servicio_marcado_el);
     },
     conSuFallo: async () => {
       desdeCero();

@@ -920,11 +920,22 @@ out = {
   "sistemas":[
     # Los cinco sistemas se llaman igual que en la landing: el cliente compra
     # una cosa y tiene que entrar exactamente a esa.
+    #
+    # 15 nov 2026: y ahora tambien igual que en SANADORES LIBRES IMPRESO, que
+    # es la fuente que Javo congelo el 12 de noviembre. Tres perdieron su
+    # adjetivo —"de alto impacto", "automatica", "circular"—, que eran de
+    # cuando los sistemas se vendian de a uno y cada uno necesitaba su propia
+    # promesa. En el libro son a secas, y el libro es lo que el cliente tiene
+    # en la mano mientras hace el Camino.
+    #
+    # Los dias siguen siendo los de ARMAR cada sistema. La estacion, que es
+    # mas larga, la dice `losCincoPaisajes.ts`: el rio se arma del 36 al 44 y
+    # se vive hasta el 84.
     {"n":1,"nombre":"Tu reset","dias":"1-5"},
-    {"n":2,"nombre":"Tu programa de alto impacto","dias":"8-12"},
-    {"n":3,"nombre":"Tu captación automática","dias":"15-33"},
+    {"n":2,"nombre":"Tu programa","dias":"8-12"},
+    {"n":3,"nombre":"Tu captación","dias":"15-33"},
     {"n":4,"nombre":"Tu propia app","dias":"36-44"},
-    {"n":5,"nombre":"Tu ecosistema circular","dias":"85-86"}],
+    {"n":5,"nombre":"Tu ecosistema","dias":"85-86"}],
   "piezas":[{"codigo":c,"titulo":t,"dia":d,"sistema":s,"set":st,"minutos":m,"estado":e}
             for c,t,d,s,st,m,e in PIEZAS],
   # El día de cada tutorial SALE de la jornada que lo pide, no de un número

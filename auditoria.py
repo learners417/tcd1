@@ -509,7 +509,11 @@ _BLANCO = {'más','quizás','estás','jamás','atrás','detrás','demás','adem�
  'degradés','degradé','canapés','pies','bebés','purés','cafés','bidés',
  # futuros IRREGULARES de tuteo — correctos, no voseo
  'sabrás','podrás','tendrás','harás','querrás','vendrás','pondrás','saldrás',
- 'dirás','valdrás','cabrás'}
+ 'dirás','valdrás','cabrás',
+ # numeros y sustantivos que terminan igual y no son voseo. "veintitres"
+ # entro el 15 nov 2026 al escribir que el libro impreso tiene veintitres
+ # capitulos: la lente vio un acento final y canto voseo.
+ 'veintitrés','marqués','montés','arnés','ciprés','anís','maíz','raíz'}
 _vos = []
 for _f, _src in todo.items():
     if _f.endswith('vozLocalizada.ts'):
@@ -3666,9 +3670,16 @@ check('la sesión le muestra su propia respuesta',
 # ── La app cumple la promesa de la landing (C4) ──────────────────────
 _seed_land = _json64.loads(rd('src/lib/roadmap.seed.json'))
 _nombres = [x['nombre'] for x in _seed_land['sistemas']]
+# Los nombres salen de SANADORES LIBRES IMPRESO, que es la fuente que Javo
+# congelo el 12 nov 2026, y son los mismos que ya usaba la landing: en
+# pages/camino.html del repo learners417/landings, la fila "Sanadores Libres"
+# dice "Tu reset / Tu programa / Tu captacion / Tu propia app / Tu ecosistema".
+# Esta lente los tenia con sus adjetivos viejos —"de alto impacto",
+# "automatica", "circular"— asi que medido al reves: la app estaba desalineada
+# y la lente defendia la desalineacion.
 check('los cinco sistemas se llaman igual que en la landing',
-      _nombres == ['Tu reset', 'Tu programa de alto impacto', 'Tu captación automática',
-                   'Tu propia app', 'Tu ecosistema circular'], str(_nombres))
+      _nombres == ['Tu reset', 'Tu programa', 'Tu captación',
+                   'Tu propia app', 'Tu ecosistema'], str(_nombres))
 _j1 = [j for j in _seed_land['jornadas'] if j['dia'] == 1][0]
 check('el día 1 toma la medición de entrada',
       'reset.medicion_entrada' in _j1.get('adn_escribe', []))

@@ -54,8 +54,28 @@ for (const s of seed.sistemas) {
   ok(p !== null, `el sistema ${s.n} tiene su paisaje`);
   ok(p?.sistema === s.nombre,
     `y se llama igual que en el Camino: «${s.nombre}»`);
-  ok(p?.dias === `Días ${s.dias}`.replace('-', ' a '),
-    `con sus días: ${p?.dias} = ${s.dias}`);
+  /*
+   * ── LOS DÍAS SON DOS NÚMEROS, NO UNO (15 nov 2026) ───────────────────
+   *
+   * Antes la etiqueta era exactamente el rango del seed: «Días 36 a 44».
+   * Pero ese rango es el de ARMAR el sistema, no el de la estación, y los
+   * libros y la home usan el de la estación, que es más largo: el río se
+   * vive hasta el día 84. Con un solo número, el lector abría el libro del
+   * río el día 50 y no encontraba su día.
+   *
+   * Así que la etiqueta dice los dos, y acá se comprueba que el de armar
+   * siga saliendo del seed —que es lo que esta lente vino a cuidar— y que
+   * el de la estación lo contenga.
+   */
+  const arma = `${s.dias}`.replace('-', ' al ');
+  ok(p?.dias.includes(`se arma del ${arma}`) === true,
+    `con sus días de armado, sacados del Camino: «${arma}» en «${p?.dias}»`);
+  const estacion = /^Días (\d+) a (\d+)/.exec(p?.dias ?? '');
+  const [desdeArma, hastaArma] = s.dias.split('-').map(Number);
+  ok(estacion !== null
+    && Number(estacion[1]) <= desdeArma
+    && Number(estacion[2]) >= hastaArma,
+    `y su estación contiene a su armado: ${p?.dias}`);
 }
 
 console.log('\n══ cada uno trae lo suyo ══');

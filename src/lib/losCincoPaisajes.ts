@@ -122,7 +122,7 @@ export const PAISAJES: Paisaje[] = [
       + 'mira. Qué cobras, a quién atiendes, cuánto vale tu hora. Lo que se '
       + 'construye sobre una imagen movida sale torcido, y se nota recién al '
       + 'final.',
-    dias: 'Días 1 a 5',
+    dias: 'Días 1 a 7 · se arma del 1 al 5',
     color: { lecho: '#19445E', fondo: '#1B4A66', claro: '#9FC5D8', medio: '#4E86A4', hondo: '#10354B' },
     // La línea del agua con la cordillera reflejada. Va en 0.62 y no en el
     // medio: con el centro más arriba, la franja del teléfono cortaba el sol
@@ -131,26 +131,26 @@ export const PAISAJES: Paisaje[] = [
   },
   {
     id: 'montana', n: 2,
-    sistema: 'Tu programa de alto impacto',
+    sistema: 'Tu programa',
     nombre: 'La montaña',
     libro: 'Lo que la montaña te enseña',
     ensena: 'Subir por etapas hasta la cumbre',
     dato:
-      'Nadie sube el Tronador de una vez. Se duerme en el refugio, se sale de '
-      + 'madrugada, y la cumbre llega el segundo día. Los que intentan hacerlo '
-      + 'en una jornada vuelven a mitad de camino.',
+      'Al Tronador se sube en dos días. Se camina hasta el refugio, se duerme '
+      + 'ahí arriba, se sale de madrugada y la cumbre llega al día siguiente. '
+      + 'La montaña no se discute: se sube por etapas o no se sube.',
     bajada:
       'Tu programa es eso: etapas con nombre, no una promesa de llegar. Quien '
       + 'compra una cumbre entera de una vez se baja en el primer tramo duro. '
       + 'Quien compra la primera etapa, sube.',
-    dias: 'Días 8 a 12',
+    dias: 'Días 8 a 14 · se arma del 8 al 12',
     color: { lecho: '#6A301D', fondo: '#A64B2E', claro: '#E8A68C', medio: '#C9674A', hondo: '#6B2A18' },
     // la cumbre y los campamentos de la huella
     foco: 0.42,
   },
   {
     id: 'viento', n: 3,
-    sistema: 'Tu captación automática',
+    sistema: 'Tu captación',
     nombre: 'El viento',
     libro: 'Lo que el viento te enseña',
     ensena: 'Que tu voz llegue lejos',
@@ -162,7 +162,7 @@ export const PAISAJES: Paisaje[] = [
       'Tu captación funciona igual. No es el día que publicas algo que explota: '
       + 'es la misma dirección, sostenida, hasta que lo que dices crece '
       + 'inclinado hacia donde querías.',
-    dias: 'Días 15 a 33',
+    dias: 'Días 15 a 35 · se arma del 15 al 33',
     color: { lecho: '#533C12', fondo: '#C08A2A', claro: '#F0D9A0', medio: '#D9A94B', hondo: '#7A5312' },
     // las rachas con el árbol inclinado
     foco: 0.55,
@@ -174,33 +174,34 @@ export const PAISAJES: Paisaje[] = [
     libro: 'Lo que el río te enseña',
     ensena: 'Que todo corra solo',
     dato:
-      'El Limay sale del Nahuel Huapi y corre quinientos kilómetros hasta el '
-      + 'Atlántico sin que nadie lo empuje. El cauce lo hizo el agua, pasando '
-      + 'siempre por el mismo lugar.',
+      'El Limay sale del Nahuel Huapi y corre casi cuatrocientos kilómetros '
+      + 'hasta juntarse con el Neuquén. De esos dos nace el río Negro, y recién '
+      + 'ese llega al Atlántico. El cauce lo hizo el agua, pasando siempre por '
+      + 'el mismo lugar.',
     bajada:
       'Tu sistema es el cauce. Lo que repetiste tres veces esta semana, se '
       + 'graba: ahí deja de necesitarte. Lo que queda en vivo es lo único que '
       + 'solo haces tú.',
-    dias: 'Días 36 a 44',
+    dias: 'Días 36 a 84 · se arma del 36 al 44',
     color: { lecho: '#144646', fondo: '#1F6E6E', claro: '#A8DCDC', medio: '#3E9B9B', hondo: '#0E4747' },
     // la curva del río donde se ve el cauce
     foco: 0.58,
   },
   {
     id: 'bosque', n: 5,
-    sistema: 'Tu ecosistema circular',
+    sistema: 'Tu ecosistema',
     nombre: 'El bosque',
     libro: 'Lo que el bosque te enseña',
     ensena: 'Raíces, red y tiempo',
     dato:
       'Los alerces de la Patagonia viven más de mil quinientos años, y no están '
-      + 'solos: sus raíces se tocan bajo tierra y se pasan agua y azúcares entre '
-      + 'ellos. El bosque es una sola cosa.',
+      + 'solos: en sus raíces vive un hongo que les cambia agua y minerales por '
+      + 'azúcares. Ningún alerce come solo.',
     bajada:
       'Tu marca es lo que queda cuando dejas de empujar. Se construye con lo que '
       + 'ya eres —tu historia, tus años de consulta— y crece por abajo, donde no '
       + 'se ve, mucho antes de que se note arriba.',
-    dias: 'Días 85 a 86',
+    dias: 'Días 85 a 90 · se arma del 85 al 86',
     color: { lecho: '#17301F', fondo: '#1E3A2B', claro: '#8FB89A', medio: '#3E6B4E', hondo: '#0E2017' },
     // la línea de tierra con las raíces que se tocan
     foco: 0.70,
@@ -279,5 +280,5 @@ export const LIBRO_MADRE = {
 
 /** Lo que se dice cuando alguien pregunta por dónde empezar. */
 export const COMO_SE_LEE =
-  'Cada libro se lee solo, en cualquier orden. El número es el de la colección, '
-  + 'no el de lectura.';
+  'Cada lección se lee sola. Si haces el Camino, cada una tiene su día. El '
+  + 'número es el de la colección, no el de lectura.';

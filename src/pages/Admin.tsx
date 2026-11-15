@@ -2183,7 +2183,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                     onChange={(val) => setFiltroPlan(val)}
                     options={[
                       { value: 'ALL', label: 'Todos los planes' },
-                      { value: 'blanco', label: '⚪ Semana Blanca' },
+                      { value: 'blanco', label: '⚪ Tu nuevo precio' },
                       { value: 'amarillo', label: '🟡 Tu Base' },
                       { value: 'verde', label: '🟢 Tu Sistema' },
                       { value: 'negro', label: '⬛ Completo' },
@@ -2551,7 +2551,7 @@ Tono: profesional, directo, orientado a resultados. Sin emojis. En español.`;
                                   los pagos les ponía un corte que la ruta automática no les
                                   pone. Como el acceso hoy se abre SIEMPRE desde este botón,
                                   el número de acá era el único que llegaba al cliente. */}
-                              {([['blanco','⚪ Semana Blanca'],['amarillo','🟡 Tu Base'],['verde','🟢 Tu Sistema'],['negro','⬛ Completo'],['completo','Cliente clásico']] as const).map(([p, label]) => (
+                              {([['blanco','⚪ Tu nuevo precio'],['amarillo','🟡 Tu Base'],['verde','🟢 Tu Sistema'],['negro','⬛ La Base'],['completo','Cliente clásico']] as const).map(([p, label]) => (
                                 <button key={p}
                                   onClick={async () => {
                                     if (!supabase) return;

@@ -133,23 +133,29 @@ const MARCADO = '2026-10-14T12:00:00Z';
 const abiertos = (serv: string) =>
   Array.from({ length: 91 }, (_, d) => d).filter((d) => entraEnElEscalon(d, sist(d), serv, MARCADO));
 
-ok(abiertos('base').join(',') === '0,1,2,3,4,5,6,7,8,9,10,12',
-  `base abre los días 0 al 10 y el 12: los sistemas 1 y 2 (abre ${abiertos('base').join(',')})`);
-ok(!entraEnElEscalon(11, sist(11), 'base', MARCADO),
-  'el día 11 queda cerrado: es del sistema 3, aunque esté en medio de los otros');
-ok(entraEnElEscalon(12, sist(12), 'base', MARCADO),
-  'y el 12 abre igual, que es con lo que cierra su primera etapa');
+/*
+ * ─── LO QUE CAMBIÓ EL 15 DE NOVIEMBRE DE 2026 ───────────────────────────
+ *
+ * Hasta hoy esto medía que `base` abriera los días 0 al 10 y el 12, y que el
+ * 11 y el 68 quedaran cerrados. Era correcto mientras el escalón de 1.000 se
+ * vendiera como «los sistemas 1 y 2».
+ *
+ * Ya no se vende así. El producto que se cobra a 1.000 se llama «La Base · 90
+ * días con Javo», y eso dicen la página y cada propuesta. Lo que separa a los
+ * tres escalones es cuánto Javo tiene adentro, no cuánta app: tres sesiones,
+ * acompañado, o con todo montado. Por eso el Camino se abre entero en los
+ * tres, y lo que se sigue repartiendo por escalón son las ENTREGAS del
+ * equipo, que es lo que esta pieza vino a arreglar y sigue midiéndose abajo.
+ */
+ok(abiertos('base').length === 91,
+  `La Base abre los 90 días: se vende como «90 días con Javo» (abre ${abiertos('base').length} de 91)`);
 ok(abiertos('ascenso').length === 91 && abiertos('instalacion').length === 91,
-  'los dos escalones de arriba abren los 90 días');
-ok(ultimoDiaDelEscalon(sist, 'base', MARCADO) === ULTIMO_DIA_DE_BASE,
-  `el último día de base es el ${ULTIMO_DIA_DE_BASE}`);
-ok(ultimoDiaDelEscalon(sist, 'ascenso', MARCADO) === null, 'y los de arriba no tienen tope');
-
-// El techo de día hace falta ADEMÁS del sistema: el día 68 revisa su precio y
-// el 80 su programa, así que los dos son del sistema 1 y del 2. Cortando solo
-// por sistema, base abría jornadas sueltas hasta el día 80.
-ok(sist(68) !== null && [1, 2].includes(sist(68)!) && !entraEnElEscalon(68, sist(68), 'base', MARCADO),
-  'el día 68 es del sistema 2 y queda cerrado igual: los sistemas se intercalan hasta el final');
+  'y los dos escalones de arriba, también');
+ok(ultimoDiaDelEscalon(sist, 'base', MARCADO) === null
+  && ultimoDiaDelEscalon(sist, 'ascenso', MARCADO) === null,
+  'ninguno tiene tope de día: el que paga mil no se encuentra una pared en el 13');
+ok(typeof ULTIMO_DIA_DE_BASE === 'number',
+  `el techo sigue declarado (día ${ULTIMO_DIA_DE_BASE}) por si vuelve a hacer falta un escalón que abra menos`);
 
 console.log('\n══ sin marcar, nada se corta ══');
 ok(!estaMarcado(null) && !estaMarcado(undefined) && estaMarcado(MARCADO),
@@ -160,13 +166,20 @@ ok(!leTocanLasEntregas('instalacion', null),
   'y las entregas no se disparan sin marcar: el equipo no recibe tareas de instalar hasta que alguien diga quién la compró');
 ok(puertaDelEscalon('base', null) === null, 'ni ve una puerta que no le corresponde');
 
+/*
+ * ── LA PUERTA SE FUE CON EL TOPE (15 nov 2026) ──────────────────────────
+ *
+ * Era el cartel del final de la primera etapa, y tenía sentido mientras el
+ * Camino se cortara en el día 12. Con los 90 días abiertos en los tres
+ * escalones, ese cartel queda como una pared pintada sobre una puerta
+ * abierta: le dice al cliente que su acceso termina donde no termina.
+ */
 console.log('\n══ la puerta ══');
-const puerta = puertaDelEscalon('base', MARCADO) ?? '';
-ok(puerta.length > 0 && puertaDelEscalon('ascenso', MARCADO) === null,
-  'solo base ve una puerta');
-ok(/Cerraste|tienes/.test(puerta) && !/no pagaste|te falta pagar|no incluye/i.test(puerta),
-  'y dice lo que SÍ tiene, nunca lo que le falta por no haber pagado');
-ok(!/gente/i.test(puerta + faltaEnLaAntesala({})), 'nunca «gente»');
+ok(puertaDelEscalon('base', MARCADO) === null
+  && puertaDelEscalon('ascenso', MARCADO) === null
+  && puertaDelEscalon('instalacion', MARCADO) === null,
+  'ningún escalón ve una puerta: los tres abren los 90 días');
+ok(!/gente/i.test(faltaEnLaAntesala({})), 'nunca «gente»');
 
 // ── 5 · Las entregas son del escalón que las compró ───────────────────────
 console.log('\n══ las entregas del equipo ══');

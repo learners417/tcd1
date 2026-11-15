@@ -37,10 +37,10 @@ En La Base y en El Ascenso, lo técnico lo monta el cliente con los tutoriales d
 ## Los cinco sistemas
 
 **1 · Tu reset** — días 1-5
-**2 · Tu programa de alto impacto** — días 8-12
-**3 · Tu captación automática** — días 15-33
+**2 · Tu programa** — días 8-12
+**3 · Tu captación** — días 15-33
 **4 · Tu propia app** — días 36-44
-**5 · Tu ecosistema circular** — días 85-86
+**5 · Tu ecosistema** — días 85-86
 
 ## Los tres momentos en que cambia de etapa
 
@@ -175,7 +175,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 8 · A quién le hablas
 
-*Sesión · 60 min · sistema 2: Tu programa de alto impacto*
+*Sesión · 60 min · sistema 2: Tu programa*
 
 - Elige al consultante que mejor te salió
 - Escribe su dolor con sus palabras, como te lo dijo
@@ -191,7 +191,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 9 · Tu método, escrito con sus etapas
 
-*Sesión · 60 min · sistema 2: Tu programa de alto impacto · entrenador: diego*
+*Sesión · 60 min · sistema 2: Tu programa · entrenador: diego*
 
 - Escribe las etapas de lo que ya haces, en orden. Ejemplo: entrevista, medición, devolución
 - Define con qué entra la persona y con qué sale
@@ -204,7 +204,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 10 · Tu programa de 1.000 USD
 
-*Sesión · 75 min · sistema 2: Tu programa de alto impacto · entrenador: vera*
+*Sesión · 75 min · sistema 2: Tu programa · entrenador: vera*
 
 - Promesa: un resultado, no una actividad. Ejemplo: duermes seis horas seguidas, no diez sesiones
 - Plazo, con fecha de cierre
@@ -218,7 +218,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 11 · Tus guiones
 
-*Sesión · 90 min · sistema 3: Tu captación automática · entrenador: mateo*
+*Sesión · 90 min · sistema 3: Tu captación · entrenador: mateo*
 
 > **ENTREGA 2 · Sitios, formularios y contactos.** Se montan su página, su formulario de aplicación y su lista de contactos. Desbloquea publicar la página y recibir aplicaciones.
 
@@ -236,7 +236,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 12 · Tu método aprobado y todo listo
 
-*Sesión · 45 min · sistema 2: Tu programa de alto impacto · entrenador: diego*
+*Sesión · 45 min · sistema 2: Tu programa · entrenador: diego*
 
 - Presenta tu método a Diego
 - Examen 1: ¿se puede medir? Si no hay número al principio y al final, no es método
@@ -272,7 +272,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 15 · Tu día de rodaje
 
-*Rodaje · 210 min · sistema 3: Tu captación automática*
+*Rodaje · 210 min · sistema 3: Tu captación*
 
 - Graba primero los tres anuncios, uno detrás del otro
 - Después el video de tu página, de corrido y sin leer. Tres tomas y sigues
@@ -288,7 +288,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 16 · Tu perfil y tu página, publicados
 
-*Sesión · 90 min · sistema 3: Tu captación automática · entrenador: caro*
+*Sesión · 90 min · sistema 3: Tu captación · entrenador: caro*
 
 - Foto: tu cara, fondo limpio, que se entienda en miniatura
 - Nombre buscable: cómo te buscarían, no tu título completo
@@ -304,7 +304,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 17 · Tu agenda y tu cobro, andando
 
-*Sesión · 75 min · sistema 3: Tu captación automática · entrenador: lucas*
+*Sesión · 75 min · sistema 3: Tu captación · entrenador: lucas*
 
 - Sube el video a tu página
 - Arma el formulario con las cinco preguntas que filtran
@@ -318,7 +318,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 18 · Le avisas a tu entorno
 
-*Sesión · 60 min · sistema 3: Tu captación automática · entrenador: sofi*
+*Sesión · 60 min · sistema 3: Tu captación · entrenador: sofi*
 
 - Edita la plantilla con tu voz: no vende, pide veinte minutos
 - Manda veinte hoy, empezando por los más fáciles
@@ -334,7 +334,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 19 · Tu número y tu llamada
 
-*Protocolo · 60 min · sistema 3: Tu captación automática · entrenador: espejo*
+*Protocolo · 60 min · sistema 3: Tu captación · entrenador: espejo*
 
 - Elige un gesto físico chico y repetible. Ejemplo: apoyar la mano en la mesa
 - Grábate diciendo tu número veinte veces, con el gesto antes de cada una
@@ -372,7 +372,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 22 · Tus primeras llamadas
 
-*Sesión · 60 min · sistema 3: Tu captación automática · entrenador: lucas*
+*Sesión · 60 min · sistema 3: Tu captación · entrenador: lucas*
 
 - Elige a quién de tu red le ofreciste y todavía no cerraste
 - Repasa tu W una vez, no más
@@ -388,7 +388,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 23 · Grabar y revisar tus llamadas
 
-*Sesión · 30 min · sistema 3: Tu captación automática · entrenador: lucas*
+*Sesión · 30 min · sistema 3: Tu captación · entrenador: lucas*
 
 - Activa la grabación en el Sistema
 - Escribe la frase con la que avisas
@@ -402,7 +402,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 24 · Tu preventa: los tres primeros
 
-*Sesión · 60 min · sistema 2: Tu programa de alto impacto · entrenador: vera*
+*Sesión · 60 min · sistema 2: Tu programa · entrenador: vera*
 
 - Elige dos bonos del menú para los tres primeros
 - Al mismo precio que el resto
@@ -416,7 +416,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 25 · Tu recuperador
 
-*Sesión · 60 min · sistema 3: Tu captación automática · entrenador: espejo*
+*Sesión · 60 min · sistema 3: Tu captación · entrenador: espejo*
 
 - Arma tu bandeja con los cuatro estados
 - A cada 'no ahora' ponle fecha de vuelta
@@ -429,7 +429,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 26 · Tu primera venta y tus números
 
-*Sesión · 45 min · sistema 3: Tu captación automática · entrenador: ramiro*
+*Sesión · 45 min · sistema 3: Tu captación · entrenador: ramiro*
 
 - Manda el link a quien ya dijo que sí
 - Cuando entre el cobro, sube el comprobante
@@ -465,7 +465,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 29 · Meta conectado y tu pixel midiendo
 
-*Sesión · 90 min · sistema 3: Tu captación automática*
+*Sesión · 90 min · sistema 3: Tu captación*
 
 > **ENTREGA 3 · Conversaciones, automatizaciones, reportes y WhatsApp.** Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Desbloquea encender las campañas.
 
@@ -482,7 +482,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 30 · Tus tres anuncios, listos para salir
 
-*Sesión · 60 min · sistema 3: Tu captación automática*
+*Sesión · 60 min · sistema 3: Tu captación*
 
 - Edita corto: sin música, sin intro y sin logo animado
 - Ponles subtítulos quemados: la mayoría los mira sin sonido
@@ -494,7 +494,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 31 · Encender tus dos campañas
 
-*Sesión · 90 min · sistema 3: Tu captación automática*
+*Sesión · 90 min · sistema 3: Tu captación*
 
 - Campaña 1, frío amplio: sin intereses, solo país, ciudad y edad. Va a tu recurso
 - Campaña 2, para quienes ya te vieron: los que vieron tu recurso, tus videos o tu perfil. Va directo a tu video de venta
@@ -524,7 +524,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 33 · Mientras la pauta aprende
 
-*Espera activa · 20 min · sistema 3: Tu captación automática*
+*Espera activa · 20 min · sistema 3: Tu captación*
 
 - Mira tu tablero una vez. Anota el costo por agenda de hoy
 - No toques nada de la campaña. Al tercer día vas a querer: por eso a la mayoría no le funciona
@@ -649,7 +649,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 43 · Crecer o apagar
 
-*Sesión · 45 min · sistema 3: Tu captación automática · entrenador: ramiro*
+*Sesión · 45 min · sistema 3: Tu captación · entrenador: ramiro*
 
 - Mira tu costo por agenda de los catorce días
 - La app habilita un solo botón según tu número
@@ -676,7 +676,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 45 · Tu primer consultante nuevo
 
-*Sesión · 30 min · sistema 3: Tu captación automática*
+*Sesión · 30 min · sistema 3: Tu captación*
 
 - Prueba tu enlace de pago desde el teléfono de otra persona: que llegue hasta el comprobante
 - Revisa que tu página cargue en menos de tres segundos en datos móviles
@@ -694,7 +694,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 46 · Tus cinco niveles
 
-*Sesión · 45 min · sistema 2: Tu programa de alto impacto*
+*Sesión · 45 min · sistema 2: Tu programa*
 
 - Diseña los cinco niveles, de la puerta de entrada al acompañamiento más completo
 - Marca el tercero: es el único que vendes hoy
@@ -706,7 +706,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 47 · La máquina de 10
 
-*Sesión · 45 min · sistema 3: Tu captación automática*
+*Sesión · 45 min · sistema 3: Tu captación*
 
 - La app trae tus números reales del tablero
 - Escribe la cadena: conversaciones, agendas, llamadas, ventas
@@ -741,7 +741,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 50 · Tu semana 8
 
-*Cierre de semana · 45 min · sistema 3: Tu captación automática*
+*Cierre de semana · 45 min · sistema 3: Tu captación*
 
 - Publica la pieza que ya tenías escrita. Hoy sale, no se escribe
 - Contesta a todos los que escribieron, cada uno con una pregunta
@@ -764,7 +764,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 51 · Tu cobranza de la semana
 
-*Sesión · 25 min · sistema 3: Tu captación automática*
+*Sesión · 25 min · sistema 3: Tu captación*
 
 - Lista las cuotas que tocaban esta semana y cuáles entraron
 - Escríbele hoy a cada uno que no pagó, uno por uno
@@ -800,7 +800,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 54 · Tu segundo creativo
 
-*Sesión · 30 min · sistema 3: Tu captación automática*
+*Sesión · 30 min · sistema 3: Tu captación*
 
 - Mira cuál de tus anuncios trae las agendas más baratas
 - Graba tres variantes del MISMO 20, con otro gancho
@@ -832,7 +832,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 57 · Tu semana 9
 
-*Cierre de semana · 45 min · sistema 3: Tu captación automática*
+*Cierre de semana · 45 min · sistema 3: Tu captación*
 
 - Publica la pieza que ya tenías escrita. Hoy sale, no se escribe
 - Contesta a todos los que escribieron, cada uno con una pregunta
@@ -855,7 +855,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 58 · La conversación de renovación
 
-*Sesión · 30 min · sistema 2: Tu programa de alto impacto*
+*Sesión · 30 min · sistema 2: Tu programa*
 
 - Mira quiénes terminan en las próximas tres semanas
 - Escríbele a cada uno para hablar ANTES de que termine
@@ -923,7 +923,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 64 · Tu semana 10
 
-*Cierre de semana · 45 min · sistema 3: Tu captación automática*
+*Cierre de semana · 45 min · sistema 3: Tu captación*
 
 - Publica la pieza que ya tenías escrita. Hoy sale, no se escribe
 - Contesta a todos los que escribieron, cada uno con una pregunta
@@ -946,7 +946,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 65 · Tus números contra tu banda
 
-*Sesión · 25 min · sistema 3: Tu captación automática*
+*Sesión · 25 min · sistema 3: Tu captación*
 
 - Mira tu costo por agenda y tu costo por conversación de esta semana
 - Compáralos con la referencia de TU país, no con la semana pasada
@@ -969,7 +969,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 67 · El primero que termina
 
-*Sesión · 30 min · sistema 5: Tu ecosistema circular*
+*Sesión · 30 min · sistema 5: Tu ecosistema*
 
 - Cierra con él: qué se llevó, en sus palabras
 - Pídele el resultado en una frase y el permiso por escrito
@@ -981,7 +981,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 68 · Tu precio de la próxima camada
 
-*Sesión · 25 min · sistema 2: Tu programa de alto impacto*
+*Sesión · 25 min · sistema 2: Tu programa*
 
 - Suma lo que ya puedes probar: resultados, casos y testimonios
 - Sube el precio de la próxima camada y escribe el número
@@ -1013,7 +1013,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 71 · Tu semana 11
 
-*Cierre de semana · 45 min · sistema 3: Tu captación automática*
+*Cierre de semana · 45 min · sistema 3: Tu captación*
 
 - Publica la pieza que ya tenías escrita. Hoy sale, no se escribe
 - Contesta a todos los que escribieron, cada uno con una pregunta
@@ -1036,7 +1036,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 72 · Los que se enfriaron
 
-*Sesión · 25 min · sistema 3: Tu captación automática*
+*Sesión · 25 min · sistema 3: Tu captación*
 
 - Lista las agendas que no se presentaron y las llamadas sin cierre del último mes
 - Escríbele a cada uno con algo nuevo, nunca con «¿cómo vas?»
@@ -1048,7 +1048,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 73 · Sus resultados, contados por ellos
 
-*Sesión · 45 min · sistema 3: Tu captación automática*
+*Sesión · 45 min · sistema 3: Tu captación*
 
 - Pídele a cada uno su resultado en una frase
 - Pide permiso por escrito para usarlo
@@ -1102,7 +1102,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 78 · Tu semana 12
 
-*Cierre de semana · 45 min · sistema 3: Tu captación automática*
+*Cierre de semana · 45 min · sistema 3: Tu captación*
 
 - Publica la pieza que ya tenías escrita. Hoy sale, no se escribe
 - Contesta a todos los que escribieron, cada uno con una pregunta
@@ -1193,7 +1193,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 85 · Tu ecosistema circular
 
-*Sesión · 45 min · sistema 5: Tu ecosistema circular · entrenador: mateo*
+*Sesión · 45 min · sistema 5: Tu ecosistema · entrenador: mateo*
 
 - Saca tus tres enfoques de la Matriz ABC
 - Para cada enfoque, escribe a quién filtra y a quién atrae
@@ -1204,7 +1204,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 ### Día 86 · Las doce semanas escritas
 
-*Sesión · 90 min · sistema 5: Tu ecosistema circular · entrenador: mateo*
+*Sesión · 90 min · sistema 5: Tu ecosistema · entrenador: mateo*
 
 - Reparte tus tres enfoques en doce semanas
 - Para cada semana, el gancho y el ángulo

@@ -106,7 +106,7 @@ export interface Profile {
   biblioteca_abierta?: boolean;
   biblioteca_abierta_el?: string | null;
   plan_reservado?: string | null;  // el plan que eligió al reservar su cupo
-  acceso_hasta?: string | null;    // fin de la Semana Blanca (o del acceso del plan)
+  acceso_hasta?: string | null;    // fin del acceso de Tu nuevo precio (o del plan)
   agentes_activos?: string[];   // granular: ids ('bruno', 'vera'...) o 'todos'
   modulos_activos?: string[];   // override admin: 'campanas', 'creativos'
   adn_edit_secciones?: string[]; // secciones del ADN que el cliente puede editar ('todas' o ID/META/IRR/NEG/INF/CAP/MET)

@@ -38,10 +38,39 @@
 
 export type Escalon = 'base' | 'ascenso' | 'instalacion';
 
+/*
+ * ═══ LO QUE CAMBIÓ EL 15 DE NOVIEMBRE DE 2026 ══════════════════════════
+ *
+ * Dos cosas, y las dos vienen de afuera del código.
+ *
+ * 1 · LA INSTALACIÓN VALE 6.000, NO 5.000. Subió el 12 de noviembre y desde
+ *     enero de 2027 va a 7.000. La Cima dejó de venderse suelta: va adentro
+ *     del mastermind de 10.000.
+ *
+ * 2 · LA BASE ABRE LOS 90 DÍAS. Esto es más de fondo, y era una trampa a
+ *     punto de dispararse. El escalón `base` cortaba en el día 12, con buen
+ *     motivo en su momento. Pero el producto que hoy se cobra a 1.000 se
+ *     llama, textualmente, «La Base · 90 días con Javo»: así figura en el
+ *     Sistema, así lo dice la página y así se escribe en cada propuesta.
+ *
+ *     Hoy no se nota porque la puerta solo baja para quien tiene fecha de
+ *     marcado, y a los que entran solos nadie los marca. O sea que el día
+ *     que el equipo marque como `base` a alguien que pagó 1.000 —lo primero
+ *     que uno haría— ese cliente se encuentra una pared en el día 13 de un
+ *     programa que le vendieron de 90.
+ *
+ *     Lo que separa a los tres escalones no es cuánta app ve, es cuánto Javo
+ *     tiene adentro: La Base son los 90 días con tres sesiones, la mentoría
+ *     son los 90 días acompañados, y la instalación son los 90 días con todo
+ *     montado por el equipo. Por eso el Camino se abre entero en los tres, y
+ *     lo que se sigue repartiendo por escalón son las ENTREGAS del equipo,
+ *     que es lo que esta pieza vino a arreglar y sigue haciendo intacto en
+ *     `leTocanLasEntregas`.
+ */
 export const ESCALONES: Record<Escalon, { precio: string; hasta: string }> = {
-  base: { precio: '$1.000', hasta: 'los sistemas 1 y 2' },
-  ascenso: { precio: '$3.000', hasta: 'los 90 días completos' },
-  instalacion: { precio: '$5.000', hasta: 'los 90 días, con todo montado' },
+  base: { precio: '$1.000', hasta: 'los 90 días, con tres sesiones' },
+  ascenso: { precio: '$3.000', hasta: 'los 90 días, acompañado' },
+  instalacion: { precio: '$6.000', hasta: 'los 90 días, con todo montado' },
 };
 
 /** Los sistemas que entran en el escalón base: su reset y su programa. */
@@ -88,15 +117,23 @@ export function estaMarcado(marcadoEn?: string | null): boolean {
 }
 
 export function entraEnElEscalon(
-  dia: number,
-  sistema: number | null,
-  servicio?: string | null,
-  marcadoEn?: string | null,
+  _dia: number,
+  _sistema: number | null,
+  _servicio?: string | null,
+  _marcadoEn?: string | null,
 ): boolean {
-  if (!estaMarcado(marcadoEn)) return true;
-  if (escalonDe(servicio) !== 'base') return true;
-  if (dia > ULTIMO_DIA_DE_BASE) return false;
-  return sistema === null || SISTEMAS_DE_BASE.includes(sistema);
+  /*
+   * El Camino se abre entero en los tres escalones, por el motivo del
+   * encabezado: los tres venden 90 días y se diferencian en cuánto Javo
+   * tiene adentro, no en cuánta app.
+   *
+   * La función se queda —con sus cuatro parámetros y sus llamadas intactas—
+   * porque el día que haya un escalón que de verdad abra menos, el corte va
+   * acá y no repartido por las pantallas. `SISTEMAS_DE_BASE` y
+   * `ULTIMO_DIA_DE_BASE` siguen declarados abajo por lo mismo, y los usa
+   * `queAbreCadaOferta` para contar lo que cada oferta entrega.
+   */
+  return true;
 }
 
 /**
@@ -122,13 +159,22 @@ export function leTocanLasEntregas(
  * pagado: el que terminó su primera etapa acaba de hacer un trabajo real.
  */
 export function puertaDelEscalon(
-  servicio?: string | null,
-  marcadoEn?: string | null,
+  _servicio?: string | null,
+  _marcadoEn?: string | null,
 ): string | null {
-  if (!estaMarcado(marcadoEn) || escalonDe(servicio) !== 'base') return null;
-  return 'Hasta acá llega tu primera etapa. Cerraste tu reset y tu programa: ' +
-    'tienes precio, método y oferta en una página. Lo que sigue es tu captación, ' +
-    'y se abre cuando lo decidas.';
+  /*
+   * Era el cartel del final de la primera etapa: «Hasta acá llega tu primera
+   * etapa… lo que sigue se abre cuando lo decidas». Lo dibuja `Roadmap.tsx`
+   * donde el Camino se cortaba.
+   *
+   * Con el Camino abierto entero, ese cartel pasa a ser una pared pintada
+   * sobre una puerta abierta: el cliente ve sus noventa días y al lado un
+   * aviso de que su acceso termina. Peor que el corte, porque le dice que
+   * compró menos de lo que tiene.
+   *
+   * `null` es «no hay puerta», que es lo que Roadmap ya sabe leer.
+   */
+  return null;
 }
 
 /**
@@ -136,15 +182,21 @@ export function puertaDelEscalon(
  * jornada. La pasa quien tiene el seed cargado.
  */
 export function ultimoDiaDelEscalon(
-  sistemaDe: (dia: number) => number | null,
-  servicio?: string | null,
-  marcadoEn?: string | null,
+  _sistemaDe: (dia: number) => number | null,
+  _servicio?: string | null,
+  _marcadoEn?: string | null,
 ): number | null {
-  if (!estaMarcado(marcadoEn) || escalonDe(servicio) !== 'base') return null;
-  let ultimo = 0;
-  for (let d = 1; d <= ULTIMO_DIA_DE_BASE; d += 1) {
-    const s = sistemaDe(d);
-    if (s !== null && SISTEMAS_DE_BASE.includes(s)) ultimo = d;
-  }
-  return ultimo || null;
+  /*
+   * `null` quiere decir «no tiene tope», y desde el 15 nov 2026 no lo tiene
+   * ninguno de los tres: los tres abren los 90 días.
+   *
+   * Tiene que decir lo MISMO que `entraEnElEscalon`, y por eso se cambia
+   * junto con ella. Dejarla devolviendo 12 mientras el Camino abría entero
+   * era peor que cualquiera de las dos cosas por separado: la pantalla
+   * mostraba los 90 días y el cartel decía «hasta el día 12».
+   *
+   * Hoy no la llama ninguna pantalla. Se queda por lo mismo que su hermana:
+   * el día que haya un escalón que abra menos, el número se calcula acá.
+   */
+  return null;
 }

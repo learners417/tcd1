@@ -1,6 +1,7 @@
 /**
  * planes.ts — La escalera comercial de cinturones (los 5 días y los 3 planes)
- * Regla de la casa: en la UI jamás se dice "trial" ni "prueba" — es "Tus 5 días".
+ * Regla de la casa: en la UI jamás se dice "trial" ni "prueba". La entrada se
+ * llama "Tu nuevo precio", que es lo que el cliente se lleva.
  */
 import type { Profile } from './supabase';
 
@@ -8,23 +9,51 @@ export type PlanComercial = 'blanco' | 'amarillo' | 'verde' | 'negro' | 'complet
 
 /** Hasta qué pilar del Camino llega cada plan (inclusive). */
 export const PILAR_MAX: Record<PlanComercial, number> = {
-  blanco: 1,      // los 5 días: Sanar el Dinero (P0 + P1)
+  blanco: 1,      // Tu nuevo precio: los días 1 a 5 (P0 + P1)
   amarillo: 2,    // Tu Base: + método bautizado (P2)
   verde: 4,       // Tu Sistema: + oferta, perfil, sistema, campaña (P3-P4)
-  negro: 99,      // El Programa Completo
+  negro: 99,      // La Base: los 90 días
   completo: 99,   // los clientes actuales
 };
 
+/*
+ * ═══ LOS NOMBRES DE LA ESCALERA (12 y 15 nov 2026) ══════════════════════
+ *
+ * La escalera que decidió Javo el 12 de noviembre es una sola, y se dice
+ * igual en la app, en las páginas y en las propuestas:
+ *
+ *   97      Tu nuevo precio      la entrada: los días 1 a 5
+ *   497     Tu Sistema           hasta el pilar 4
+ *   1.000   La Base              los 90 días
+ *   3.000   la mentoría          ·  6.000  la instalación  ·  10.000 el mastermind
+ *
+ * Dos nombres se fueron, y conviene saber por qué, porque los dos vuelven
+ * solos si nadie lo escribe:
+ *
+ *   «Los 5 días» describía la duración del acceso, no lo que el cliente se
+ *   lleva. Lo que se lleva es un precio nuevo, y ese es el nombre con el que
+ *   se vende en todos lados. «Semana Blanca» era lo mismo, con el color del
+ *   cinturón encima.
+ *
+ *   «El Programa Completo · $997» era de cuando los planes se llamaban por
+ *   color y el de arriba era el último. Hoy arriba hay tres escalones más,
+ *   así que «completo» mentía, y el 997 y el 1.000 resultaron ser el mismo
+ *   producto con dos precios. Se queda el nombre con el que se vende: La
+ *   Base, que en el Sistema figura como «La Base · 90 días con Javo».
+ *
+ * `prueba-la-escalera.ts` compara estos nombres y precios contra el resto de
+ * la app para que no vuelvan a separarse.
+ */
 export const NOMBRE_PLAN: Record<PlanComercial, string> = {
-  blanco: 'Los 5 días',
+  blanco: 'Tu nuevo precio',
   amarillo: 'Tu Base',
   verde: 'Tu Sistema',
-  negro: 'El Programa Completo',
-  completo: 'El Programa Completo',
+  negro: 'La Base',
+  completo: 'La Base',
 };
 
 export const PRECIO_FUNDADOR: Record<string, string> = {
-  verde: '$497', negro: '$997',
+  verde: '$497', negro: '$1.000',
 };
 
 /**
@@ -40,13 +69,13 @@ const env = (import.meta as { env?: Record<string, string | undefined> }).env ??
 export const CHECKOUT_URL: Record<'amarillo' | 'verde' | 'negro', string> = {
   amarillo: env.VITE_CHECKOUT_AMARILLO || '', // Tu Base $147
   verde: env.VITE_CHECKOUT_VERDE || '',       // Tu Sistema $497
-  negro: env.VITE_CHECKOUT_NEGRO || '',       // El Completo $997
+  negro: env.VITE_CHECKOUT_NEGRO || '',       // La Base $1.000
 };
 
 /** El plan mínimo (comprable) que desbloquea ese pilar. */
 export function planParaPilar(pilarNum: number): 'verde' | 'negro' {
   // La escalera que se vende dentro de la app: $497 (Tu Sistema, hasta P4) y
-  // $997 (El Programa Completo). 'amarillo' queda solo para clientes antiguos.
+  // $1.000 (La Base). 'amarillo' queda solo para clientes antiguos.
   if (pilarNum <= PILAR_MAX.verde) return 'verde';
   return 'negro';
 }

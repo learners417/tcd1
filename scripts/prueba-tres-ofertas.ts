@@ -54,8 +54,10 @@ for (const t of LOS_TRES) {
   ok(Boolean(a.camino && a.monta && a.entregas),
     `${TICKETS[t].nombre}: dice su Camino, quién monta y si el equipo recibe tareas`);
 }
-ok(loQueAbre('base').camino.includes(String(ULTIMO_DIA_DE_BASE)),
-  `La Base nombra su último día (${ULTIMO_DIA_DE_BASE}), que sale de la constante y no de un número escrito`);
+// 15 nov 2026: La Base dejó de cerrar en el día 12. Se vende como «90 días
+// con Javo» y eso es lo que abre, igual que los otros dos.
+ok(loQueAbre('base').camino.includes('90 días'),
+  'La Base nombra los 90 días, que es lo que se vende y lo que abre');
 ok(/90 días completos/.test(loQueAbre('ascenso').camino)
   && /90 días completos/.test(loQueAbre('instalacion').camino),
   'y las dos de arriba abren los 90 días');

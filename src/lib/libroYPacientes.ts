@@ -27,6 +27,24 @@ export interface Capitulo {
  * El mapa al pilar no es decorativo: cada capítulo responde la pregunta que
  * el sanador se está haciendo en ese momento del Camino. Leído antes, es
  * teoría; leído ahí, es la explicación de lo que le está pasando.
+ *
+ * ⚠ ESTOS ONCE CAPÍTULOS NO SON LOS DEL LIBRO (revisión del 12 nov 2026).
+ *
+ * El libro impreso tiene un Umbral y veintitrés capítulos. Estos once se
+ * escribieron acá cuando el libro todavía no estaba cerrado, y quedaron.
+ *
+ * Hoy no llegan a nadie: ninguna pantalla del cliente importa este archivo
+ * —lo comprobé archivo por archivo— y solo lo leen tres lentes y el script
+ * que arma los PDF. Por eso no se borran todavía: borrarlos rompe esas
+ * piezas sin arreglar nada que se vea.
+ *
+ * Lo que NO puede pasar es que alguien los conecte a una pantalla creyendo
+ * que son los del libro. Si el cliente abre el libro buscando «El dinero no
+ * es sucio», no lo encuentra, y lo que se rompe ahí no es una pantalla: es
+ * que la app le mintió sobre un libro que tiene en la mano.
+ *
+ * LIBROS pasa los veintitrés reales y se reemplazan de una. Anotado en el
+ * MAPA, frente APP.
  */
 export const CAPITULOS: Capitulo[] = [
   { numero: 1, titulo: 'El sanador que no cobra', pilar: 0, minutos: 12,

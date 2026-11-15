@@ -91,8 +91,18 @@ export function textoDelBoton(t: Ticket): string {
 
 /** Lo que abre, en una línea, para que sepa qué está comprando. */
 export function queAbreLaOferta(t: Ticket): string {
-  if (t === 'base') return 'Tu Camino hasta el día 12: tu método escrito y tu programa de 1.000 USD en una página.';
-  if (t === 'ascenso') return 'Los 90 días completos, desde la antesala hasta tu graduación.';
+  /*
+   * La Base decía «Tu Camino hasta el día 12». Era verdad en el código y
+   * mentira en la página: el producto que se cobra a 1.000 se llama «La Base
+   * · 90 días con Javo». Este es el cartel del candado del día 5, o sea la
+   * primera frase que lee el que está por subir de la entrada a La Base: si
+   * una de las dos estaba mal, era esta.
+   *
+   * Los tres abren los 90 días. Lo que cambia entre ellos es cuánto Javo hay
+   * adentro, y eso es lo que dice cada línea.
+   */
+  if (t === 'base') return 'Los 90 días completos, con tres sesiones a solas con Javo.';
+  if (t === 'ascenso') return 'Los 90 días completos, acompañado en la mentoría de cada semana.';
   /*
    * La Instalación también abre los 90 días, pero eso no es lo que se compra:
    * lo que cambia es QUIÉN los monta. Decirle «los 90 días completos» acá

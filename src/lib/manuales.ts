@@ -28,9 +28,16 @@ export const MANUALES: Record<string, Manual> = {
     url: 'https://tuclinica.digital/manual-tuprograma',
     cubre: 'Tu método, tu oferta, tu garantía, tu escalera y tu app.',
   },
+  /*
+   * Se llamaba «El Camino», y era el único nombre repetido de toda la casa:
+   * El Camino es la sección de los 90 días, y en papel es «El Camino en
+   * papel». Un manual de anuncios con ese nombre mandaba al cliente a buscar
+   * sus días y le aparecía la pauta. Desde el 12 nov 2026 es «La Campaña»,
+   * que además dice de qué trata. La dirección web no cambia.
+   */
   camino: {
     id: 'camino',
-    titulo: 'El Camino',
+    titulo: 'La Campaña',
     url: 'https://tuclinica.digital/manual-ads-page',
     cubre: 'Tu página, tus anuncios, tu campaña y tus números.',
   },

@@ -37,7 +37,7 @@ console.log('\n── toca el candado del día 6 ──');
 const oferta = laOfertaTrasElAcceso(PILAR_MAX.blanco);
 ok(oferta.ticket === 'base', 'se le ofrece La Base');
 ok(oferta.precio === '$1.000', 'a $1.000', oferta.precio);
-ok(oferta.abre.includes(String(ULTIMO_DIA_DE_BASE)), `y le dice que abre hasta el día ${ULTIMO_DIA_DE_BASE}`);
+ok(oferta.abre.includes('90 días'), 'y le dice que abre los 90 días');
 
 console.log('\n── paga La Base: el webhook escribe las dos columnas ──');
 /*

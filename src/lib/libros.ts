@@ -42,6 +42,24 @@ export interface Libro {
   enlace?: string;
 }
 
+/*
+ * ═══ DÓNDE VIVEN LOS CINCO DEL SUR (15 nov 2026) ═══════════════════════
+ *
+ * Los cinco están publicados desde el 12 de noviembre y se entregan juntos,
+ * en una sola carpeta, a quien compra Tu nuevo precio. Cada edición nueva
+ * reemplaza a la anterior ahí mismo, así que al que compró hace un mes le
+ * llega igual.
+ *
+ * El enlace de esa carpeta NO se escribe acá. Se lee del entorno, como los
+ * checkouts: así se cambia sin tocar código, y así no queda escrito en el
+ * repositorio. Con la variable vacía el estante igual anuncia los libros,
+ * sin botón —que es lo que esta pieza ya hacía con los que no tenían enlace.
+ *
+ * En Vercel: VITE_LIBROS_URL.
+ */
+const envLibros = (import.meta as { env?: Record<string, string | undefined> }).env ?? {};
+export const CARPETA_DE_LOS_LIBROS = envLibros.VITE_LIBROS_URL || '';
+
 export const LIBROS: Libro[] = [
   {
     id: 'siete-libertades',
@@ -71,7 +89,8 @@ export const LIBROS: Libro[] = [
     queExplica: 'Tu reset. Lo que cambia adentro antes de que cambie el precio.',
     rol: 'coleccion',
     orden: 1,
-    estado: 'escribiendo',
+    estado: 'publicado',
+    enlace: CARPETA_DE_LOS_LIBROS,
   },
   {
     id: 'montana',
@@ -79,7 +98,8 @@ export const LIBROS: Libro[] = [
     queExplica: 'Tu programa. Cómo tu forma de trabajar se vuelve un método con nombre.',
     rol: 'coleccion',
     orden: 2,
-    estado: 'escribiendo',
+    estado: 'publicado',
+    enlace: CARPETA_DE_LOS_LIBROS,
   },
   {
     id: 'viento',
@@ -87,7 +107,8 @@ export const LIBROS: Libro[] = [
     queExplica: 'Tu captación. Cómo llega a ti quien te estaba buscando.',
     rol: 'coleccion',
     orden: 3,
-    estado: 'escribiendo',
+    estado: 'publicado',
+    enlace: CARPETA_DE_LOS_LIBROS,
   },
   {
     id: 'rio',
@@ -95,7 +116,8 @@ export const LIBROS: Libro[] = [
     queExplica: 'Tu propia app. Lo que entregas cuando dejas de vender horas.',
     rol: 'coleccion',
     orden: 4,
-    estado: 'escribiendo',
+    estado: 'publicado',
+    enlace: CARPETA_DE_LOS_LIBROS,
   },
   {
     id: 'bosque',
@@ -104,7 +126,8 @@ export const LIBROS: Libro[] = [
       'Tu ecosistema. Treinta y tres lecciones del bosque patagónico sobre cómo se construye una marca y una vida.',
     rol: 'coleccion',
     orden: 5,
-    estado: 'escribiendo',
+    estado: 'publicado',
+    enlace: CARPETA_DE_LOS_LIBROS,
   },
   {
     id: 'heroe-descapado',

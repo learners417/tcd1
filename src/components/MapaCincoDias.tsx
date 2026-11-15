@@ -24,7 +24,7 @@ export default function MapaCincoDias() {
   return (
     <div className="card-panel p-5 border border-gold/20">
       <p className="text-sm font-bold uppercase tracking-[0.25em] text-gold mb-1">Tus 5 días, guiados</p>
-      <p className="text-xs text-cream/55 mb-4">Tu número lo sacas hoy, en minutos. Los 5 días son para lo difícil: sostenerlo.</p>
+      <p className="text-xs text-cream/55 mb-4">Tu número lo sacas hoy, en minutos. Estos cinco días son para lo difícil: sostenerlo.</p>
       <div className="space-y-2.5">
         {DIAS.map((x) => (
           <div key={x.d} className="flex items-baseline gap-3">

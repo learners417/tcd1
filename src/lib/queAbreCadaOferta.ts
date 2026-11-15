@@ -19,7 +19,7 @@
  * día que el tope cambie, el alta no siga diciendo lo de antes.
  */
 import { TICKETS, type Ticket } from './cuadroTickets';
-import { ULTIMO_DIA_DE_BASE, leTocanLasEntregas } from './topeDelEscalon';
+import { leTocanLasEntregas } from './topeDelEscalon';
 
 
 export interface LoQueAbre {
@@ -34,9 +34,14 @@ export interface LoQueAbre {
 export function loQueAbre(t: Ticket): LoQueAbre {
   const marcado = 'marcado';
   return {
-    camino: t === 'base'
-      ? `Su Camino abre la antesala y los sistemas 1 y 2: hasta el día ${ULTIMO_DIA_DE_BASE}, que cierra con su precio, su método y su oferta en una página.`
-      : 'Su Camino abre los 90 días completos, desde la antesala hasta su graduación.',
+    /*
+     * Los tres abren los 90 días desde el 15 nov 2026. La Base decía «hasta
+     * el día 12», que era lo que el código hacía y no lo que la página
+     * vendía: el producto se llama «La Base · 90 días con Javo». Lo que los
+     * separa está en las dos líneas de abajo —quién monta lo técnico y si el
+     * equipo recibe entregas—, que es donde de verdad estuvo siempre.
+     */
+    camino: 'Su Camino abre los 90 días completos, desde la antesala hasta su graduación.',
     /*
      * EN TERCERA PERSONA, porque esta frase la lee el equipo sobre un cliente.
      *

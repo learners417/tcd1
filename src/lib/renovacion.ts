@@ -11,11 +11,21 @@
  *
  * ═══ OJO CON LOS NÚMEROS ═══
  *
- * 497 y 997 también son los precios de `PRECIO_FUNDADOR` en planes.ts, y son
- * cosas distintas: allá es lo que se paga UNA VEZ para entrar al Camino
- * completo; acá es lo que se paga POR MES para seguir después del día 90.
- * Mismo número, significado distinto. Por eso cada pase dice «al mes» en
- * pantalla, siempre, y nunca se muestran las dos escaleras juntas.
+ * 497 y 997 son también números de la escalera de entrada, y son cosas
+ * distintas: allá es lo que se paga UNA VEZ para entrar al Camino; acá es lo
+ * que se paga POR MES para seguir después del día 90. Mismo número,
+ * significado distinto. Por eso cada pase dice «al mes» en pantalla, siempre,
+ * y nunca se muestran las dos escaleras juntas.
+ *
+ * ⚠ Y DESDE EL 15 NOV 2026 HAY UNO QUE SE ROZA DE MÁS. La escalera de entrada
+ * dejó de tener un 997: su escalón de arriba es La Base, a 1.000 de una vez.
+ * Acá sigue habiendo un pase privado de 997 AL MES. Para el que miró las dos
+ * páginas, 997 y 1.000 son el mismo número, y el que paga mil una vez puede
+ * leer que le están cobrando casi lo mismo todos los meses.
+ *
+ * No lo cambio por mi cuenta: es un precio, y los precios los decide Javo.
+ * Queda anotado en el MAPA, frente APP, para que lo resuelva con un número
+ * que no se confunda con el de al lado.
  *
  * ═══ DÓNDE SE COBRA ═══
  *
