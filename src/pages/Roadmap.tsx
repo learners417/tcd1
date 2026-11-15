@@ -1076,6 +1076,19 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
   }, []);
 
   /**
+   * Los micro pasos del día, atados por posición a los pasos de arriba.
+   *
+   * En un día de revisión los pasos NO son los de la jornada: son los de la
+   * cosa que se revisa. Sus micro no existen, y los de la jornada quedarían
+   * debajo de la tarea equivocada —que es peor que no tenerlos, porque no
+   * se ve roto—. Por eso ahí van vacíos.
+   */
+  const microDeHoy = useCallback((meta: RoadmapMeta) => {
+    if (enRevision.has(meta.codigo)) return [];
+    return (meta.micro ?? []).map((m) => m.map((x) => VOC(x)));
+  }, [enRevision]);
+
+  /**
    * EL PUNTO DE PARTIDA: SE GUARDA LO QUE YA TIENE, NO SE MUEVE SU FECHA.
    *
    * Acá estaba `const fechaInicio = proximoLunes();`, y escribía esa fecha en
@@ -1906,6 +1919,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                             metaTitulo={VOC(meta.titulo)}
                             teLlevas={VOC(meta.descripcion || meta.evidencia_requerida?.nombre || '')}
                             pasos={pasosDeHoy(meta)}
+                            micro={microDeHoy(meta)}
                             pide={VOC(meta.evidencia_requerida?.pide ?? '')}
                             seAbre={[meta.veredicto ? VOC(meta.veredicto) : '', meta.cinturon ? 'Ganaste un grado nuevo: míralo en tu Camino.' : ''].filter(Boolean).join(' ') || undefined}
                             base={baseDeHoy(meta)}
@@ -1971,6 +1985,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                             metaTitulo={VOC(meta.titulo)}
                             teLlevas={VOC(meta.descripcion || meta.evidencia_requerida?.nombre || '')}
                             pasos={pasosDeHoy(meta)}
+                            micro={microDeHoy(meta)}
                             pide={VOC(meta.evidencia_requerida?.pide ?? '')}
                             seAbre={[meta.veredicto ? VOC(meta.veredicto) : '', meta.cinturon ? 'Ganaste un grado nuevo: míralo en tu Camino.' : ''].filter(Boolean).join(' ') || undefined}
                             base={baseDeHoy(meta)}

@@ -1375,7 +1375,13 @@ html { font-variant-numeric: lining-nums; }
      letra. La diferencia entre .20 y .22 no se ve; la de .22 a .30, sí. */
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--oro-libro);
+  /* El oro de la casa (#A8875A) está medido para LÍNEAS de 1px, no para
+     texto: sobre el papel de la ficha da 3,2:1 y AA pide 4,5. Medido el 15
+     de noviembre en los tres rótulos de los hilos del día, que es la
+     pantalla que el cliente abre cada mañana. El escalón de texto —el mismo
+     oro, un paso más oscuro— da 5,2:1 y se lee. Las líneas y la capitular
+     siguen en --oro-libro, porque ahí el ojo no tiene que descifrar nada. */
+  color: var(--oro-t2);
 }
 
 /* La regla de 20 mm de la tapa, a escala de pantalla. */

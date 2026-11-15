@@ -27,9 +27,9 @@ FUENTE. Las tres tablas las pasa el frente LIBROS, no se inventan acá:
 LO QUE FALTA, Y ES DE LIBROS. Montaña, Viento, Río y Bosque todavía no
 tienen su tabla: llega cuando cierre cada libro. Hasta entonces, 27 de los
 91 días traen lección y el resto viene vacío — la app lo dibuja solo cuando
-hay algo, nunca anuncia lo que falta. Y el reparto de los cinco pasos afuera
-es una rotación por orden de día, no una tabla: cuando LIBROS pase el paso
-de cada día, se reemplaza `PASOS_AFUERA` por esa tabla y nada más cambia.
+hay algo, nunca anuncia lo que falta. Los 28 pasos afuera sí están los 28,
+uno por día y escrito contra la tarea de ese día: si LIBROS pasa los suyos,
+se reemplazan los textos de `PASOS_AFUERA` y nada más cambia.
 
 La regla que no se toca: los días y los nombres de `roadmap.seed.json`
 mandan. Acá se cuelgan hilos de esos días; si un día de esta tabla no
@@ -187,13 +187,45 @@ LECCIONES = [
 # lleva la tilde de verdad. Es la misma palabra de LIBROS, dicha como orden
 # para hoy. Si alguien la devuelve a «Publica una historia», el medidor
 # cuenta una falta en `roadmap>jornada`.
-PASOS_AFUERA = [
-    "Cambia una línea de tu perfil.",
-    "Graba una historia con tu cara y publícala.",
-    "Escríbele a un ex consultante.",
-    "Responde con una pregunta.",
-    "Pide una devolución.",
-]
+# 15 nov 2026 · DEJÓ DE SER UNA ROTACIÓN. Cinco pasos repartidos entre 28
+# días le daban al cliente «Cambia una línea de tu perfil» seis veces en los
+# 90 días, y la sexta ya no expone nada: expone que el paso no mira el día.
+#
+# Ahora cada uno está escrito contra la tarea de ESE día. El día 8 arma su
+# lista de veinte, así que su paso es escribirle a uno de esa lista; el 74
+# vuelve a medir su hora real, así que su paso es ponerla al lado de la del
+# día 1. Si LIBROS pasa su tabla, se reemplazan estos textos y nada más
+# cambia: los días son los mismos de abajo.
+PASOS_AFUERA = {
+    1:  "Dile a una sola persona que empezaste. Por mensaje, hoy, con la fecha de tu día 90.",
+    2:  "Pregúntale a quien te crió qué pensaba del dinero. Escucha sin discutir.",
+    3:  "Escríbele a un colega y pregúntale qué hace él cuando se le va el día.",
+    4:  "Pega tu protocolo donde alguien de tu casa lo vea, y cuéntale qué es.",
+    8:  "Escribe a uno de los veinte de tu lista. Sin ofrecer nada: solo cómo está.",
+    9:  "Cuéntale las etapas de tu método a alguien que no sea de tu rubro. Si no se entiende, anótalo.",
+    10: "Dile tu precio nuevo en voz alta a una persona de confianza. Mira qué te pasa en el cuerpo.",
+    12: "Anuncia en una historia que terminaste tu método. Sin vender.",
+    18: "Responde todos los mensajes que te llegaron hoy, cada uno con una pregunta.",
+    19: "Grábate diciendo tu número y mándaselo a alguien que te vaya a decir la verdad.",
+    25: "Escríbele a uno que te dijo «después» y ponle fecha de vuelta.",
+    30: "Muéstrale tus tres anuncios a alguien que no te conoce y pregúntale qué entendió.",
+    32: "Preséntale por mensaje a dos colegas que se puedan derivar entre ellos.",
+    43: "Cuenta en una historia qué número estás mirando esta semana. Sin resultado todavía.",
+    51: "Escríbele hoy a cada uno que no pagó. Uno por uno, con la fecha.",
+    52: "Pídele a un consultante que te diga una cosa que le faltó. Agradécesela por escrito.",
+    59: "Comparte uno de tus ejercicios. El que más te piden.",
+    60: "Avísale a tu casa en qué bloques no estás disponible la semana que viene.",
+    65: "Pregúntale a un colega cuánto le cuesta a él una agenda. Comparen los dos números.",
+    66: "Gasta algo en otra persona hoy, sin motivo y sin avisar.",
+    73: "Pídele a cada uno de los primeros su resultado en una frase, y el permiso para usarlo.",
+    74: "Pon tu hora real de hoy al lado de la del día 1 y muéstrasela a alguien.",
+    82: "Muestra los dos números: el de entrada y el de hoy. Sin explicar.",
+    85: "Escríbele a alguien que admires de otra disciplina y preséntate en tres líneas.",
+    87: "Cuenta tu foto de llegada en una historia, con tu cara.",
+    88: "Mándale tu plan de 180 días a una persona que te lo vaya a recordar.",
+    89: "Escríbeles hoy a los que quedaron en la bandeja. Nombre y fecha, uno por uno.",
+    90: "Manda tres cartas de gracias a quienes te sostuvieron estos noventa días.",
+}
 
 # Los 28 días sin nada visible, tal como los pasó LIBROS. No se derivan del
 # seed: medido el 15 de noviembre, 59 días no piden acciones de campo, así
@@ -253,11 +285,16 @@ def colgar_los_hilos(J):
                               "dicha": l["pausa_dicha"] or _n}
                 break
 
-    for n, dia in enumerate(sorted(DIAS_PASO_AFUERA)):
+    sin_texto = sorted(set(DIAS_PASO_AFUERA) - set(PASOS_AFUERA))
+    if sin_texto:
+        raise SystemExit(
+            f"Días con paso afuera y sin texto: {sin_texto}. Cada uno se "
+            "escribe contra la tarea de su día; no hay repertorio del que sacar.")
+    for dia in sorted(DIAS_PASO_AFUERA):
         if dia not in J:
             raise SystemExit(f"El día {dia} del paso afuera no existe en el camino.")
         if J[dia]["acciones_campo"]:
             raise SystemExit(
                 f"El día {dia} ya pide salir al mundo (acciones de campo): "
                 "el paso afuera va solo donde la app no pide nada visible.")
-        J[dia]["paso_afuera"] = PASOS_AFUERA[n % len(PASOS_AFUERA)]
+        J[dia]["paso_afuera"] = PASOS_AFUERA[dia]

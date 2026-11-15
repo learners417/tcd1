@@ -208,6 +208,14 @@ export interface Jornada {
   pausa: PausaDelDia | null
   /** Afuera · la micro-tarea opcional de 10 min, solo los días sin nada visible. */
   paso_afuera: string | null
+  /**
+   * Cómo se empieza cada tarea de este día. Va por posición: micro[i] son
+   * los micro pasos de pasos[i], y el generador se planta si no coinciden.
+   *
+   * Los días sin tarea —fines de semana, días de atender, la graduación—
+   * no traen el campo.
+   */
+  micro?: string[][]
 }
 
 export interface Roadmap {
@@ -356,7 +364,12 @@ export interface RoadmapMeta {
   tipo_jornada: TipoJornada
   sistema: number | null
   pasos: string[]
-  checklist: string[]
+  /**
+   * Cómo se empieza cada tarea: micro[i] son los micro pasos de pasos[i].
+   * Reemplaza a `checklist`, que era una copia textual de `pasos` que no
+   * dibujaba ninguna pantalla.
+   */
+  micro: string[][]
   agente: AgenteId | null
   usa_ia: boolean
   cinturon: CinturonId | null
@@ -452,7 +465,7 @@ const comoMeta = (
   tipo_jornada: j.tipo,
   sistema: j.sistema,
   pasos: j.pasos,
-  checklist: j.pasos,
+  micro: j.micro ?? [],
   agente: j.agente,
   usa_ia: j.agente !== null,
   cinturon: j.cinturon,

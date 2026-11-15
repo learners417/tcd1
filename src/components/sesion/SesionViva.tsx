@@ -43,6 +43,14 @@ interface Props {
   metaTitulo: string;
   teLlevas?: string;
   pasos?: string[];
+  /**
+   * Cómo se empieza cada paso: micro[i] son los de pasos[i].
+   *
+   * Se dibujan SOLO los del paso en curso —el primero sin tildar—. Los
+   * trece del día 1 juntos son una pared igual que la que vinieron a
+   * sacar; de a uno, son el próximo movimiento y nada más.
+   */
+  micro?: string[][];
   pide?: string;
   seAbre?: string;
   /** Lo que ya contestó en el onboarding para esta jornada. */
@@ -84,7 +92,7 @@ const ROTULO: Record<PantallaSesion, string> = {
 };
 
 export default function SesionViva({
-  metaKey, metaCodigo, metaTitulo, teLlevas, pasos, pide, seAbre, base,
+  metaKey, metaCodigo, metaTitulo, teLlevas, pasos, micro, pide, seAbre, base,
   tiempoEstimado, isCompleted, userId, children, video, evidencia, onIr, hilos,
 }: Props) {
   const orden = useMemo<PantallaSesion[]>(
@@ -270,6 +278,10 @@ export default function SesionViva({
               <ul className="mt-3 space-y-1">
                 {pasos.map((paso, n) => {
                   const hecho = hechos.has(n);
+                  /* El paso en curso es el primero que queda sin tildar. Los
+                     micro de ESE se ven; los demás esperan su turno. */
+                  const enCurso = !hecho && pasos.findIndex((_, i) => !hechos.has(i)) === n;
+                  const arranque = enCurso ? (micro?.[n] ?? []) : [];
                   return (
                     <li key={n}>
                       <button
@@ -292,6 +304,20 @@ export default function SesionViva({
                         </span>
                         <span className={`text-[17px] leading-snug ${hecho ? 'text-cream/60' : 'text-cream'}`}>{paso}</span>
                       </button>
+                      {/* Y debajo, por dónde se empieza. Sin tilde propia: si
+                          cada movimiento tuviera la suya, el día pasaría de
+                          cinco cosas que cerrar a trece, y el que llega
+                          cansado no cierra ninguna. */}
+                      {arranque.length > 0 && (
+                        <ul className="ml-10 mb-2 space-y-1.5">
+                          {arranque.map((m, k) => (
+                            <li key={k} className="flex gap-2 text-[15px] leading-snug text-cream/75">
+                              <span aria-hidden="true" className="text-goldhi">·</span>
+                              <span>{m}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                     </li>
                   );
                 })}

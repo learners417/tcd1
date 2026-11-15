@@ -963,7 +963,6 @@
       "nota": "Lo ejecuta el equipo. Subcuenta, número nuevo de WhatsApp, permisos solo de pagos y calendario.",
       "paso_esencial": null,
       "avanza_sin_evidencia": false,
-      "checklist": [],
       "leccion": [],
       "pausa": null,
       "paso_afuera": null
@@ -1039,13 +1038,6 @@
       "nota": null,
       "paso_esencial": 5,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Confirma tus seis números de entrada: ya los cargaste al entrar, ajústalos si algo cambió",
-        "Elige dónde y a qué hora vas a construir esto cada día",
-        "Suma lo que cobraste el último mes y las horas que trabajaste de verdad",
-        "Divide: esa es tu hora real neta",
-        "Escríbela donde la veas"
-      ],
       "leccion": [
         {
           "libro": "lago",
@@ -1073,7 +1065,31 @@
         "base": "Lehrer y Gevirtz 2014 (revisión); Marchant y otros 2025",
         "dicha": "Seis por minuto"
       },
-      "paso_afuera": "Cambia una línea de tu perfil."
+      "paso_afuera": "Dile a una sola persona que empezaste. Por mensaje, hoy, con la fecha de tu día 90.",
+      "micro": [
+        [
+          "Abre tu medición de entrada en la app",
+          "Revisa los seis números, uno por uno",
+          "Corrige el que haya cambiado"
+        ],
+        [
+          "Elige un lugar: el mismo todos los días",
+          "Pon la hora en tu agenda, de lunes a viernes",
+          "Saca una foto del lugar con el cuaderno sobre la mesa"
+        ],
+        [
+          "Suma lo que entró el último mes, no lo facturado",
+          "Suma las horas reales: consulta, mensajes, traslados y papeles"
+        ],
+        [
+          "Lo cobrado, dividido por las horas",
+          "Escribe el resultado con su moneda"
+        ],
+        [
+          "En un papel, con letra grande",
+          "Pégalo donde trabajas"
+        ]
+      ]
     },
     {
       "dia": 2,
@@ -1145,7 +1161,31 @@
         "base": "Weitzberg y Lundberg 2002; Hatha Yoga Pradipika, s. XV (bhramari)",
         "dicha": "Tararear"
       },
-      "paso_afuera": "Graba una historia con tu cara y publícala."
+      "paso_afuera": "Pregúntale a quien te crió qué pensaba del dinero. Escucha sin discutir.",
+      "micro": [
+        [
+          "Las que decía quien te crió",
+          "Textuales, con sus palabras",
+          "Una por renglón"
+        ],
+        [
+          "Dibuja tu árbol: tú, tus padres y tus cuatro abuelos",
+          "Al lado de cada uno, una palabra: cómo vivió el dinero"
+        ],
+        [
+          "Busca quién ganó más en tu árbol",
+          "Escribe cuánto, aunque sea aproximado"
+        ],
+        [
+          "Escribe el primer nombre que aparezca",
+          "No lo corrijas"
+        ],
+        [
+          "Escríbelo a mano, con tu letra",
+          "Léelo en voz alta una vez",
+          "Pégalo en la app"
+        ]
+      ]
     },
     {
       "dia": 3,
@@ -1217,7 +1257,30 @@
         "base": "Kross y otros 2014 (seis estudios con metaanálisis interno)",
         "dicha": "Hablarte por tu nombre"
       },
-      "paso_afuera": "Escríbele a un ex consultante."
+      "paso_afuera": "Escríbele a un colega y pregúntale qué hace él cuando se le va el día.",
+      "micro": [
+        [
+          "Abre el test en la app",
+          "Contesta rápido, sin pensarlo demasiado",
+          "Anota tu tipo"
+        ],
+        [
+          "Subraya lo que reconoces de ti entero",
+          "Subraya lo que reconoces de ti cansado"
+        ],
+        [
+          "Repasa tus últimos siete días",
+          "Elige tres momentos concretos, con día y hora"
+        ],
+        [
+          "Lo que haces de verdad, no lo que deberías",
+          "Una línea por situación"
+        ],
+        [
+          "Cierra los ojos y vuelve a cada situación",
+          "Escribe el lugar: pecho, estómago, garganta o mandíbula"
+        ]
+      ]
     },
     {
       "dia": 4,
@@ -1268,13 +1331,6 @@
       "nota": null,
       "paso_esencial": 5,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Para cada disparador de ayer, elige un reemplazo que ya te guste. Ejemplo: en vez del postre, salgo a caminar veinte minutos",
-        "Que el reemplazo se pueda hacer en menos de cinco minutos y no dependa de nadie",
-        "Elige un gesto físico chico que lo arranque. Ejemplo: apoyar las dos manos en la mesa y respirar hondo una vez",
-        "Escribe tu protocolo en tres líneas: si pasa X, hago Y, y empiezo con este gesto",
-        "Pégalo donde trabajas y pruébalo esta semana"
-      ],
       "leccion": [
         {
           "libro": "lago",
@@ -1302,7 +1358,30 @@
         "base": "Práctica de Javo",
         "dicha": "Tu protocolo (el 7-7-7 de Javo)"
       },
-      "paso_afuera": "Responde con una pregunta."
+      "paso_afuera": "Pega tu protocolo donde alguien de tu casa lo vea, y cuéntale qué es.",
+      "micro": [
+        [
+          "Relee tus tres disparadores",
+          "Al lado de cada uno, algo que ya disfrutas hacer"
+        ],
+        [
+          "Tacha los reemplazos que llevan más de cinco minutos",
+          "Tacha los que necesitan a otra persona"
+        ],
+        [
+          "Prueba dos o tres gestos",
+          "Quédate con el que te sale sin pensar"
+        ],
+        [
+          "Una línea por disparador",
+          "Con esta forma: si pasa…, hago…, empiezo con…"
+        ],
+        [
+          "Pégalo a la altura de los ojos",
+          "Sácale una foto para la app",
+          "Cada vez que lo uses, una marca al lado"
+        ]
+      ]
     },
     {
       "dia": 5,
@@ -1375,13 +1454,6 @@
       "nota": null,
       "paso_esencial": 5,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Pon lado a lado tu hora real neta y tu precio de hoy",
-        "Escribe tu precio nuevo y dilo tres veces en voz alta",
-        "Sella el precio y crea tu link de pago",
-        "Ordena a quienes atiendes en tres grupos: siguen, suben, sueltas",
-        "Si recién empiezas: escribe a quién no vas a atender"
-      ],
       "leccion": [
         {
           "libro": "lago",
@@ -1409,7 +1481,31 @@
         "base": "Lehrer y Gevirtz 2014 (revisión); Marchant y otros 2025",
         "dicha": "Seis por minuto, antes de escribirlo"
       },
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "Escribe los dos números en la misma línea",
+          "Mira la diferencia sin justificarla"
+        ],
+        [
+          "Escríbelo con número y moneda",
+          "Dilo de pie, mirando un punto fijo",
+          "Si la voz sube, repite hasta que baje"
+        ],
+        [
+          "Sella tu precio en la app",
+          "Crea el link de pago en el Sistema",
+          "Haz un cobro de prueba"
+        ],
+        [
+          "Lista a todos los que atiendes, con su monto",
+          "Marca a cada uno: sigue, sube o suelta"
+        ],
+        [
+          "Una línea: a quién no",
+          "Guárdala para el día 53"
+        ]
+      ]
     },
     {
       "dia": 6,
@@ -1548,16 +1644,33 @@
       "nota": "Menos de 500 → frío. 500 o más → tibio. Cambia solo los días 31 y 32.",
       "paso_esencial": 5,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Elige al consultante que mejor te salió",
-        "Escribe su dolor con sus palabras, como te lo dijo",
-        "Escribe qué quería lograr y qué ya había probado",
-        "Arma tu lista de veinte: nombres, no categorías",
-        "Al lado de cada nombre, su canal"
-      ],
       "leccion": [],
       "pausa": null,
-      "paso_afuera": "Pide una devolución."
+      "paso_afuera": "Escribe a uno de los veinte de tu lista. Sin ofrecer nada: solo cómo está.",
+      "micro": [
+        [
+          "Repasa tu agenda de los últimos doce meses",
+          "Marca tres nombres que se fueron mejor de lo que llegaron",
+          "Elige uno: el que volverías a atender mañana"
+        ],
+        [
+          "Copia la primera frase que te dijo, textual",
+          "Suma dos frases que repetía",
+          "Tacha cada palabra técnica tuya"
+        ],
+        [
+          "Lo que quería, en una línea",
+          "Tres cosas que probó antes de llegar a ti"
+        ],
+        [
+          "Veinte renglones numerados",
+          "Solo nombres propios: nada de «colegas» ni «pacientes»"
+        ],
+        [
+          "WhatsApp, Instagram, correo o en persona",
+          "Si no sabes el canal, déjalo marcado y sigue"
+        ]
+      ]
     },
     {
       "dia": 9,
@@ -1600,15 +1713,28 @@
       "nota": null,
       "paso_esencial": 4,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Escribe las etapas de lo que ya haces, en orden. Ejemplo: entrevista, medición, devolución",
-        "Define con qué entra la persona y con qué sale",
-        "Define cómo se mide: qué número miras al empezar y al terminar",
-        "Arma las siglas con una letra por etapa y ponle nombre"
-      ],
       "leccion": [],
       "pausa": null,
-      "paso_afuera": "Cambia una línea de tu perfil."
+      "paso_afuera": "Cuéntale las etapas de tu método a alguien que no sea de tu rubro. Si no se entiende, anótalo.",
+      "micro": [
+        [
+          "Piensa en tu último proceso completo con alguien",
+          "Una etapa por renglón, en orden"
+        ],
+        [
+          "Cómo llega: una frase con sus palabras",
+          "Cómo se va: una frase con un resultado"
+        ],
+        [
+          "Elige un número que la persona entienda",
+          "Escribe cómo lo mides el primer día y el último"
+        ],
+        [
+          "Una letra por etapa",
+          "Si la palabra no sale, cambia el nombre de una etapa, no el orden",
+          "Escribe el nombre completo de tu método"
+        ]
+      ]
     },
     {
       "dia": 10,
@@ -1655,13 +1781,6 @@
       "nota": null,
       "paso_esencial": 5,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Promesa: un resultado, no una actividad. Ejemplo: duermes seis horas seguidas, no diez sesiones",
-        "Plazo, con fecha de cierre",
-        "Entregables: lo que la persona recibe, no lo que tú haces",
-        "Precio con número, nunca menor al que sellaste el día 5",
-        "Para cada palanca, una acción tuya: más resultado, más certeza, menos tiempo, menos esfuerzo"
-      ],
       "leccion": [
         {
           "libro": "lago",
@@ -1680,7 +1799,30 @@
         "base": "Kross y otros 2014 (seis estudios con metaanálisis interno)",
         "dicha": "Hablarte por tu nombre"
       },
-      "paso_afuera": "Graba una historia con tu cara y publícala."
+      "paso_afuera": "Dile tu precio nuevo en voz alta a una persona de confianza. Mira qué te pasa en el cuerpo.",
+      "micro": [
+        [
+          "Escribe un resultado que la persona pueda ver",
+          "Tacha toda palabra de actividad: sesiones, encuentros, clases"
+        ],
+        [
+          "Elige el número de semanas",
+          "Escribe la fecha de inicio y la de cierre"
+        ],
+        [
+          "Lo que recibe, uno por renglón",
+          "Tacha lo que es tarea tuya y no algo que se lleva"
+        ],
+        [
+          "Escribe el precio con número",
+          "Compáralo con el del día 5: igual o más"
+        ],
+        [
+          "Más resultado: una acción",
+          "Más certeza: una acción",
+          "Menos tiempo y menos esfuerzo: una acción para cada uno"
+        ]
+      ]
     },
     {
       "dia": 11,
@@ -1736,16 +1878,33 @@
       "nota": null,
       "paso_esencial": 5,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Escribe tu presentación de treinta segundos: lo que viviste, tu transformación, a quién ayudas, contra qué obstáculo y con qué método",
-        "Escribe el guion del video de tu página, que arranca con esa misma historia",
-        "Escribe tres piezas que abren distinto y terminan igual",
-        "Dibuja la W de tu llamada",
-        "Arma la lista de lo que grabas el lunes"
-      ],
       "leccion": [],
       "pausa": null,
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "Cinco frases, una por parte",
+          "Léela en voz alta con cronómetro: treinta segundos o menos"
+        ],
+        [
+          "Arranca con la misma historia",
+          "Sigue con tu método y sus etapas",
+          "Termina invitando a agendar"
+        ],
+        [
+          "Tres comienzos distintos",
+          "Un mismo final para las tres"
+        ],
+        [
+          "Usa la plantilla de la app",
+          "Dibújala en una hoja entera"
+        ],
+        [
+          "Tres anuncios",
+          "El video de tu página",
+          "El video de preparación para la llamada"
+        ]
+      ]
     },
     {
       "dia": 12,
@@ -1790,13 +1949,6 @@
       "nota": null,
       "paso_esencial": 5,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Presenta tu método a Diego",
-        "Examen 1: ¿se puede medir? Si no hay número al principio y al final, no es método",
-        "Examen 2: el qué y el cómo, separados",
-        "Examen 3: ¿importa el orden de las etapas?",
-        "Corrige lo que te devuelva y vuelve a presentarlo. Puedes reprobar las veces que haga falta"
-      ],
       "leccion": [
         {
           "libro": "lago",
@@ -1815,7 +1967,30 @@
         "base": "Balban y otros, Cell Reports Medicine 2023 (ensayo aleatorizado)",
         "dicha": "Suspiro cíclico"
       },
-      "paso_afuera": "Escríbele a un ex consultante."
+      "paso_afuera": "Anuncia en una historia que terminaste tu método. Sin vender.",
+      "micro": [
+        [
+          "Abre a Diego en Entrenadores",
+          "Pega tu método: nombre, etapas y cómo se mide"
+        ],
+        [
+          "Que haya un número al principio",
+          "Que haya un número al final"
+        ],
+        [
+          "Separa qué logra cada etapa de cómo lo hace",
+          "Si se mezclan, reescribe esa etapa"
+        ],
+        [
+          "Prueba cambiar dos etapas de lugar",
+          "Si da igual, corrige el orden"
+        ],
+        [
+          "Anota lo que te devuelve",
+          "Corrige y vuelve a presentarlo",
+          "Hasta que apruebe"
+        ]
+      ]
     },
     {
       "dia": 13,
@@ -1933,16 +2108,32 @@
       "nota": "Misma ropa · plano de pecho · luz de ventana · teléfono en modo avión · número y palmada · tres tomas.",
       "paso_esencial": 5,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Graba primero los tres anuncios, uno detrás del otro",
-        "Después el video de tu página, de corrido y sin leer. Tres tomas y sigues",
-        "Al final, el de preparación para la llamada",
-        "No revises nada hasta terminar el día: mirar en el medio es la forma más eficiente de no grabar el resto",
-        "Sube los cinco archivos"
-      ],
       "leccion": [],
       "pausa": null,
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "Luz de ventana y plano de pecho",
+          "Teléfono en modo avión",
+          "Número y palmada antes de cada toma"
+        ],
+        [
+          "De corrido, sin leer",
+          "Tres tomas y sigues"
+        ],
+        [
+          "De corrido, sin leer",
+          "Tres tomas como máximo"
+        ],
+        [
+          "No mires ninguna toma hasta el final",
+          "Si dudas, graba otra y sigue"
+        ],
+        [
+          "Pásalos a la computadora",
+          "Súbelos a la app, cada uno con su nombre"
+        ]
+      ]
     },
     {
       "dia": 16,
@@ -1999,16 +2190,32 @@
       "nota": null,
       "paso_esencial": 5,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Foto: tu cara, fondo limpio, que se entienda en miniatura",
-        "Nombre buscable: cómo te buscarían, no tu título completo",
-        "Frase: tu promesa, no tu profesión. Ejemplo: ayudo a X a lograr Y",
-        "Enlace a tu página",
-        "Cierra y no toques nada más hoy"
-      ],
       "leccion": [],
       "pausa": null,
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "Tu cara mirando a cámara, con luz de día",
+          "Fondo limpio",
+          "Mírala en miniatura: que se entienda"
+        ],
+        [
+          "Cómo te buscaría alguien que no te conoce",
+          "Ejemplo: tu nombre y tu especialidad"
+        ],
+        [
+          "Ayudo a quién a lograr qué",
+          "La misma frase arriba de tu página, palabra por palabra"
+        ],
+        [
+          "Pega el enlace en tu perfil",
+          "Ábrelo desde el teléfono para probarlo"
+        ],
+        [
+          "Sácale captura a tu perfil",
+          "Cierra y no toques nada más hoy"
+        ]
+      ]
     },
     {
       "dia": 17,
@@ -2071,16 +2278,31 @@
       "nota": null,
       "paso_esencial": 5,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Sube el video a tu página",
-        "Arma el formulario con las cinco preguntas que filtran",
-        "Arma el calendario en dos pasos y conéctalo a tu correo",
-        "Arma la página de preparación que ve después de agendar",
-        "Agéndate a ti mismo desde el teléfono, de punta a punta, como si fueras un desconocido"
-      ],
       "leccion": [],
       "pausa": null,
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "Arriba de todo en tu página",
+          "Mira que se vea bien en el teléfono"
+        ],
+        [
+          "Las cinco preguntas de la app",
+          "Conecta el formulario al calendario"
+        ],
+        [
+          "Elige tus horarios disponibles",
+          "Conéctalo a tu correo"
+        ],
+        [
+          "Tu video de preparación arriba",
+          "Qué tiene que traer a la llamada"
+        ],
+        [
+          "Desde el teléfono, como un desconocido",
+          "Mira que te llegue la confirmación"
+        ]
+      ]
     },
     {
       "dia": 18,
@@ -2130,13 +2352,6 @@
       "nota": "Desde hoy son dos por día, sostenidos. Deja de ser tarea y pasa a ser estado.",
       "paso_esencial": 5,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Edita la plantilla con tu voz: no vende, pide veinte minutos",
-        "Manda veinte hoy, empezando por los más fáciles",
-        "Marca en la app a quién le escribiste",
-        "Abre la plantilla del grupo uno y escríbela con tu voz",
-        "Escribe desde cuándo rige el precio nuevo. Ejemplo: desde el 1 del mes que viene"
-      ],
       "leccion": [
         {
           "libro": "lago",
@@ -2155,7 +2370,30 @@
         "base": "Sturm y otros 2020: 60 adultos mayores, 8 semanas",
         "dicha": "Caminata de asombro"
       },
-      "paso_afuera": "Responde con una pregunta."
+      "paso_afuera": "Responde todos los mensajes que te llegaron hoy, cada uno con una pregunta.",
+      "micro": [
+        [
+          "Léela en voz alta",
+          "Cambia cada palabra que no dirías",
+          "Que pida veinte minutos, no que venda"
+        ],
+        [
+          "Empieza por los cinco más fáciles",
+          "Uno por uno, nunca en grupo"
+        ],
+        [
+          "Marca cada nombre al enviar",
+          "Anota la fecha"
+        ],
+        [
+          "Ábrela en la app",
+          "Reescríbela con tu voz"
+        ],
+        [
+          "Elige la fecha",
+          "Escríbela en el mensaje"
+        ]
+      ]
     },
     {
       "dia": 19,
@@ -2207,13 +2445,6 @@
       "nota": "Si todavía sube el tono, devuelve 'repite mañana' y no aprueba.",
       "paso_esencial": 5,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Elige un gesto físico chico y repetible. Ejemplo: apoyar la mano en la mesa",
-        "Grábate diciendo tu número veinte veces, con el gesto antes de cada una",
-        "Escucha la primera y la veinte, una después de la otra",
-        "Dibuja tu W sobre la plantilla",
-        "Escribe tus preguntas de cada tramo"
-      ],
       "leccion": [
         {
           "libro": "lago",
@@ -2232,7 +2463,29 @@
         "base": "Kross y otros 2014 (seis estudios con metaanálisis interno)",
         "dicha": "Hablarte por tu nombre"
       },
-      "paso_afuera": "Pide una devolución."
+      "paso_afuera": "Grábate diciendo tu número y mándaselo a alguien que te vaya a decir la verdad.",
+      "micro": [
+        [
+          "Prueba dos gestos",
+          "Quédate con uno que puedas repetir en una llamada"
+        ],
+        [
+          "El gesto antes de cada repetición",
+          "En audio, de corrido"
+        ],
+        [
+          "Una después de la otra",
+          "Anota cuál suena más firme"
+        ],
+        [
+          "Sobre la plantilla de la app",
+          "Una W grande, en hoja entera"
+        ],
+        [
+          "Una o dos preguntas por tramo",
+          "Escríbelas como las dirías"
+        ]
+      ]
     },
     {
       "dia": 20,
@@ -2337,13 +2590,6 @@
       "nota": "Esa objeción vale más que veinte sesiones de teoría. Alimenta el día 42.",
       "paso_esencial": 5,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Elige a quién de tu red le ofreciste y todavía no cerraste",
-        "Repasa tu W una vez, no más",
-        "Haz la llamada",
-        "Escribe qué objeción apareció",
-        "Escribe tu mensaje previo"
-      ],
       "leccion": [
         {
           "libro": "lago",
@@ -2362,7 +2608,29 @@
         "base": "Balban y otros, Cell Reports Medicine 2023 (ensayo aleatorizado)",
         "dicha": "Suspiro cíclico al colgar"
       },
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "Busca en tu lista a quién ya le ofreciste",
+          "Elige a uno que todavía no cerró"
+        ],
+        [
+          "Una sola vez, en voz alta",
+          "Deja la hoja a la vista durante la llamada"
+        ],
+        [
+          "Clava el marco al empezar",
+          "Sigue tu W de punta a punta"
+        ],
+        [
+          "Con las palabras exactas que usó",
+          "Apenas cortas, antes de hacer otra cosa"
+        ],
+        [
+          "El que mandas antes de cada llamada",
+          "Que confirme día, hora y para qué es"
+        ]
+      ]
     },
     {
       "dia": 23,
@@ -2414,16 +2682,31 @@
       "nota": null,
       "paso_esencial": 5,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Activa la grabación en el Sistema",
-        "Escribe la frase con la que avisas",
-        "Sube o elige una llamada real",
-        "Escúchala entera: la app no deja saltar",
-        "Anota los cuatro números"
-      ],
       "leccion": [],
       "pausa": null,
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "Abre la configuración de llamadas en el Sistema",
+          "Actívala y haz una prueba"
+        ],
+        [
+          "Que diga que grabas y para qué",
+          "Escríbela y apréndela"
+        ],
+        [
+          "Una llamada de esta semana",
+          "Súbela a la app"
+        ],
+        [
+          "Sin hacer otra cosa",
+          "Con papel al lado"
+        ],
+        [
+          "Los cuatro que pide la app",
+          "Uno por renglón"
+        ]
+      ]
     },
     {
       "dia": 24,
@@ -2483,7 +2766,29 @@
         "base": "Emmons y McCullough 2003",
         "dicha": "Gratitud"
       },
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "Abre el menú de bonos en la app",
+          "Elige dos que puedas cumplir a tiempo"
+        ],
+        [
+          "Sin descuento",
+          "El precio completo, escrito en el mensaje"
+        ],
+        [
+          "Nombra los dos bonos",
+          "Di que son solo para los tres primeros"
+        ],
+        [
+          "Lista a quienes dijeron sí o casi",
+          "Uno por uno, por su canal"
+        ],
+        [
+          "Nombre y respuesta, uno por renglón",
+          "Al que dijo «después», ponle fecha"
+        ]
+      ]
     },
     {
       "dia": 25,
@@ -2534,15 +2839,28 @@
       "nota": null,
       "paso_esencial": 4,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Arma tu bandeja con los cuatro estados",
-        "A cada 'no ahora' ponle fecha de vuelta",
-        "Arma las respuestas automáticas",
-        "Protocolo: escribe la lista de lo que te deben y táchala"
-      ],
       "leccion": [],
       "pausa": null,
-      "paso_afuera": "Cambia una línea de tu perfil."
+      "paso_afuera": "Escríbele a uno que te dijo «después» y ponle fecha de vuelta.",
+      "micro": [
+        [
+          "Crea los cuatro estados en el Sistema",
+          "Pasa cada conversación a su estado"
+        ],
+        [
+          "Una fecha concreta para cada uno",
+          "Cárgala en el Sistema"
+        ],
+        [
+          "Las respuestas de la app, con tu voz",
+          "Actívalas y pruébalas"
+        ],
+        [
+          "Lo que te deben: nombre y monto",
+          "Escríbele a cada uno",
+          "Tacha cada pago que entra"
+        ]
+      ]
     },
     {
       "dia": 26,
@@ -2601,13 +2919,6 @@
       "nota": null,
       "paso_esencial": 5,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Manda el link a quien ya dijo que sí",
-        "Cuando entre el cobro, sube el comprobante",
-        "Escribe al lado quién viene después, con nombre y fecha. Eso evita que lo bajes",
-        "Arma la vista con cuatro columnas y nada más: gasto, entradas, agendas y costo por agenda",
-        "Anota tu costo por agenda de hoy"
-      ],
       "leccion": [
         {
           "libro": "lago",
@@ -2626,7 +2937,29 @@
         "base": "Noetel y otros, BMJ 2024; Salimpoor y otros 2011",
         "dicha": "Bailar tu canción"
       },
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "El link de pago del día 5",
+          "Hoy, no mañana"
+        ],
+        [
+          "Captura donde se lea el monto",
+          "Súbela a la app"
+        ],
+        [
+          "Nombre y fecha",
+          "Al lado del comprobante"
+        ],
+        [
+          "Gasto, entradas, agendas y costo por agenda",
+          "Ninguna columna más"
+        ],
+        [
+          "Gasto dividido por agendas",
+          "Anótalo con la fecha"
+        ]
+      ]
     },
     {
       "dia": 27,
@@ -2734,15 +3067,28 @@
       "nota": null,
       "paso_esencial": 4,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Conecta tu página y tu perfil profesional",
-        "Crea tu cuenta publicitaria dentro de tu business",
-        "Carga tu forma de pago",
-        "Instala el pixel en tu página y pruébalo abriéndola desde el teléfono"
-      ],
       "leccion": [],
       "pausa": null,
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "Entra a tu business de Meta",
+          "Agrega tu página y tu cuenta de Instagram"
+        ],
+        [
+          "País, moneda y zona horaria correctos",
+          "Revísalos antes de confirmar: no se cambian después"
+        ],
+        [
+          "Una tarjeta a tu nombre",
+          "Mira que quede activa"
+        ],
+        [
+          "Copia el código del pixel",
+          "Pégalo en tu página desde el Sistema",
+          "Ábrela desde el teléfono y mira que dispare"
+        ]
+      ]
     },
     {
       "dia": 30,
@@ -2780,14 +3126,23 @@
       "nota": null,
       "paso_esencial": 3,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Edita corto: sin música, sin intro y sin logo animado",
-        "Ponles subtítulos quemados: la mayoría los mira sin sonido",
-        "Súbelos al banco de creativos y márcalos como listos"
-      ],
       "leccion": [],
       "pausa": null,
-      "paso_afuera": "Graba una historia con tu cara y publícala."
+      "paso_afuera": "Muéstrale tus tres anuncios a alguien que no te conoce y pregúntale qué entendió.",
+      "micro": [
+        [
+          "Arranca en la primera palabra",
+          "Sin música, sin intro y sin logo"
+        ],
+        [
+          "Quemados en el video",
+          "Que no tapen tu cara"
+        ],
+        [
+          "Súbelos con nombre",
+          "Márcalos como listos"
+        ]
+      ]
     },
     {
       "dia": 31,
@@ -2837,16 +3192,32 @@
       "nota": null,
       "paso_esencial": 5,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Campaña 1, frío amplio: sin intereses, solo país, ciudad y edad. Va a tu recurso",
-        "Campaña 2, para quienes ya te vieron: los que vieron tu recurso, tus videos o tu perfil. Va directo a tu video de venta",
-        "Reparte el presupuesto mitad y mitad",
-        "Los tres anuncios adentro del mismo conjunto, para que compitan entre ellos",
-        "Enciende y anota la fecha y la hora"
-      ],
       "leccion": [],
       "pausa": null,
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "Sin intereses",
+          "Solo país, ciudad y edad",
+          "Destino: tu recurso"
+        ],
+        [
+          "Público: quienes vieron tu recurso, tus videos o tu perfil",
+          "Destino: tu video de venta"
+        ],
+        [
+          "Decide el total por día",
+          "Mitad y mitad"
+        ],
+        [
+          "Los tres en el mismo conjunto",
+          "No los separes"
+        ],
+        [
+          "Revisa todo una vez",
+          "Enciende y anota fecha y hora"
+        ]
+      ]
     },
     {
       "dia": 32,
@@ -2896,13 +3267,6 @@
       "nota": null,
       "paso_esencial": 5,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "A quien termina, escríbele cuándo cierra su proceso y qué se lleva",
-        "A quien se deriva, pásale un nombre concreto y preséntalos",
-        "Carga las fechas de cierre en tu agenda",
-        "Escribe qué recibe tu consultante a cambio del dinero",
-        "Escribe qué se libera él al pagar. Ejemplo: deja de deberse a sí mismo empezar"
-      ],
       "leccion": [
         {
           "libro": "lago",
@@ -2921,7 +3285,29 @@
         "base": "Lehrer y Gevirtz 2014 (revisión); Marchant y otros 2025",
         "dicha": "Seis por minuto"
       },
-      "paso_afuera": "Escríbele a un ex consultante."
+      "paso_afuera": "Preséntale por mensaje a dos colegas que se puedan derivar entre ellos.",
+      "micro": [
+        [
+          "Fecha de cierre",
+          "Qué se lleva, en una línea"
+        ],
+        [
+          "Un nombre concreto",
+          "Preséntalos en un mismo mensaje"
+        ],
+        [
+          "Una fecha por consultante",
+          "Sácale captura"
+        ],
+        [
+          "En sus palabras, no en las tuyas",
+          "Una línea"
+        ],
+        [
+          "Una línea",
+          "Desde lo que siente él, no desde lo que haces tú"
+        ]
+      ]
     },
     {
       "dia": 33,
@@ -2963,11 +3349,6 @@
       "nota": null,
       "paso_esencial": 3,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Mira tu tablero una vez. Anota el costo por agenda de hoy",
-        "No toques nada de la campaña. Al tercer día vas a querer: por eso a la mayoría no le funciona",
-        "Sigue escribiendo a tu red: dos mensajes nuevos"
-      ],
       "leccion": [
         {
           "libro": "lago",
@@ -2986,7 +3367,21 @@
         "base": "Weitzberg y Lundberg 2002; Hatha Yoga Pradipika, s. XV (bhramari)",
         "dicha": "Tararear"
       },
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "Una sola vez, a la misma hora",
+          "Anota el costo por agenda"
+        ],
+        [
+          "Ni el presupuesto, ni los anuncios, ni el público",
+          "Si tienes ganas de tocar, escribe por qué y espera"
+        ],
+        [
+          "Dos mensajes nuevos",
+          "Márcalos en la app"
+        ]
+      ]
     },
     {
       "dia": 34,
@@ -3099,15 +3494,27 @@
       "nota": null,
       "paso_esencial": 4,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Parte tu programa en dos columnas: grabado y en vivo",
-        "Nombra tus estaciones, en orden",
-        "Define tu línea base",
-        "Haz la cuenta: horas para uno, horas para diez"
-      ],
       "leccion": [],
       "pausa": null,
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "Grabado: lo que se repite igual con todos",
+          "En vivo: lo que necesita tu presencia"
+        ],
+        [
+          "Una estación por etapa de tu método",
+          "Con nombre corto"
+        ],
+        [
+          "El número con el que entra cada consultante",
+          "Cómo lo mides el primer día"
+        ],
+        [
+          "Horas por consultante al mes",
+          "Multiplícalas por diez"
+        ]
+      ]
     },
     {
       "dia": 37,
@@ -3151,12 +3558,6 @@
       "nota": null,
       "paso_esencial": 4,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Escribe tu mensaje de bienvenida",
-        "Escribe tus tres límites",
-        "Ordena tus siete pasos del alta",
-        "Conecta la línea base al triage"
-      ],
       "leccion": [
         {
           "libro": "lago",
@@ -3175,7 +3576,26 @@
         "base": "Kross y otros 2014 (seis estudios con metaanálisis interno)",
         "dicha": "Hablarte por tu nombre"
       },
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "Qué pasa en la primera semana",
+          "Cómo y cuándo te escribe"
+        ],
+        [
+          "Horarios en que respondes",
+          "Por dónde te escribe",
+          "Qué pasa si falta"
+        ],
+        [
+          "Del pago al primer encuentro",
+          "En orden, uno por renglón"
+        ],
+        [
+          "Que el formulario de entrada pida la línea base",
+          "Pruébalo con un alta de prueba"
+        ]
+      ]
     },
     {
       "dia": 38,
@@ -3226,15 +3646,29 @@
       "nota": null,
       "paso_esencial": 4,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Carga tu nombre, tu color y tu logo. Nada más por hoy",
-        "La app se publica sola en tu dirección",
-        "Ábrela desde tu teléfono y mírala como la va a ver tu consultante",
-        "Guarda tus dos accesos: el del código y el de la publicación"
-      ],
       "leccion": [],
       "pausa": null,
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "Tu nombre como te buscan",
+          "Un color",
+          "Tu logo o tus iniciales"
+        ],
+        [
+          "Espera el aviso de publicación",
+          "Copia la dirección"
+        ],
+        [
+          "Como la va a ver tu consultante",
+          "Anota lo que no se entiende"
+        ],
+        [
+          "El del código",
+          "El de la publicación",
+          "Guárdalos en un lugar seguro"
+        ]
+      ]
     },
     {
       "dia": 39,
@@ -3275,15 +3709,27 @@
       "nota": null,
       "paso_esencial": 4,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Aprieta el botón que trae todo desde tu ADN",
-        "Revisa que haya llegado bien y corrige",
-        "Arma cuatro semanas con lo que desbloquea cada una",
-        "Carga cuatro, no doce"
-      ],
       "leccion": [],
       "pausa": null,
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "Desde la sección de tu app",
+          "Espera que termine de traer todo"
+        ],
+        [
+          "Lee cada etapa",
+          "Corrige nombres y textos"
+        ],
+        [
+          "Qué desbloquea cada semana",
+          "Una línea por semana"
+        ],
+        [
+          "Solo las primeras cuatro",
+          "El resto, después"
+        ]
+      ]
     },
     {
       "dia": 40,
@@ -3333,12 +3779,6 @@
       "nota": null,
       "paso_esencial": 4,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Cómprate a ti mismo con una tarjeta real y recorre lo que recorre tu consultante",
-        "Invita a tu primer consultante y mándale la frase exacta",
-        "Cambia un texto de tu app con Claude: pídeselo en una línea y publica",
-        "Sácale captura a lo que cambiaste"
-      ],
       "leccion": [
         {
           "libro": "lago",
@@ -3357,7 +3797,25 @@
         "base": "Holt-Lunstad y otros 2010; Harvard Study of Adult Development",
         "dicha": "Escribirle a alguien que te importa"
       },
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "Con una tarjeta real",
+          "Recorre todo: pago, bienvenida y primera etapa"
+        ],
+        [
+          "Copia la frase exacta de la app",
+          "Mándasela por su canal"
+        ],
+        [
+          "Pídeselo en una línea",
+          "Publica el cambio"
+        ],
+        [
+          "Del texto nuevo, ya publicado",
+          "Súbela a la app"
+        ]
+      ]
     },
     {
       "dia": 41,
@@ -3460,14 +3918,23 @@
       "nota": "Desde hoy se repite todos los lunes. Un escalón por semana, +20%, nunca duplicar.",
       "paso_esencial": 3,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Mira tu costo por agenda de los catorce días",
-        "La app habilita un solo botón según tu número",
-        "Escribe la decisión y el número que la justifica"
-      ],
       "leccion": [],
       "pausa": null,
-      "paso_afuera": "Responde con una pregunta."
+      "paso_afuera": "Cuenta en una historia qué número estás mirando esta semana. Sin resultado todavía.",
+      "micro": [
+        [
+          "Abre tu tablero",
+          "Mira los últimos catorce días"
+        ],
+        [
+          "Lee qué te habilita la app",
+          "Uno solo: crecer o apagar"
+        ],
+        [
+          "La decisión en una línea",
+          "El número que la justifica"
+        ]
+      ]
     },
     {
       "dia": 44,
@@ -3508,15 +3975,27 @@
       "nota": null,
       "paso_esencial": 4,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Elige de tu columna 'va grabado' del día 47",
-        "Uno por etapa, de tres a siete minutos",
-        "Una sola toma por video",
-        "Sin edición: se sube como salió"
-      ],
       "leccion": [],
       "pausa": null,
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "Abre tus dos columnas",
+          "Marca lo que va grabado"
+        ],
+        [
+          "Cuatro videos, uno por etapa",
+          "Entre tres y siete minutos cada uno"
+        ],
+        [
+          "Si te equivocas, sigues",
+          "Misma ropa y mismo lugar"
+        ],
+        [
+          "Sube cada archivo como salió",
+          "Con el nombre de su etapa"
+        ]
+      ]
     },
     {
       "dia": 45,
@@ -3558,13 +4037,6 @@
       "nota": "Si no llega, el camino no se frena. El grado queda en ventana.",
       "paso_esencial": 5,
       "avanza_sin_evidencia": true,
-      "checklist": [
-        "Prueba tu enlace de pago desde el teléfono de otra persona: que llegue hasta el comprobante",
-        "Revisa que tu página cargue en menos de tres segundos en datos móviles",
-        "Abre tus números y mira de dónde vino cada consulta de esta semana",
-        "Si alguien pagó y no te conocía, regístralo con su origen",
-        "Contesta las conversaciones sin responder, y no toques la campaña"
-      ],
       "leccion": [
         {
           "libro": "lago",
@@ -3583,7 +4055,29 @@
         "base": "Emmons y McCullough 2003",
         "dicha": "Gratitud"
       },
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "Desde el teléfono de otra persona",
+          "Hasta ver el comprobante"
+        ],
+        [
+          "Con datos móviles, no con wifi",
+          "Cuenta: uno, dos, tres"
+        ],
+        [
+          "Abre tus números",
+          "Anota el origen de cada consulta"
+        ],
+        [
+          "Regístralo en la app",
+          "Con su origen"
+        ],
+        [
+          "Todas las pendientes",
+          "La campaña, intacta"
+        ]
+      ]
     },
     {
       "dia": 46,
@@ -3635,14 +4129,23 @@
       "nota": null,
       "paso_esencial": 3,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Diseña los cinco niveles, de la puerta de entrada al acompañamiento más completo",
-        "Marca el tercero: es el único que vendes hoy",
-        "Elige qué nivel ofreces primero después de tu programa"
-      ],
       "leccion": [],
       "pausa": null,
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "De la puerta de entrada al acompañamiento más completo",
+          "Un nombre para cada uno"
+        ],
+        [
+          "Es tu programa de hoy",
+          "Los demás quedan escritos, no a la venta"
+        ],
+        [
+          "Elige uno",
+          "Escribe por qué"
+        ]
+      ]
     },
     {
       "dia": 47,
@@ -3684,12 +4187,6 @@
       "nota": null,
       "paso_esencial": 4,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "La app trae tus números reales del tablero",
-        "Escribe la cadena: conversaciones, agendas, llamadas, ventas",
-        "Tradúcelo a lo que tiene que pasar cada semana",
-        "Marca cuál de los tres cuellos tienes"
-      ],
       "leccion": [
         {
           "libro": "lago",
@@ -3708,7 +4205,25 @@
         "base": "Balban y otros, Cell Reports Medicine 2023 (ensayo aleatorizado)",
         "dicha": "Suspiro cíclico"
       },
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "Abre la máquina de 10",
+          "Revisa que los números estén bien"
+        ],
+        [
+          "Conversaciones, agendas, llamadas, ventas",
+          "Con tus números de verdad"
+        ],
+        [
+          "Cuántas de cada una por semana",
+          "Para llegar a diez"
+        ],
+        [
+          "Mira dónde se corta la cadena",
+          "Marca uno solo"
+        ]
+      ]
     },
     {
       "dia": 48,
@@ -3815,16 +4330,31 @@
       "nota": null,
       "paso_esencial": 5,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Publica la pieza que ya tenías escrita. Hoy sale, no se escribe",
-        "Contesta a todos los que escribieron, cada uno con una pregunta",
-        "Da las llamadas de la semana con tu W adelante",
-        "Atiende a tus consultantes activos: marca quién está en su semana 2 y quién en la 7",
-        "Carga tus cuatro números: conversaciones, agendas, llamadas y ventas"
-      ],
       "leccion": [],
       "pausa": null,
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "Ábrela y publícala tal cual",
+          "Sin reescribir"
+        ],
+        [
+          "A todos los que escribieron",
+          "Cada respuesta termina en una pregunta"
+        ],
+        [
+          "Con la W a la vista",
+          "Anota la objeción de cada llamada"
+        ],
+        [
+          "Marca quién está en su semana 2",
+          "Marca quién está en su semana 7"
+        ],
+        [
+          "Conversaciones, agendas, llamadas y ventas",
+          "Cárgalos en la app"
+        ]
+      ]
     },
     {
       "dia": 51,
@@ -3866,7 +4396,21 @@
       "avanza_sin_evidencia": false,
       "leccion": [],
       "pausa": null,
-      "paso_afuera": "Pide una devolución."
+      "paso_afuera": "Escríbele hoy a cada uno que no pagó. Uno por uno, con la fecha.",
+      "micro": [
+        [
+          "Las que tocaban esta semana",
+          "Marca las que entraron"
+        ],
+        [
+          "Uno por uno, hoy",
+          "Con la fecha de pago"
+        ],
+        [
+          "Solo lo que entró",
+          "En tus números"
+        ]
+      ]
     },
     {
       "dia": 52,
@@ -3922,7 +4466,21 @@
         "base": "Many Smiles Collaboration 2022: 3.878 personas, 19 países; efecto chico",
         "dicha": "Sonreír al espejo"
       },
-      "paso_afuera": "Cambia una línea de tu perfil."
+      "paso_afuera": "Pídele a un consultante que te diga una cosa que le faltó. Agradécesela por escrito.",
+      "micro": [
+        [
+          "Qué le sirvió",
+          "Qué le faltó"
+        ],
+        [
+          "Marca lo que dijeron dos o más",
+          "Elige lo más repetido"
+        ],
+        [
+          "Una sola cosa",
+          "Escribe qué cambiaste y por qué"
+        ]
+      ]
     },
     {
       "dia": 53,
@@ -3964,7 +4522,21 @@
       "avanza_sin_evidencia": false,
       "leccion": [],
       "pausa": null,
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "Una línea",
+          "Usa la del día 5 si la escribiste"
+        ],
+        [
+          "Dos colegas de confianza",
+          "Escríbeles hoy para avisarles"
+        ],
+        [
+          "Escríbelo una vez, bien",
+          "Guárdalo donde lo encuentres"
+        ]
+      ]
     },
     {
       "dia": 54,
@@ -4004,7 +4576,21 @@
       "avanza_sin_evidencia": false,
       "leccion": [],
       "pausa": null,
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "Abre tus números por anuncio",
+          "Marca el ganador"
+        ],
+        [
+          "El mismo mensaje, con otro gancho",
+          "Tres ganchos distintos"
+        ],
+        [
+          "Al mismo conjunto",
+          "El que gana, intacto"
+        ]
+      ]
     },
     {
       "dia": 55,
@@ -4111,16 +4697,31 @@
       "nota": null,
       "paso_esencial": 5,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Publica la pieza que ya tenías escrita. Hoy sale, no se escribe",
-        "Contesta a todos los que escribieron, cada uno con una pregunta",
-        "Da las llamadas de la semana con tu W adelante",
-        "Atiende a tus consultantes activos: marca quién está en su semana 2 y quién en la 7",
-        "Carga tus cuatro números: conversaciones, agendas, llamadas y ventas"
-      ],
       "leccion": [],
       "pausa": null,
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "Ábrela y publícala tal cual",
+          "Sin reescribir"
+        ],
+        [
+          "A todos los que escribieron",
+          "Cada respuesta termina en una pregunta"
+        ],
+        [
+          "Con la W a la vista",
+          "Anota la objeción de cada llamada"
+        ],
+        [
+          "Marca quién está en su semana 2",
+          "Marca quién está en su semana 7"
+        ],
+        [
+          "Conversaciones, agendas, llamadas y ventas",
+          "Cárgalos en la app"
+        ]
+      ]
     },
     {
       "dia": 58,
@@ -4178,7 +4779,21 @@
         "base": "Lehrer y Gevirtz 2014 (revisión); Marchant y otros 2025",
         "dicha": "Seis por minuto"
       },
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "En las próximas tres semanas",
+          "Con nombre y fecha"
+        ],
+        [
+          "Antes de que termine",
+          "Para agendar una conversación"
+        ],
+        [
+          "Un nivel distinto, no el mismo programa",
+          "En tres líneas"
+        ]
+      ]
     },
     {
       "dia": 59,
@@ -4234,7 +4849,21 @@
         "base": "Evidencia débil: va como ritual de pausa, no como terapia",
         "dicha": "Pies en la tierra"
       },
-      "paso_afuera": "Graba una historia con tu cara y publícala."
+      "paso_afuera": "Comparte uno de tus ejercicios. El que más te piden.",
+      "micro": [
+        [
+          "Los que más te piden",
+          "Uno por renglón"
+        ],
+        [
+          "Con sus instrucciones paso a paso",
+          "Mira cómo se ven en el teléfono"
+        ],
+        [
+          "Un mensaje a cada consultante",
+          "Pregunta cómo les fue al final de la semana"
+        ]
+      ]
     },
     {
       "dia": 60,
@@ -4290,7 +4919,21 @@
         "base": "Sturm y otros 2020: 60 adultos mayores, 8 semanas",
         "dicha": "Caminata de asombro"
       },
-      "paso_afuera": "Escríbele a un ex consultante."
+      "paso_afuera": "Avísale a tu casa en qué bloques no estás disponible la semana que viene.",
+      "micro": [
+        [
+          "Antes que las de atender",
+          "El mismo horario que elegiste el día 1"
+        ],
+        [
+          "Para lo que se caiga",
+          "No los llenes"
+        ],
+        [
+          "Con hora",
+          "En la agenda, no en la cabeza"
+        ]
+      ]
     },
     {
       "dia": 61,
@@ -4332,7 +4975,21 @@
       "avanza_sin_evidencia": false,
       "leccion": [],
       "pausa": null,
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "Las que más te repitieron este mes",
+          "Textuales"
+        ],
+        [
+          "Bien escrita",
+          "Corta"
+        ],
+        [
+          "En tu app o en tu mensaje automático",
+          "Pruébala"
+        ]
+      ]
     },
     {
       "dia": 62,
@@ -4439,16 +5096,31 @@
       "nota": null,
       "paso_esencial": 5,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Publica la pieza que ya tenías escrita. Hoy sale, no se escribe",
-        "Contesta a todos los que escribieron, cada uno con una pregunta",
-        "Da las llamadas de la semana con tu W adelante",
-        "Atiende a tus consultantes activos: marca quién está en su semana 2 y quién en la 7",
-        "Carga tus cuatro números: conversaciones, agendas, llamadas y ventas"
-      ],
       "leccion": [],
       "pausa": null,
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "Ábrela y publícala tal cual",
+          "Sin reescribir"
+        ],
+        [
+          "A todos los que escribieron",
+          "Cada respuesta termina en una pregunta"
+        ],
+        [
+          "Con la W a la vista",
+          "Anota la objeción de cada llamada"
+        ],
+        [
+          "Marca quién está en su semana 2",
+          "Marca quién está en su semana 7"
+        ],
+        [
+          "Conversaciones, agendas, llamadas y ventas",
+          "Cárgalos en la app"
+        ]
+      ]
     },
     {
       "dia": 65,
@@ -4488,7 +5160,21 @@
       "avanza_sin_evidencia": false,
       "leccion": [],
       "pausa": null,
-      "paso_afuera": "Responde con una pregunta."
+      "paso_afuera": "Pregúntale a un colega cuánto le cuesta a él una agenda. Comparen los dos números.",
+      "micro": [
+        [
+          "Costo por agenda",
+          "Costo por conversación"
+        ],
+        [
+          "Abre la referencia de tu país en la app",
+          "No la compares con la semana pasada"
+        ],
+        [
+          "Elige uno",
+          "Escribe qué vas a cambiar"
+        ]
+      ]
     },
     {
       "dia": 66,
@@ -4527,10 +5213,6 @@
       "nota": null,
       "paso_esencial": 2,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Escribe tu día completo con el ingreso siguiente, en detalle físico",
-        "En presente, no en condicional"
-      ],
       "leccion": [
         {
           "libro": "lago",
@@ -4549,7 +5231,17 @@
         "base": "Dunn, Aknin y Norton, Science 2008",
         "dicha": "Gastar en otro"
       },
-      "paso_afuera": "Pide una devolución."
+      "paso_afuera": "Gasta algo en otra persona hoy, sin motivo y sin avisar.",
+      "micro": [
+        [
+          "Desde que te despiertas hasta que te duermes",
+          "Con detalles físicos: dónde, con quién, qué ves"
+        ],
+        [
+          "Cambia cada «tendría» por «tengo»",
+          "Léelo en voz alta"
+        ]
+      ]
     },
     {
       "dia": 67,
@@ -4591,7 +5283,21 @@
       "avanza_sin_evidencia": false,
       "leccion": [],
       "pausa": null,
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "Pregúntale qué se llevó",
+          "Anota sus palabras textuales"
+        ],
+        [
+          "Su resultado en una frase",
+          "Su permiso por escrito"
+        ],
+        [
+          "Al final de la llamada",
+          "Un nombre y un contacto"
+        ]
+      ]
     },
     {
       "dia": 68,
@@ -4633,7 +5339,22 @@
       "avanza_sin_evidencia": false,
       "leccion": [],
       "pausa": null,
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "Resultados",
+          "Casos",
+          "Testimonios"
+        ],
+        [
+          "Escribe el número nuevo",
+          "Cárgalo en la app"
+        ],
+        [
+          "Anota quiénes son",
+          "A los demás, el precio nuevo"
+        ]
+      ]
     },
     {
       "dia": 69,
@@ -4740,16 +5461,31 @@
       "nota": null,
       "paso_esencial": 5,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Publica la pieza que ya tenías escrita. Hoy sale, no se escribe",
-        "Contesta a todos los que escribieron, cada uno con una pregunta",
-        "Da las llamadas de la semana con tu W adelante",
-        "Atiende a tus consultantes activos: marca quién está en su semana 2 y quién en la 7",
-        "Carga tus cuatro números: conversaciones, agendas, llamadas y ventas"
-      ],
       "leccion": [],
       "pausa": null,
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "Ábrela y publícala tal cual",
+          "Sin reescribir"
+        ],
+        [
+          "A todos los que escribieron",
+          "Cada respuesta termina en una pregunta"
+        ],
+        [
+          "Con la W a la vista",
+          "Anota la objeción de cada llamada"
+        ],
+        [
+          "Marca quién está en su semana 2",
+          "Marca quién está en su semana 7"
+        ],
+        [
+          "Conversaciones, agendas, llamadas y ventas",
+          "Cárgalos en la app"
+        ]
+      ]
     },
     {
       "dia": 72,
@@ -4789,7 +5525,21 @@
       "avanza_sin_evidencia": false,
       "leccion": [],
       "pausa": null,
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "Agendas que no se presentaron",
+          "Llamadas sin cierre del último mes"
+        ],
+        [
+          "Un caso, un dato o una invitación",
+          "Nunca «¿cómo vas?»"
+        ],
+        [
+          "Cuántos escribiste",
+          "Cuántos contestaron"
+        ]
+      ]
     },
     {
       "dia": 73,
@@ -4831,7 +5581,21 @@
       "avanza_sin_evidencia": false,
       "leccion": [],
       "pausa": null,
-      "paso_afuera": "Cambia una línea de tu perfil."
+      "paso_afuera": "Pídele a cada uno de los primeros su resultado en una frase, y el permiso para usarlo.",
+      "micro": [
+        [
+          "A cada uno de los primeros",
+          "Con sus palabras"
+        ],
+        [
+          "Por escrito",
+          "Guarda la captura"
+        ],
+        [
+          "Con su nombre y su fecha",
+          "En tu ADN"
+        ]
+      ]
     },
     {
       "dia": 74,
@@ -4889,7 +5653,21 @@
         "base": "Lehrer y Gevirtz 2014 (revisión); Marchant y otros 2025",
         "dicha": "Seis por minuto"
       },
-      "paso_afuera": "Graba una historia con tu cara y publícala."
+      "paso_afuera": "Pon tu hora real de hoy al lado de la del día 1 y muéstrasela a alguien.",
+      "micro": [
+        [
+          "Lo que entró este mes",
+          "Las horas reales"
+        ],
+        [
+          "Lo cobrado, dividido por las horas",
+          "Anótala"
+        ],
+        [
+          "Una al lado de la otra",
+          "Escribe la diferencia"
+        ]
+      ]
     },
     {
       "dia": 75,
@@ -5026,16 +5804,31 @@
       "nota": null,
       "paso_esencial": 5,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Publica la pieza que ya tenías escrita. Hoy sale, no se escribe",
-        "Contesta a todos los que escribieron, cada uno con una pregunta",
-        "Da las llamadas de la semana con tu W adelante",
-        "Atiende a tus consultantes activos: marca quién está en su semana 2 y quién en la 7",
-        "Carga tus cuatro números: conversaciones, agendas, llamadas y ventas"
-      ],
       "leccion": [],
       "pausa": null,
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "Ábrela y publícala tal cual",
+          "Sin reescribir"
+        ],
+        [
+          "A todos los que escribieron",
+          "Cada respuesta termina en una pregunta"
+        ],
+        [
+          "Con la W a la vista",
+          "Anota la objeción de cada llamada"
+        ],
+        [
+          "Marca quién está en su semana 2",
+          "Marca quién está en su semana 7"
+        ],
+        [
+          "Conversaciones, agendas, llamadas y ventas",
+          "Cárgalos en la app"
+        ]
+      ]
     },
     {
       "dia": 79,
@@ -5077,7 +5870,21 @@
       "avanza_sin_evidencia": false,
       "leccion": [],
       "pausa": null,
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "Anuncios, mensajes, agenda, cobro y entrega",
+          "Uno por renglón"
+        ],
+        [
+          "Si no entras una semana",
+          "Márcalo con una cruz"
+        ],
+        [
+          "El que más te cuesta sostener",
+          "Déjalo andando antes del día 90"
+        ]
+      ]
     },
     {
       "dia": 80,
@@ -5120,7 +5927,25 @@
       "avanza_sin_evidencia": false,
       "leccion": [],
       "pausa": null,
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "Desde el día 1",
+          "Con comprobantes"
+        ],
+        [
+          "Por semana",
+          "Comparadas con el día 1"
+        ],
+        [
+          "Tu ecosistema se abre el día 85",
+          "Márcalo en tu agenda"
+        ],
+        [
+          "Una sola cosa para corregir",
+          "Escribe qué cambias esta semana"
+        ]
+      ]
     },
     {
       "dia": 81,
@@ -5193,7 +6018,25 @@
       "avanza_sin_evidencia": false,
       "leccion": [],
       "pausa": null,
-      "paso_afuera": "Escríbele a un ex consultante."
+      "paso_afuera": "Muestra los dos números: el de entrada y el de hoy. Sin explicar.",
+      "micro": [
+        [
+          "La del primer día",
+          "Sin mirar todavía los números de hoy"
+        ],
+        [
+          "Con lo que hay hoy",
+          "Sin redondear"
+        ],
+        [
+          "Uno al lado del otro",
+          "Marca el que más cambió"
+        ],
+        [
+          "Una sola frase",
+          "La que más te sorprende"
+        ]
+      ]
     },
     {
       "dia": 83,
@@ -5295,13 +6138,19 @@
       "nota": null,
       "paso_esencial": 2,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Saca tus tres enfoques de la Matriz ABC",
-        "Para cada enfoque, escribe a quién filtra y a quién atrae"
-      ],
       "leccion": [],
       "pausa": null,
-      "paso_afuera": "Responde con una pregunta."
+      "paso_afuera": "Escríbele a alguien que admires de otra disciplina y preséntate en tres líneas.",
+      "micro": [
+        [
+          "Abre tu Matriz ABC en Mi ADN",
+          "Elige tres enfoques"
+        ],
+        [
+          "Para cada enfoque: a quién filtra",
+          "Para cada enfoque: a quién atrae"
+        ]
+      ]
     },
     {
       "dia": 86,
@@ -5347,15 +6196,27 @@
       "nota": null,
       "paso_esencial": 4,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Reparte tus tres enfoques en doce semanas",
-        "Para cada semana, el gancho y el ángulo",
-        "Marca cuáles son de filtro y cuáles de autoridad",
-        "No grabes nada todavía"
-      ],
       "leccion": [],
       "pausa": null,
-      "paso_afuera": null
+      "paso_afuera": null,
+      "micro": [
+        [
+          "Cuatro semanas por enfoque",
+          "Numera las doce semanas"
+        ],
+        [
+          "Un gancho por semana",
+          "Un ángulo por semana"
+        ],
+        [
+          "Marca F o A en cada semana",
+          "Mezcla las dos"
+        ],
+        [
+          "Solo escribe",
+          "Guarda el plan en la app"
+        ]
+      ]
     },
     {
       "dia": 87,
@@ -5397,14 +6258,23 @@
       "nota": null,
       "paso_esencial": 3,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Contesta las mismas preguntas del día 3",
-        "Recalcula tu hora real neta con los datos de Mi Clínica",
-        "Recién ahí la app destapa el número del día 3"
-      ],
       "leccion": [],
       "pausa": null,
-      "paso_afuera": "Pide una devolución."
+      "paso_afuera": "Cuenta tu foto de llegada en una historia, con tu cara.",
+      "micro": [
+        [
+          "Abre la medición en la app",
+          "Contesta sin mirar las respuestas viejas"
+        ],
+        [
+          "Con los datos de Mi Clínica",
+          "Lo cobrado, dividido por las horas"
+        ],
+        [
+          "Mira tu número de entonces y el de hoy",
+          "Escribe la diferencia"
+        ]
+      ]
     },
     {
       "dia": 88,
@@ -5444,14 +6314,23 @@
       "nota": null,
       "paso_esencial": 3,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "La app arma el borrador de tu plan de 180",
-        "Edítalo, apruébalo y descárgalo",
-        "Te lo llevas lo tomes o no lo tomes"
-      ],
       "leccion": [],
       "pausa": null,
-      "paso_afuera": "Cambia una línea de tu perfil."
+      "paso_afuera": "Mándale tu plan de 180 días a una persona que te lo vaya a recordar.",
+      "micro": [
+        [
+          "Ábrelo en la app",
+          "Léelo entero"
+        ],
+        [
+          "Corrige lo que no suene a ti",
+          "Apruébalo y descárgalo"
+        ],
+        [
+          "Guárdalo donde lo veas",
+          "Imprime la primera página"
+        ]
+      ]
     },
     {
       "dia": 89,
@@ -5490,13 +6369,19 @@
       "nota": null,
       "paso_esencial": 2,
       "avanza_sin_evidencia": false,
-      "checklist": [
-        "Mira cuántas ventas tienes y cuántas te faltan",
-        "Escribe qué puedes cerrar esta semana con lo que ya está en la bandeja"
-      ],
       "leccion": [],
       "pausa": null,
-      "paso_afuera": "Graba una historia con tu cara y publícala."
+      "paso_afuera": "Escríbeles hoy a los que quedaron en la bandeja. Nombre y fecha, uno por uno.",
+      "micro": [
+        [
+          "Cuenta las que tienes",
+          "Cuenta las que te faltan para diez"
+        ],
+        [
+          "Revisa tu bandeja",
+          "Nombre y fecha de cada cierre posible"
+        ]
+      ]
     },
     {
       "dia": 90,
@@ -5550,7 +6435,14 @@
         "base": "Noetel y otros, BMJ 2024; Salimpoor y otros 2011",
         "dicha": "Bailar tu canción"
       },
-      "paso_afuera": "Escríbele a un ex consultante."
+      "paso_afuera": "Manda tres cartas de gracias a quienes te sostuvieron estos noventa días.",
+      "micro": [
+        [
+          "La de entrada",
+          "La de llegada",
+          "Una al lado de la otra"
+        ]
+      ]
     }
   ]
 }

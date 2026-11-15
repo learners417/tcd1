@@ -853,7 +853,12 @@ for r in REUBICADAS:
         base["agente"] = base["agente"] or o["agente"]
         base["manual"] = base["manual"] or o["manual"]
     base.update(dia=r["dia"], titulo=r["titulo"], sistema=r["sistema"],
-                minutos=r["minutos"], pasos=r["pasos"], checklist=r["pasos"],
+                # `checklist` era una copia textual de `pasos` que viajaba en
+                # cada jornada y que no dibujaba nadie: el tipo la declaraba,
+                # la app la llenaba desde `pasos` y ninguna pantalla la leía.
+                # Lo que hacía falta de verdad —cómo se empieza cada tarea—
+                # es `micro`, que se ata más abajo.
+                minutos=r["minutos"], pasos=r["pasos"],
                 lleva=r["lleva"], veredicto=r["veredicto"])
     base["paso_esencial"] = len(r["pasos"]) or None
     if r.get("cinturon"): base["cinturon"] = r["cinturon"]
@@ -978,6 +983,34 @@ out = {
   "pausas":pausas_del_seed(),
   "jornadas":[J[d] for d in sorted(J)]
 }
+
+# ── LOS MICRO PASOS DE CADA TAREA (15 nov 2026) ────────────────────────
+#
+# Cada paso del día dice QUÉ hacer. Sus micro pasos dicen por dónde se
+# empieza, que es lo que falta cuando uno se sienta con la cabeza llena.
+#
+# Van por POSICIÓN: micro[i] son los de pasos[i]. Por eso se atan acá,
+# después de que las jornadas quedaron armadas y reubicadas: atarlos
+# antes los dejaba colgando del día que la hoja de ruta movió.
+from los_micro_pasos import MICRO
+
+for _j in out["jornadas"]:
+    _m = MICRO.get(_j["dia"])
+    if not _m:
+        continue
+    # Un desajuste silencioso es peor que no tener micro pasos: los de una
+    # tarea quedarían debajo de otra, y el cliente leería el arranque
+    # equivocado sin que nada se vea roto.
+    assert len(_m) == len(_j.get("pasos") or []), (
+        f'día {_j["dia"]}: {len(_m)} micro contra {len(_j.get("pasos") or [])} pasos')
+    _j["micro"] = [list(x) for x in _m]
+
+_dias = {_j["dia"] for _j in out["jornadas"]}
+_sin_paso = {d for d in MICRO} - _dias
+assert not _sin_paso, f"micro pasos en días que no existen: {sorted(_sin_paso)}"
+_sin_micro = sorted(_j["dia"] for _j in out["jornadas"]
+                    if (_j.get("pasos") or []) and not _j.get("micro"))
+assert not _sin_micro, f"días con tarea y sin micro pasos: {_sin_micro}"
 
 # Castellano neutro (tú): la app se usa en toda Latinoamérica y España.
 from tuteo import tutear_todo
