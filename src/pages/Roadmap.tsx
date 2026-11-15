@@ -74,6 +74,11 @@ import { NIVEL_NOMBRES, NIVEL_METADATA } from '../lib/supabase';
 import TaskVideo from '../components/tasks/TaskVideo';
 import TaskCoach from '../components/tasks/TaskCoach';
 import SesionViva from '../components/sesion/SesionViva';
+import MiProtocolo from '../components/camino/MiProtocolo';
+import ElJuegoDelSur from '../components/camino/ElJuegoDelSur';
+import { leerPasosAfuera } from '../lib/elJuegoDelSur';
+import { PAISAJES } from '../lib/losCincoPaisajes';
+import { leer as leerMedicion, horaReal as horaRealDe, KEY_ENTRADA, KEY_SALIDA } from '../lib/medicion';
 import TaskFotoPartida from '../components/tasks/TaskFotoPartida';
 import TaskMapaMamuska from '../components/tasks/TaskMapaMamuska';
 import EspejoIdentidadModal from '../components/EspejoIdentidadModal';
@@ -708,9 +713,59 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
     localStorage.setItem('tcd_graduacion_vista', '1');
     setGraduacionVisible(true);
   }, [diaActual]);
+  /* ─── EL JUEGO DEL SUR: todo sale de lo que ya hay, nada se guarda doble ───
+   *
+   * Los días hechos salen de `completadas`, que es la misma cuenta que mueve
+   * el anillo; el color de cada día, del sistema que cada jornada ya trae; y
+   * los días que tienen paso afuera, del propio seed. Copiar cualquiera de
+   * las tres a una tabla acá era abrir un segundo calendario.
+   */
+  const diasHechosDelCamino = useMemo(() => {
+    const dias: number[] = [];
+    for (const pil of seedConVideos) {
+      for (const m of pil.metas ?? []) {
+        if (completadas.has(`${pil.numero}-${m.codigo}`) && m.dia_asignado) dias.push(m.dia_asignado);
+      }
+    }
+    return [...new Set(dias)].sort((a, b) => a - b);
+  }, [seedConVideos, completadas]);
+
+  const sistemaPorDia = useMemo(() => {
+    const mapa: Record<number, number | null> = {};
+    for (const pil of seedConVideos) {
+      for (const m of pil.metas ?? []) {
+        if (m.dia_asignado) mapa[m.dia_asignado] = m.sistema ?? null;
+      }
+    }
+    return mapa;
+  }, [seedConVideos]);
+
+  const diasQueTienenPasoAfuera = useMemo(() => {
+    const dias: number[] = [];
+    for (const pil of seedConVideos) {
+      for (const m of pil.metas ?? []) {
+        if (m.paso_afuera && m.dia_asignado) dias.push(m.dia_asignado);
+      }
+    }
+    return [...new Set(dias)].sort((a, b) => a - b);
+  }, [seedConVideos]);
+
+  const [pasosAfueraMarcados] = useState<number[]>(() => leerPasosAfuera());
+
+  /* Su hora real al entrar y la de hoy: es lo que abren las diez palabras, y
+     son los dos números que la app ya le pidió el día 1 y el día 82. */
+  const horaRealDeLosDos = useMemo(() => ({
+    entrada: horaRealDe(leerMedicion(KEY_ENTRADA)),
+    hoy: horaRealDe(leerMedicion(KEY_SALIDA)) ?? horaRealDe(leerMedicion(KEY_ENTRADA)),
+  }), []);
+
   // El paso en el que va: el primero sin completar, en el orden del Camino.
   let diaEsperado: number | null = null;
   let pasoDeHoy: (PasoDeHoy & { pilar: number; sistema: number | null }) | null = null;
+  /* Los números de lección de ese mismo día: la pieza N del protocolo es la
+     de la lección N, así que de acá sale cuál se escribe hoy. Se toma en el
+     mismo recorrido y no buscando otra vez, para que no puedan discrepar. */
+  let leccionesDeHoy: number[] = [];
   buscarPaso: for (const pil of seedConVideos) {
     for (const m of pil.metas ?? []) {
       if (!esPasoDelCliente(m)) continue;
@@ -725,6 +780,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
           tiempo: m.tiempo_estimado,
           salesCon: m.evidencia_requerida?.nombre ?? null,
         };
+        leccionesDeHoy = (m.leccion ?? []).map((l) => l.numero);
         break buscarPaso;
       }
     }
@@ -1432,6 +1488,24 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
           arriba empujaban el anillo y la jornada del día debajo del pliegue,
           que es lo contrario de lo que esta pantalla tiene que contestar
           primero. Es un directorio, y los directorios van al final. */}
+      {/* EL JUEGO DEL SUR · el tablero de los 90 días, el mismo que está en la
+          guarda de los libros. Va pegado a Mi protocolo: las dos cosas son lo
+          que el cliente mira cuando quiere ver cuánto lleva, no cuando quiere
+          saber qué hacer hoy. */}
+      <ElJuegoDelSur
+        diasHechos={diasHechosDelCamino}
+        pasosAfuera={pasosAfueraMarcados}
+        diasConPasoAfuera={diasQueTienenPasoAfuera}
+        sistemaPorDia={sistemaPorDia}
+        coloresDeSistema={PAISAJES.map((p) => p.color.fondo)}
+        horaReal={horaRealDeLosDos}
+      />
+
+      {/* MI PROTOCOLO · las 33 piezas que el Lago deja escritas. Va acá, con
+          el trabajo del día y antes del directorio: la pieza de hoy es algo
+          que se escribe hoy, no una sección que se visita. */}
+      <MiProtocolo leccionesDeHoy={leccionesDeHoy} />
+
       <PartesDelCamino
         cinturonOrden={cinturonCamino?.orden ?? 1}
         modulosActivos={(perfil as { modulos_activos?: string[] } | undefined)?.modulos_activos ?? []}
@@ -1924,6 +1998,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                             seAbre={[meta.veredicto ? VOC(meta.veredicto) : '', meta.cinturon ? 'Ganaste un grado nuevo: míralo en tu Camino.' : ''].filter(Boolean).join(' ') || undefined}
                             base={baseDeHoy(meta)}
                             hilos={hilosDeHoy(meta)}
+                            diaDelPaso={meta.dia_asignado}
                             tiempoEstimado={enRevision.has(meta.codigo) ? '20 min' : meta.tiempo_estimado}
                             isCompleted={estaCompletada}
                             userId={userId}
@@ -1990,6 +2065,7 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
                             seAbre={[meta.veredicto ? VOC(meta.veredicto) : '', meta.cinturon ? 'Ganaste un grado nuevo: míralo en tu Camino.' : ''].filter(Boolean).join(' ') || undefined}
                             base={baseDeHoy(meta)}
                             hilos={hilosDeHoy(meta)}
+                            diaDelPaso={meta.dia_asignado}
                             tiempoEstimado={enRevision.has(meta.codigo) ? '20 min' : meta.tiempo_estimado}
                             isCompleted={estaCompletada}
                             userId={userId}

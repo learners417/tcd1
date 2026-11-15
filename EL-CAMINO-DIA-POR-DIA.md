@@ -114,7 +114,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 *Sesión · 60 min · sistema 1: Tu reset · entrenador: espejo*
 
 - Contesta el test y mira tu tipo
-- Lee cómo se ve tu tipo cuando estás entero y cuando estás cansado
+- Lee cómo se ve tu tipo cuando estás en tu mejor momento y cuando te gana el cansancio
 - Anota tres situaciones de tu semana que te sacan de eje
 - Escribe qué haces hoy en cada una
 - Marca dónde lo sientes en el cuerpo
@@ -348,7 +348,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 **Veredicto:** Escucha la primera y la última: ahí se oye si el precio ya es tuyo.
 
-*Si todavía sube el tono, devuelve 'repite mañana' y no aprueba.*
+*Si todavía sube el tono, devuelve «repite mañana» y no aprueba.*
 
 ### Día 20 · Fin de semana
 
@@ -419,7 +419,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 *Sesión · 60 min · sistema 3: Tu captación · entrenador: espejo*
 
 - Arma tu bandeja con los cuatro estados
-- A cada 'no ahora' ponle fecha de vuelta
+- A cada «no ahora» ponle fecha de vuelta
 - Arma las respuestas automáticas
 - Protocolo: escribe la lista de lo que te deben y táchala
 
@@ -433,7 +433,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 - Manda el link a quien ya dijo que sí
 - Cuando entre el cobro, sube el comprobante
-- Escribe al lado quién viene después, con nombre y fecha. Eso evita que lo bajes
+- Escribe al lado quién viene después, con nombre y fecha. Eso evita que bajes el ritmo
 - Arma la vista con cuatro columnas y nada más: gasto, entradas, agendas y costo por agenda
 - Anota tu costo por agenda de hoy
 
@@ -470,7 +470,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 > **ENTREGA 3 · Conversaciones, automatizaciones, reportes y WhatsApp.** Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Desbloquea encender las campañas.
 
 - Conecta tu página y tu perfil profesional
-- Crea tu cuenta publicitaria dentro de tu business
+- Crea tu cuenta publicitaria dentro de tu cuenta comercial de Meta
 - Carga tu forma de pago
 - Instala el pixel en tu página y pruébalo abriéndola desde el teléfono
 
@@ -516,7 +516,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 - A quien se deriva, pásale un nombre concreto y preséntalos
 - Carga las fechas de cierre en tu agenda
 - Escribe qué recibe tu consultante a cambio del dinero
-- Escribe qué se libera él al pagar. Ejemplo: deja de deberse a sí mismo empezar
+- Escribe de qué se libera tu consultante al pagar. Ejemplo: deja de postergar su propio comienzo
 
 **Lo que queda hecho:** Agenda con fechas de cierre · Dos columnas
 
@@ -569,7 +569,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 - Define tu línea base
 - Haz la cuenta: horas para uno, horas para diez
 
-**Lo que queda hecho:** Dos columnas, estaciones y línea base · Horas por consultante al mes
+**Lo que queda hecho:** Dos columnas, estaciones y línea base · Horas por consultante, por semana
 
 **Veredicto:** Ya sabes qué se graba y qué va en vivo. Eso es lo que te deja atender diez sin quemarte.
 
@@ -665,7 +665,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 *Rodaje · 150 min · sistema 4: Tu propia app*
 
-- Elige de tu columna 'va grabado' del día 47
+- Elige de tu columna «va grabado» del día 36
 - Uno por etapa, de tres a siete minutos
 - Una sola toma por video
 - Sin edición: se sube como salió
@@ -690,7 +690,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 **Veredicto:** La máquina camina: alguien pagó sin conocerte. Eso ya no depende de tu agenda.
 
-*Si no llega, el camino no se frena. El grado queda en ventana.*
+*Si no llega, el camino no se frena: lo registras el día que entre.*
 
 ### Día 46 · Tus cinco niveles
 
@@ -790,7 +790,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 *Sesión · 20 min · sistema 1: Tu reset*
 
-- Escribe en una línea a quién NO atiendes
+- Escribe en una línea a quién no atiendes
 - Elige a dos colegas a quienes derivar, y escríbeles para avisarles
 - Guarda el mensaje con el que derivas, para no improvisarlo
 
@@ -803,7 +803,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 *Sesión · 30 min · sistema 3: Tu captación*
 
 - Mira cuál de tus anuncios trae las agendas más baratas
-- Graba tres variantes del MISMO 20, con otro gancho
+- Graba tres variantes del mismo anuncio, con otro gancho
 - Súbelas al mismo conjunto, sin tocar el que gana
 
 **Lo que queda hecho:** Tres variantes grabadas
@@ -858,7 +858,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 *Sesión · 30 min · sistema 2: Tu programa*
 
 - Mira quiénes terminan en las próximas tres semanas
-- Escríbele a cada uno para hablar ANTES de que termine
+- Escríbele a cada uno para hablar antes de que termine
 - Prepara qué le ofreces después: no es el mismo programa otra vez
 
 **Lo que queda hecho:** Tu oferta de continuidad, en tres líneas
@@ -949,8 +949,8 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 *Sesión · 25 min · sistema 3: Tu captación*
 
 - Mira tu costo por agenda y tu costo por conversación de esta semana
-- Compáralos con la referencia de TU país, no con la semana pasada
-- Elige UN número para mover, y anota qué vas a cambiar
+- Compáralos con la referencia de tu país, no con la semana pasada
+- Elige un solo número para mover, y anota qué vas a cambiar
 
 **Lo que queda hecho:** El número que eliges mover
 
@@ -1129,7 +1129,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 - Lista lo que pasa solo: anuncios, mensajes, agenda, cobro, entrega
 - Marca lo que se apaga si no entras una semana
-- Elige UNO de los que se apagan y déjalo andando antes del día 90
+- Elige uno solo de los que se apagan y déjalo andando antes del día 90
 
 **Lo que queda hecho:** Lo que se apaga y el que dejas andando
 
@@ -1142,7 +1142,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 - Suma todo lo que vendiste desde el día 1
 - Cuenta cuántas horas recuperaste por semana
 - Si pasaste los 7.000, tu ecosistema se abre el día 85
-- Si todavía no, elige qué corriges: anuncios, VSL, oferta, triage o perfil
+- Si todavía no, elige qué corriges: anuncios, video, oferta, triage o perfil
 
 **Lo que queda hecho:** Tu total vendido
 
@@ -1219,9 +1219,9 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 *Sesión · 45 min*
 
-- Contesta las mismas preguntas del día 3
+- Contesta las mismas preguntas del día 1
 - Recalcula tu hora real neta con los datos de Mi Clínica
-- Recién ahí la app destapa el número del día 3
+- Recién ahí la app destapa el número del día 1
 
 **Lo que queda hecho:** Hora real neta final
 
@@ -1233,7 +1233,7 @@ Se conecta el WhatsApp, se arman las respuestas automáticas y los reportes. Des
 
 - La app arma el borrador de tu plan de 180
 - Edítalo, apruébalo y descárgalo
-- Te lo llevas lo tomes o no lo tomes
+- Te lo llevas, sigas o no conmigo
 
 **Lo que queda hecho:** Plan de 180 aprobado
 

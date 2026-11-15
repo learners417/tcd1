@@ -15,6 +15,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import ElEncargo from './ElEncargo';
 import LaPuerta from './LaPuerta';
 import { Check, Clock, ArrowLeft, ArrowRight } from 'lucide-react';
+import { leerPasosAfuera, marcarPasoAfuera } from '../../lib/elJuegoDelSur';
 import {
   type SesionEnCurso,
   getSesionEnCurso, setSesionEnCurso, segundosDeSesion,
@@ -51,6 +52,12 @@ interface Props {
    * sacar; de a uno, son el próximo movimiento y nada más.
    */
   micro?: string[][];
+  /**
+   * El día del camino de esta jornada. Lo pide el paso afuera: sin número,
+   * marcarlo no se puede guardar, y sin eso la racha y el vaso del juego del
+   * sur no tienen nada que contar.
+   */
+  diaDelPaso?: number | null;
   pide?: string;
   seAbre?: string;
   /** Lo que ya contestó en el onboarding para esta jornada. */
@@ -92,9 +99,12 @@ const ROTULO: Record<PantallaSesion, string> = {
 };
 
 export default function SesionViva({
-  metaKey, metaCodigo, metaTitulo, teLlevas, pasos, micro, pide, seAbre, base,
+  metaKey, metaCodigo, metaTitulo, teLlevas, pasos, micro, diaDelPaso, pide, seAbre, base,
   tiempoEstimado, isCompleted, userId, children, video, evidencia, onIr, hilos,
 }: Props) {
+  const [pasoAfueraHecho, setPasoAfueraHecho] = useState<boolean>(
+    () => (diaDelPaso ? leerPasosAfuera().includes(diaDelPaso) : false),
+  );
   const orden = useMemo<PantallaSesion[]>(
     () => ['llevas', ...(video ? (['mira'] as PantallaSesion[]) : []), 'haz', 'sube', 'listo'],
     [video],
@@ -228,8 +238,37 @@ export default function SesionViva({
                     Tu paso afuera · 10 min
                   </p>
                   <p className="mt-1 text-[17px] leading-snug text-cream">{hilos.pasoAfuera}</p>
+                  {/*
+                    UN SOLO TOQUE, y solo acá. El paso afuera sigue sin tilde
+                    en la lista del día —el día cierra con sus cinco cosas, no
+                    con seis—, pero el juego del sur necesita saber que pasó:
+                    es lo que cuenta la racha y lo que vale dos piedras. Sin
+                    este toque, las dos mecánicas quedaban dibujadas y en cero
+                    para siempre.
+                  */}
+                  {diaDelPaso ? (
+                    <button
+                      type="button"
+                      aria-pressed={pasoAfueraHecho}
+                      onClick={() => {
+                        const lista = marcarPasoAfuera(diaDelPaso, !pasoAfueraHecho);
+                        setPasoAfueraHecho(lista.includes(diaDelPaso));
+                      }}
+                      className="mt-2 min-h-[44px] inline-flex items-center gap-2 text-[17px] font-semibold text-goldhi"
+                    >
+                      <span
+                        className="w-6 h-6 rounded-full grid place-items-center border"
+                        style={pasoAfueraHecho
+                          ? { background: 'var(--tilde, #4A7C59)', borderColor: 'var(--tilde, #4A7C59)' }
+                          : { borderColor: 'var(--line2, #DFD3BC)' }}
+                      >
+                        {pasoAfueraHecho && <Check className="w-4 h-4" style={{ color: '#FFFDF7' }} />}
+                      </span>
+                      {pasoAfueraHecho ? 'Lo hiciste' : 'Lo hice'}
+                    </button>
+                  ) : null}
                   <p className="text-[15px] leading-snug text-cream/70">
-                    Es opcional y no traba tu día.
+                    Es opcional: el día cierra igual.
                   </p>
                 </div>
               )}

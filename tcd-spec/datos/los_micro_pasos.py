@@ -74,8 +74,8 @@ MICRO = {
         ['Abre el test en la app',
          'Contesta rápido, sin pensarlo demasiado',
          'Anota tu tipo'],
-        ['Subraya lo que reconoces de ti entero',
-         'Subraya lo que reconoces de ti cansado'],
+        ['Subraya lo que reconoces de ti en tu mejor momento',
+         'Subraya lo que reconoces de ti cuando te gana el cansancio'],
         ['Repasa tus últimos siete días',
          'Elige tres momentos concretos, con día y hora'],
         ['Lo que haces de verdad, no lo que deberías',
@@ -298,7 +298,7 @@ MICRO = {
          'Anótalo con la fecha'],
     ],
     29: [
-        ['Entra a tu business de Meta',
+        ['Entra a tu cuenta comercial de Meta',
          'Agrega tu página y tu cuenta de Instagram'],
         ['País, moneda y zona horaria correctos',
          'Revísalos antes de confirmar: no se cambian después'],
@@ -339,7 +339,7 @@ MICRO = {
         ['En sus palabras, no en las tuyas',
          'Una línea'],
         ['Una línea',
-         'Desde lo que siente él, no desde lo que haces tú'],
+         'Desde lo que siente tu consultante, no desde lo que haces tú'],
     ],
     33: [
         ['Una sola vez, a la misma hora',
@@ -356,7 +356,7 @@ MICRO = {
          'Con nombre corto'],
         ['El número con el que entra cada consultante',
          'Cómo lo mides el primer día'],
-        ['Horas por consultante al mes',
+        ['Horas por consultante, por semana',
          'Multiplícalas por diez'],
     ],
     37: [

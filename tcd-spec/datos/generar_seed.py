@@ -63,7 +63,7 @@ TUTORIALES = [
  ("L-09","Tu calendario en dos pasos",28,5,"Sistema"),
  ("L-10","Tu página de preparación",28,4,"Sistema"),
  ("L-11","Tu página y perfil profesional",29,6,"Meta"),
- ("L-12","Business y cuenta publicitaria",29,7,"Meta"),
+ ("L-12","Cuenta comercial y cuenta publicitaria",29,7,"Meta"),
  ("L-13","Tarjeta o PayPal",29,4,"Meta"),
  ("L-14","Tu pixel",29,5,"Meta"),
  ("L-15","Tu evento de agenda calificada",31,5,"Meta"),
@@ -199,7 +199,7 @@ add(1,"sesion","Dónde y cuándo vas a construir esto",sistema=1,minutos=60,
                 ev("imagen","Foto del búnker","mesa, cuaderno visible, sin pantalla encendida",
                    pide="Sube la foto de tu lugar, con el cuaderno sobre la mesa."),
                 ev("imagen","Pacto publicado","se lee nombre y fecha",
-                   pide="Sube la captura de tu pacto publicado, donde se lea tu nombre y la fecha.")],
+                   pide="Sube la foto de tu pacto firmado, donde se lean tu nombre y la fecha.")],
     adn=["identidad","historia.por_que_empezo","reset.medicion_entrada"],cinturon="10gup")
 
 add(2,"sesion","Toda tu clínica en un solo lugar",sistema=4,minutos=90,piezas=["P0.4","P1.2"],tutoriales=["L-02"],
@@ -211,7 +211,7 @@ add(2,"sesion","Toda tu clínica en un solo lugar",sistema=4,minutos=90,piezas=[
            "Carga los ingresos de los últimos tres meses y tus gastos fijos",
            "Hoy no ordenas nada: hoy solo entra información"],
     evidencias=[ev("imagen","Panel con consultantes","al menos 5 filas con nombre y monto",
-                   pide="Sube la captura de tu panel con tus consultantes cargados."),
+                   pide="Sube la captura de tu página de preparación."),
                 ev("numero","Consultantes activos","entero > 0",
                    pide="Escribe cuántos consultantes activos tienes hoy."),
                 ev("numero","Ingreso promedio 3 meses","> 0",
@@ -232,7 +232,7 @@ add(3,"sesion","Cuánto ganas de verdad por cada hora",sistema=1,minutos=45,
                 ev("numero","Horas reales de la semana","> 0",
                    pide="Escribe las horas que sumaste, contando todo."),
                 ev("texto","Dónde lo sentiste","una palabra",
-                   pide="Escribe en una palabra dónde lo sentiste.")],
+                   pide="Escribe en una palabra dónde sentiste en el cuerpo tu hora real neta.")],
     adn=["numeros.hora_real_neta"],cinturon="9gup")
 
 add(4,"sesion","Para qué te sirve cobrar poco",sistema=1,minutos=45,piezas=["P1.1","P1.3"],agente="espejo",
@@ -336,7 +336,7 @@ add(12,"sesion","Tu primer cobro al precio nuevo",sistema=1,minutos=30,
     piezas=["P3.9"],
     pasos=["Manda el link a quien ya dijo que sí",
            "Cuando entre el cobro, sube el comprobante",
-           "Escribe al lado quién viene después, con nombre y fecha. Eso evita que lo bajes"],
+           "Escribe al lado quién viene después, con nombre y fecha. Eso evita que bajes el ritmo"],
     evidencias=[ev("imagen","Cobro al precio nuevo","monto >= precio digno, comprobante visible",
                    pide="Sube el comprobante del cobro, donde se lea el monto."),
                 ev("texto","Quién viene después","nombre y fecha",
@@ -416,7 +416,7 @@ add(18,"sesion","Tu garantía, en una frase",sistema=2,minutos=45,piezas=["P3.2b
     adn=["garantia"],nota="El Espejo devuelve textual lo del día 4.")
 
 add(19,"sesion","Tus cinco niveles y la fecha del rodaje",sistema=2,minutos=45,piezas=["P3.3b","P3.4"],manual="CLI-3",
-    lleva="Tu escalera de cinco niveles, con el tercero marcado, y tu rodaje agendado.",
+    lleva="Tu escalera de cinco niveles, con el tercero marcado.",
     veredicto="Vendes uno solo: el tercero. Los otros existen para que ese se entienda.",
     pasos=["Diseña los cinco niveles, de la puerta de entrada al acompañamiento más completo",
            "Marca el tercero: es el único que vendes hoy",
@@ -424,14 +424,14 @@ add(19,"sesion","Tus cinco niveles y la fecha del rodaje",sistema=2,minutos=45,p
     evidencias=[ev("texto","Los cinco niveles","el tercero marcado",
                    pide="Escribe tus cinco niveles y marca el tercero."),
                 ev("evento","Rodaje agendado","fecha y hora bloqueadas",
-                   pide="Se marca solo cuando bloquees la fecha del rodaje.")],
+                   pide="Escribe qué nivel ofreces primero después de tu programa.")],
     adn=["oferta.escalera"],cinturon="6gup",activa=["F-RODAJE"])
 
 add(20,"protocolo","Cobrar libera al otro",sistema=1,minutos=20,agente="espejo",
     lleva="Dos columnas: qué recibe tu consultante y qué se libera al pagar.",
     veredicto="Cuando ves lo que el otro gana al pagar, el precio deja de ser un pedido.",
     pasos=["Escribe qué recibe tu consultante a cambio del dinero",
-           "Escribe qué se libera él al pagar. Ejemplo: deja de deberse a sí mismo empezar"],
+           "Escribe de qué se libera tu consultante al pagar. Ejemplo: deja de postergar su propio comienzo"],
     evidencias=[ev("texto","Dos columnas","ambas completas",
                    pide="Escribe las dos columnas.")],adn=["cuaderno"],
     nota="Examen: día 27, cuando diga el precio en cámara.")
@@ -444,7 +444,7 @@ add(21,"protocolo","Decir tu número sin que te tiemble",sistema=1,minutos=20,ag
            "Escucha la primera y la veinte, una después de la otra"],
     evidencias=[ev("archivo","Audio del ancla","compara tono y velocidad de la primera y la última",
                    pide="Sube el audio de las veinte repeticiones.")],
-    adn=["cuaderno"],nota="Si todavía sube el tono, devuelve 'repite mañana' y no aprueba.")
+    adn=["cuaderno"],nota="Si todavía sube el tono, devuelve «repite mañana» y no aprueba.")
 
 add(22,"sesion","Tu captación, en dos piezas",sistema=3,minutos=60,piezas=["P4.1a","P4.1"],agente="mateo",
     manual="CAM-1",acceso="Entrega 2 del Sistema — sitios, formularios y contactos",
@@ -456,9 +456,9 @@ add(22,"sesion","Tu captación, en dos piezas",sistema=3,minutos=60,piezas=["P4.
            "Marca en verde lo que ya tienes y en rojo la primera pieza que falta",
            "Escribe al lado de cada caja quién la hace: tú, tu equipo o la app"],
     evidencias=[ev("imagen","Tu captación dibujada","dos ramas: recurso y video de venta",
-                   pide="Sube la foto de tu captación, con las dos ramas."),
+                   pide="Pega tu presentación de treinta segundos."),
                 ev("texto","Tu recurso elegido","masterclass, guía o diagnóstico",
-                   pide="Escribe cuál de los tres recursos eliges.")],
+                   pide="Escribe la lista de lo que grabas el lunes.")],
     adn=["trafico.recurso"])
 
 add(23,"sesion","A quién le van a hablar tus anuncios",sistema=3,minutos=30,piezas=["P4.1c"],
@@ -543,7 +543,7 @@ add(29,"sesion","Meta conectado y tu pixel midiendo",sistema=3,minutos=90,
     lleva="Tu cuenta publicitaria, tu forma de pago y tu pixel disparando.",
     veredicto="Tu pixel ya le avisa a Meta quién sirve y quién no. Sin eso, la plataforma te trae a cualquiera.",
     pasos=["Conecta tu página y tu perfil profesional",
-           "Crea tu cuenta publicitaria dentro de tu business",
+           "Crea tu cuenta publicitaria dentro de tu cuenta comercial de Meta",
            "Carga tu forma de pago",
            "Instala el pixel en tu página y pruébalo abriéndola desde el teléfono"],
     evidencias=[ev("evento","Pixel disparando","verificado desde la app",
@@ -619,7 +619,8 @@ add(42,"sesion","La autopsia",sistema=3,minutos=60,piezas=["P5.6"],agente="lucas
     pasos=["Subí o elegí una llamada real","Escuchala entera: la app no deja saltar",
            "Anotá los cuatro números","Compara con los que midió Lucas",
            "Elegí una sola cosa para cambiar"],
-    evidencias=[ev("numero","Los cuatro números","minuto, preguntas, silencio, pidió decisión"),
+    evidencias=[ev("numero","Los cuatro números","minuto, preguntas, silencio, pidió decisión",
+                   pide="Escribe tus cuatro números."),
                 ev("texto","La cosa que cambia","una sola")],
     lleva='Tus cuatro números de la llamada, medidos, no recordados.', veredicto='Ahí está tu llamada real. Elige una sola cosa para cambiar en la próxima.')
 
@@ -644,7 +645,7 @@ add(44,"sesion","Tu recuperador",sistema=3,minutos=60,piezas=["P4.5"],tutoriales
 add(45,"sesion","Tu primer consultante nuevo",sistema=3,minutos=30,piezas=["P6.3"],
     evidencias=[ev("evento","Cobro del sistema","contacto con origen campaña",mercado=True)],
     cinturon="2gup",
-    nota="Si no llega, el camino no se frena. El grado queda en ventana.",
+    nota="Si no llega, el camino no se frena: lo registras el día que entre.",
     lleva='El cobro de alguien que no te conocía, con su origen.', veredicto='La máquina camina: alguien pagó sin conocerte. Eso ya no depende de tu agenda.')
 
 add(46,"sesion","Crecer o apagar",sistema=3,minutos=45,piezas=["P4.4c"],agente="ramiro",
@@ -660,7 +661,8 @@ add(47,"sesion","La cinta",sistema=4,minutos=45,piezas=["P6.1"],agente="bruno",m
            "Nombrá tus estaciones, en orden","Definí tu línea base",
            "Hacé la cuenta: horas para uno, horas para diez"],
     evidencias=[ev("texto","Dos columnas, estaciones y línea base","completas"),
-                ev("numero","Horas por consultante al mes","> 0")],
+                ev("numero","Horas por consultante, por semana","> 0",
+                   pide="Escribe tus horas por consultante, por semana.")],
     adn=["entrega.estaciones","entrega.que_va_grabado","entrega.que_va_en_vivo","entrega.linea_base"],
     lleva='Tus dos columnas, tus estaciones y tu línea base.', veredicto='Ya sabes qué se graba y qué va en vivo. Eso es lo que te deja atender diez sin quemarte.')
 
@@ -697,7 +699,8 @@ add(51,"sesion","Tus etapas",sistema=4,minutos=90,piezas=["P8.2"],agente="bruno"
 add(52,"rodaje","Jornada de rodaje B",sistema=4,minutos=180,piezas=["P8.4"],larga=True,
     pasos=["Elegí de tu columna 'va grabado' del día 47","Uno por etapa, de tres a siete minutos",
            "Una sola toma por video","Sin edición: se sube como salió"],
-    evidencias=[ev("archivo","Cuatro videos","subidos y asignados a su etapa")],
+    evidencias=[ev("archivo","Cuatro videos","subidos y asignados a su etapa",
+                             pide="Sube tus cuatro videos.")],
     lleva='Tus cuatro videos de entrega grabados.', veredicto='Un día de rodaje, un mes tranquilo. Eso que grabaste hoy lo vas a usar con cada consultante.')
 
 add(53,"sesion","Invitar al primero y tocar algo tú",sistema=4,minutos=60,piezas=["P8.5"],manual="CLI-6",
@@ -761,16 +764,18 @@ for d in range(56,91):
         add(87,"sesion","Tu foto de llegada",sistema=0,minutos=45,piezas=["P10.2"],
             pasos=["Contestá las mismas preguntas del día 3",
                    "Recalculá tu hora real neta con los datos de Mi Clínica",
-                   "Recién ahí la app destapa el número del día 3"],
-            evidencias=[ev("numero","Hora real neta final","> 0")],
+                   "Recién ahí la app destapa el número del día 1"],
+            evidencias=[ev("numero","Hora real neta final","> 0",
+                                 pide="Escribe tu hora real neta de llegada.")],
             adn=["numeros.hora_real_neta_final"],
-    lleva='Tus dos números lado a lado: el del día 3 y el de hoy.', veredicto='Ese es el cambio, medido. No te lo cuenta nadie: lo ves.')
+    lleva='Tus dos números lado a lado: el del día 1 y el de hoy.', veredicto='Ese es el cambio, medido. No te lo cuenta nadie: lo ves.')
     elif d == 88:
         add(88,"sesion","Qué sigue",sistema=0,minutos=45,piezas=["P10.3"],
             pasos=["La app arma el borrador de tu plan de 180",
                    "Editalo, aprobalo y descargalo","Te lo llevás lo tomes o no lo tomes"],
-            evidencias=[ev("texto","Plan de 180 aprobado","doce semanas + tres meses")],
-    lleva='Tu plan de 180 días, tuyo, lo uses con nosotros o solo.', veredicto='Tienes la máquina andando. Lo que sigue es que te conozcan más personas, y eso es otro trabajo.')
+            evidencias=[ev("texto","Plan de 180 aprobado","doce semanas + tres meses",
+                                 pide="Marca tu plan de 180 días como aprobado.")],
+    lleva='Tu plan de 180 días, tuyo, sigas o no conmigo.', veredicto='Tienes la máquina andando. Lo que sigue es que te conozcan más personas, y eso es otro trabajo.')
     elif d == 89:
         add(89,"sesion","La última recta",sistema=0,minutos=45,piezas=["P7.3"],
             pasos=["Mirá cuántas ventas tenés y cuántas te faltan",
