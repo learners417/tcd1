@@ -357,6 +357,117 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 | **16 nov, 07:25** · `16ca4a8` | las dos colas cerradas —las 17 filas y los siete turnos de la piel—, así que esta despertada fue a la pregunta de atrás: **¿la batería VE el defecto?** Dieciséis defectos puestos a propósito, las 143 lentes con cada uno. Los nueve de número, vistos; de los siete de mecanismo, **cuatro no los vio nadie**: las tres reglas de la racha —la constancia del Diario, del Admin y de la pista de 66— y el último día de la ventana de acceso, que con `>` por `>=` se llevaba el día 90 del que pagó La Base. La racha no se podía medir (preguntaba el día adentro) y la ventana se medía por el medio, nunca por el borde (abajo, en «El 16 de noviembre a las 07:25») |
 | **16 nov, 11:40** · `b648008` (MCD) + `d977776` | las dos colas seguían cerradas y cero commits de Javo (`deb5536` en TCD, `d7b905a` en MCD), `node_modules` en cero en los dos. La despertada de las 07:25 preguntó si **la batería de TCD** ve el defecto; esta hizo la misma pregunta en **el otro repo**, donde nadie la había hecho nunca: las dos veces que se midió la batería de MCD (13 y 14 de nov) preguntaron si una lente se podía *engañar* con un comentario, no si **ve el defecto de verdad**. Diez defectos puestos, las 74 lentes con cada uno: **ocho no los vio nadie**, y uno de los ocho es textualmente lo que el bloque 6 dice que existe para evitar (abajo, en «El 16 de noviembre a las 11:40»)
 | **16 nov, 15:30** · `42cd83c` + `75f617e` (MCD) | las dos colas seguían cerradas y cero commits de Javo (`58f890c` en TCD, `b648008` en MCD), `node_modules` en cero en los dos y la trampa del `HEAD` suelto con la `main` local de TCD atrás **y el clon en shallow**, que hace que `git merge-base` diga «unrelated histories» y un `merge --ff-only` se niegue (se arregló con `fetch --unshallow` antes de medir). Las dos despertadas anteriores preguntaron si cada batería ve el defecto **en su propio repo**; esta preguntó por **la costura**, que es lo único que las dos comparten: el contrato del puente estaba en **tres copias escritas a mano** que nadie ataba, y renombrar un campo del lado de MCD dejaba **las dos baterías en verde** con el Cinturón Rojo sin llegar nunca (abajo, en «El 16 de noviembre a las 15:30»)
+| **16 nov, 19:30** · `56eb38c` | las dos colas seguían cerradas y cero commits de Javo (`2e444a4` en TCD, `75f617e` en MCD), `node_modules` en cero en los dos y el clon de TCD otra vez en shallow. Las tres despertadas anteriores preguntaron si cada batería ve el defecto en su repo y si la costura entre los dos estaba atada; esta preguntó por **los datos**, que es el otro cuerpo que nadie había mirado así: el seed de los 90 días. Y ahí estaba, desde el 24 de septiembre: **el día de cada pieza de video lo decidía una lista escrita a mano, desfasada del Camino en 35 de las 43**. Más el validador del paquete, que su propio encabezado llama «paso de CI», que nadie corría y que se caía con un KeyError antes de imprimir nada (abajo, en «El 16 de noviembre a las 19:30»)
+
+### El 16 de noviembre a las 19:30: el día de cada pieza lo decidía una lista de septiembre
+
+Las dos colas siguen cerradas y Javo no subió nada. Las tres despertadas
+anteriores preguntaron por **el código** y por **la costura**. Esta preguntó
+por **los datos**: el seed de los 90 días, que es lo que el cliente lee todos
+los días y lo que le dice a Javo qué grabar.
+
+**La premisa que se cayó, y es del propio generador.** `generar_seed.py` dice,
+escrito ahí, que el día de cada tutorial sale de la jornada que lo pide y no de
+un número a mano, «porque estaba a mano y se desfasó en 14 de los 21». Lo mismo
+hace con los grados y con los entrenadores. **Las piezas de video eran la única
+lista que seguía escribiendo el día a mano**, y el Camino se reordenó el 24 de
+septiembre sin tocarla. Medido sobre el historial del seed: el 11 de septiembre
+las dos listas coincidían; el 15 ya había 14 referencias sin ficha; el 24
+quedaron **35 de las 43 piezas con un día que el Camino contradice**, y así
+estuvieron dos meses.
+
+**Lo que hacía, medido con las funciones de los dos lados, antes de tocar.** El
+turno 12 dejó cerrado que el enlace de una fila llega al cliente **en el día
+que dice la fila**. Nadie preguntó si ese día era el bueno, porque salía del
+catálogo:
+
+| lo medido | antes | después |
+|---|---|---|
+| piezas que llegan al día de su lección | **7 de 42** | 42 de 42 |
+| filas con un día que el Camino contradice | **35** | 0 |
+| filas que se ven cargadas con el video de otro día | **6** | 0 |
+| filas que se ven vacías teniendo su video ya cargado | **5** | 0 |
+
+En concreto: Javo grababa «Tu método propio» (P2.1), pegaba el enlace en su
+fila —que decía día 15— y el cliente lo veía el día 15, mientras el día 9, cuya
+lección es «Tu método, escrito con sus etapas», se quedaba sin video. Y el
+Tablero, que es su cola de trabajo, le mentía sobre lo que falta grabar.
+
+**El tercer testigo.** Los videos ya cargados (`videosCargados.ts`) están
+puestos por día y sus comentarios dicen el Camino, no el catálogo: «día 9 · Tu
+método propio». O sea que los dos lados vivos —el Camino y lo ya cargado—
+coincidían, y la lista a mano era la única que decía otra cosa.
+
+**Y lo único que miraba esta regla no lo corría nadie.** `tcd-spec/datos/validar.py`
+existe desde el 24 de septiembre, su encabezado dice «Sirve como paso de CI: si
+un número de la documentación deja de coincidir con el seed, esto lo encuentra
+antes que un cliente», y el README del paquete lo lista como tal. Nada lo
+corría: ni la batería, ni un hook, ni nadie. Al correrlo por primera vez **se
+cayó con un KeyError en la línea 63** —pedía el `dia` del entrenador, campo que
+se llama `dia_estimado` desde que ese día sale del Camino—, así que no llegaba a
+imprimir ninguno de los problemas que ya tenía encontrados arriba. Y su tabla
+de totales era de otra época: 4.265 minutos, 8 entrenadores, 9 frenos.
+
+**Lo construido:**
+
+| qué | dónde |
+|---|---|
+| el día de la pieza sale de la jornada que la pide (`DIA_DE_LA_PIEZA`) | `tcd-spec/datos/generar_seed.py` |
+| las dos deudas del catálogo, emitidas **dentro del seed** para que nadie las copie a mano | `deudas_del_catalogo` en el seed |
+| la lente que recorre al revés que el turno 12, con las funciones de los dos lados | `scripts/prueba-el-dia-de-cada-pieza.ts` |
+| el validador reparado, con su deuda de documentos declarada, y **corrido por la batería** | bloque 6.4d de `auditoria.py` |
+| ¿y el validador ve el defecto? seis defectos sobre una copia del paquete | `scripts/probar-que-el-validador-ve-el-defecto.py` |
+| el defecto `dia-de-la-pieza` en el arnés de los defectos: **once** en vez de diez | `scripts/probar-que-la-bateria-ve-el-defecto.py` |
+
+**Probado contra su propio fallo.** Puesto el día viejo de P2.1 en el seed, la
+lente nueva se pone roja nombrando el día; el arnés de los once defectos la
+corre y la ve. Y el validador se pone rojo —nombrando cuál es— con cada uno de
+los seis: el día viejo, una jornada que pide una pieza que no existe, una pieza
+que ninguna jornada pide, la deuda que crece sola, un freno que desaparece, y
+la carga del cliente moviéndose de su desacuerdo declarado.
+
+**Y una lente que estaba verde por casualidad.** `prueba-lecciones-escritas.ts`
+exige que ninguna jornada llegue sin video ni lección escrita, y daba verde: el
+día viejo de P4.5 «Tu recuperador» (decía 44) y de P4.4c «Cuándo crecer y
+cuándo apagar» (decía 46) caía justo en días con **otro** video cargado —la
+jornada de rodaje B y «Tu escalera»—, así que la lente contaba el video de otro
+día como la clase de esa pieza. Con el día arreglado dicen la verdad: no tienen
+video ni lección. Quedan declaradas y nombradas en voz alta en cada corrida.
+
+### Lo que esta despertada deja esperando tu clic
+
+Cuatro cosas, y ninguna es trabajo de la máquina: las cuatro son decisiones
+tuyas. Todas quedaron declaradas, así que la batería se pone roja el día que
+cambie cualquiera, y mientras tanto pasa.
+
+1. **Los 14 códigos que el Camino pide y el catálogo no ficha** —P1.2, P1.2b,
+   P1.3, P1.5, P1.6, P2.3, P2.5, P3.3, P3.4, P4.3, P4.8, P5.4, P7.2, P7.3—.
+   No hay fila donde grabarlos ni título que mostrar. Cada uno es **una de dos**:
+   una pieza que falta fichar (y entonces va a `PIEZAS` con su título, su set y
+   sus minutos) o una referencia que el Camino tiene que dejar de pedir.
+2. **P1.1 «Por qué el dinero se sana primero»**, fichada en el catálogo y que
+   ninguna jornada pide: hoy el cliente no la ve nunca. O entra en su jornada,
+   o sale del catálogo.
+3. **P4.5 y P4.4c, sin video y sin lección escrita.** Grabarlas, o escribir su
+   clase. Son los días 25 y 43.
+4. **71 horas contra 56.** `00-MAESTRO.md` §3 dice «el total verificado sobre
+   el seed: 4.265 minutos, unas 71 horas», `11-REVISION-FINAL.md` repite
+   «5 h 30 por semana» y el README habla de «8 agentes». El seed dice **3.375
+   minutos ≈ 56 horas**, 87 evidencias y 9 entrenadores. Cuánto trabajo dice el
+   programa que lleva es tuyo, así que **no se tocó ni un lado ni el otro**: el
+   desacuerdo quedó declarado con los dos números, y si cualquiera se mueve, la
+   batería se pone roja.
+
+**Y dos cosas medidas que no son decisión, solo apunte:** `Espejo` es el
+entrenador de ocho jornadas en el seed —los días 1, 2, 3, 4, 19, 25, 32 y 66—
+y es el único de los nueve sin módulo vivo en `src/lib/agents/` (el registro
+`AGENTES` de la app tiene ocho). No se rompe nada a la vista —el id de la
+jornada no se busca en ningún catálogo— pero el entrenador de los primeros
+cuatro días no existe del lado de la app. Y el tipo `AgenteId` de
+`roadmapSeed.ts` todavía lista los ocho nombres **viejos** (`critico`,
+`escriba`, `camara`, `sparring`, `tablero`, `arquitecto`, `estratega`), que ya
+no son los del seed; `agentePorId` y `piezaPorCodigo` son índices exportados
+que nadie usa.
 
 ### El 16 de noviembre a las 15:30: el contrato del puente vivía en tres copias
 
