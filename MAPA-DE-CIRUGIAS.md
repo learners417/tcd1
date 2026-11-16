@@ -344,6 +344,71 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 
 | **16 nov, 00:30** · `b14f4d8` | la cola vieja seguía con sus 17 filas cerradas y el plan de la piel tenía T1 a T5 cerrados, así que se tomó el **T6: el juego del sur**. La premisa se cayó entera: el plan dice «hay una pieza y media» y las cinco mecánicas estaban construidas desde la mañana del 15. Lo que no estaba era el mapa pintando bien: **55 de los 90 días se pintaban con el color de otro paisaje, y 31 días no podían pintarse nunca** —el 90 entre ellos— porque su jornada no trae sistema (abajo, en «El 16 de noviembre a las 00:30») |
 
+| **16 nov, 05:10** · `ee5a72a` | la cola vieja seguía con sus 17 filas cerradas y el plan de la piel tenía T1 a T6 cerrados, así que se tomó el **T7: los arreglos de LIBROS**, el último. **La premisa se cayó casi entera**: de los siete encargos del 12 de noviembre, seis ya estaban hechos —la escalera (1.000 y 6.000), los cinco sistemas con el nombre del impreso, el Limay, el alerce, las etiquetas de días, los cinco libros publicados con enlace y «el sexto mapa»—, y el cóndor que volvía a mitad de camino **no está en el repo**. Lo que no estaba era quien los cuide: **los cinco nombres del impreso están escritos tres veces y solo una copia tenía lente**. Y ya se había desfasado: el candado del Río dejaba «Tu app andando» con el sistema llamándose «Tu propia app», y ese texto viaja al prompt de los entrenadores (abajo, en «El 16 de noviembre a las 05:10») |
+
+### El 16 de noviembre a las 05:10: el nombre del sistema, escrito tres veces y medido una
+
+Se tomó el **T7 del plan de la piel: los arreglos de LIBROS** —el último de los
+siete—. El plan listaba siete encargos del 12 de noviembre. **Seis ya estaban
+hechos, y el séptimo no existe:**
+
+| lo que el plan pedía | lo que había |
+|---|---|
+| la escalera: 997 a 1.000, 5.000 a 6.000 | hecho desde el turno 4 (`408fe10`). `planes.ts` vende La Base a `$1.000` y `cuadroTickets.ts` La Instalación a 6.000, con su subida de enero. Los 5.000 que quedan vivos son **La Cima** —otro producto, cinco días en Bariloche— y los tramos de la inducción interna |
+| «Tu nuevo precio» en todos lados | hecho: es el nombre del escalón blanco en `planes.ts` |
+| los cinco sistemas con su nombre del impreso | hechos: Tu reset · Tu programa · Tu captación · Tu propia app · Tu ecosistema, y `prueba-paisajes.ts` ya los compara contra el seed |
+| `losCincoPaisajes.ts`: los tres datos falsos | dos arreglados —el Limay se junta con el Neuquén y es el Negro el que llega al Atlántico; el alerce cambia agua y minerales **con su hongo**, no azúcares con los otros árboles— y **el tercero, el cóndor que vuelve a mitad de camino, no está en el repo**: no aparece en `src/`, ni en `scripts/` |
+| las etiquetas de días | hechas el 15: traen los dos números, el de la estación y el de armar |
+| `libros.ts`: los cinco publicados y con enlace | hecho. El enlace sale de `VITE_LIBROS_URL`, que **sigue sin cargar en Vercel**: hasta que la cargues, el estante los anuncia sin botón |
+| `libroYPacientes.ts`: los once capítulos que no existen | sigue igual, y sigue siendo lo correcto: ninguna pantalla del cliente importa ese archivo —medido archivo por archivo— y lo leen tres lentes y el script de los PDF. Borrarlo rompe esas piezas sin arreglar nada que se vea |
+| «menos mapas para el mismo viaje» | hecho, con su lente propia (`prueba-menos-mapas.ts`) |
+
+**Lo que no estaba era quien los cuide, y por eso uno ya se había caído.**
+
+Los cinco nombres del impreso están escritos **tres veces**: el seed los manda
+(`roadmap.seed.json`, `sistemas[].nombre`), `losCincoPaisajes.ts` los repite en
+el campo `sistema`, y `libros.ts` los repite por tercera vez al abrir el
+`queExplica` de cada libro del sur. De las tres, **solo la segunda tenía quien
+la compare.**
+
+**Y el candado estaba desfasado hoy en main.** `CANDADOS.rio.teDeja` decía «Tu
+app andando, horas recuperadas y siete mil dólares vendidos» — y el sistema se
+llama «Tu propia app». No es un comentario: `Agentes.tsx` arma el contexto
+vigente de los entrenadores desde `CANDADOS`, así que al cliente se le nombraba
+su cuarto sistema con el nombre corto, el que no está en ningún impreso.
+
+**Las dos lentes que lo dejaban pasar miraban que estuviera ESCRITO, no qué
+decía:** `prueba-las-cinco-estaciones.ts` pedía `c.teDeja.trim()` y
+`prueba-estante-de-libros.ts` pedía `queExplica.trim().length > 20`. Es el
+mismo error que la cabecera de la primera ya contaba con los tramos, y el que
+la revisión de las 23:40 dejó anotado: **la lente verificaba que algo no
+estuviera vacío, no que la cuenta diera bien.**
+
+**Lo arreglado.** El candado del Río dice «Tu propia app andando». Y las dos
+lentes piden el nombre **al seed** —no a `PAISAJES`, que es otra copia— y
+comparan la respuesta: el candado de cada estación abre con el nombre de SU
+sistema, y cada libro del sur abre con el suyo y lleva **en el lomo el número
+de su sistema** (el libro 4 es el del sistema 4, no el cuarto que se escribió).
+
+**Y una medida que nunca había existido: la cadena.** «Cada estación se abre
+con el logro de la anterior: no es un calendario, es una cadena» se le dice al
+cliente en ese mismo contexto. Las dos puntas de cada eslabón viven en campos
+distintos (`teDeja` de una, `seAbreCon` de la siguiente) y ninguna lente las
+había comparado nunca. Ahora se comparan, sin tildes y sin mayúsculas.
+
+**Probadas contra su propio fallo, las cuatro en rojo:** el nombre corto puesto
+de vuelta en el candado · un eslabón roto (el Bosque abriendo con «Diez ventas
+pagas») · el nombre corto en el libro del río · dos lomos cambiados. Las cuatro
+daban verde ayer.
+
+**Cómo quedó medido.** `tsc` y `npm run build` limpios, las **143** pruebas en
+verde, `auditoria.py` con **905 miradas** y cero faltas de diseño en las 93
+vistas del cliente y las 17 del Admin: «el ZIP puede salir».
+
+**Lo que de T7 no se tocó, porque es tuyo:** nada de precio quedó pendiente —la
+escalera ya estaba—, pero sí queda **`VITE_LIBROS_URL` sin cargar en Vercel**,
+y hasta que esté los cinco libros se anuncian sin botón de descarga.
+
 ### El 16 de noviembre a las 00:30: el mapa pintaba el trabajo, no el lugar
 
 Se tomó el **T6 del plan de la piel: el juego del sur** —el vaso, el mapa, la
@@ -3515,6 +3580,11 @@ orilla en 33, la travesía en 66, la otra orilla en 100), el mapa de 90 días qu
 se pinta, la racha de pasos afuera con la regla de reenganche, un sello por
 tramo y las 10 palabras.
 
+**T7 · CERRADO el 16 de noviembre** · `ee5a72a` · seis de los siete encargos
+ya estaban hechos y el séptimo (el cóndor) no existe en el repo; lo que faltaba
+era la lente, y el candado del Río ya se había desfasado. Arriba, en «El 16 de
+noviembre a las 05:10». **Con esto el plan de la piel queda cerrado entero.**
+El plan decía:
 **T7 · Los arreglos de LIBROS.** La escalera (997 a 1.000, 5.000 a 6.000), Tu
 nuevo precio en todos lados, los cinco sistemas con su nombre del impreso,
 `losCincoPaisajes.ts` (los tres datos y las etiquetas de días), `libros.ts`
