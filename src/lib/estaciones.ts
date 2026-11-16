@@ -97,7 +97,7 @@ export const CANDADOS: Record<IdPaisaje, Candado> = {
   rio: {
     libertad: 'libertad energética',
     seAbreCon: 'Tres ventas pagas',
-    teDeja: 'Tu app andando, horas recuperadas y siete mil dólares vendidos',
+    teDeja: 'Tu propia app andando, horas recuperadas y siete mil dólares vendidos',
   },
   bosque: {
     libertad: 'libertad de tiempo',

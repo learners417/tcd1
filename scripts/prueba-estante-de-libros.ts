@@ -65,6 +65,40 @@ ok(new Set(ordenes).size === ordenes.length, 'y no hay dos con el mismo número'
 ok(sur.length <= LIBROS_DEL_SUR_ESPERADOS, `la colección no se pasa de ${LIBROS_DEL_SUR_ESPERADOS}`);
 console.log(`  · faltan ${faltanDelSur()} por cargar, y el estante lo dice en pantalla`);
 
+/*
+ * ── CADA LIBRO DEL SUR ES SU SISTEMA, CON EL NOMBRE DEL IMPRESO (16 nov) ──
+ *
+ * Hasta hoy acá se miraba `queExplica.trim().length > 20`: que el libro
+ * dijera ALGO. Y lo que dice es el nombre del sistema —«Tu reset.», «Tu
+ * propia app.»—, que es la tercera copia de esos cinco nombres: el seed los
+ * manda, `losCincoPaisajes.ts` los repite y `libros.ts` los repite otra vez.
+ * De las tres, solo la segunda tenía quien la compare (`prueba-paisajes.ts`).
+ *
+ * La misma ceguera dejó pasar en main el candado del Río con «Tu app»
+ * en vez de «Tu propia app». Así que acá se pide el nombre AL SEED y se
+ * compara con lo que el libro abre, y de paso que el número del lomo sea el
+ * del sistema: el libro 4 es el del sistema 4, no el cuarto que se escribió.
+ */
+console.log('\n── cada libro del sur abre con su sistema, como lo nombra el impreso ──');
+const sistemasDelSeed = new Map<number, string>(
+  (JSON.parse(leer('src/lib/roadmap.seed.json')).sistemas as Array<{ n: number; nombre: string }>)
+    .map((s) => [s.n, s.nombre]),
+);
+const PAISAJE_DEL_LIBRO: Record<string, number> = {
+  lago: 1, montana: 2, viento: 3, rio: 4, bosque: 5,
+};
+for (const l of sur) {
+  const n = PAISAJE_DEL_LIBRO[l.id];
+  ok(typeof n === 'number', `«${l.titulo}» es uno de los cinco paisajes`);
+  if (typeof n !== 'number') continue;
+  const sistema = sistemasDelSeed.get(n);
+  ok(Boolean(sistema), `el sistema ${n} existe en el Camino`);
+  if (!sistema) continue;
+  ok(l.queExplica.startsWith(`${sistema}.`),
+    `«${l.titulo}» abre con «${sistema}.» y dice «${l.queExplica.slice(0, 28)}…»`);
+  ok(l.orden === n, `y lleva el ${n} en el lomo, el de su sistema (lleva el ${l.orden})`);
+}
+
 console.log('\n── el estante no vende ──');
 const comp = leer('src/components/EstanteDeLibros.tsx');
 const textoDeLosLibros = LIBROS.map((l) => `${l.titulo} ${l.queExplica}`).join(' ');

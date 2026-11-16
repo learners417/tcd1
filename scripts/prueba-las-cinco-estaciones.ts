@@ -72,7 +72,26 @@ if (anterior !== DIAS) mal(`el último paisaje cierra el día ${anterior} y el C
  * El candado es lo que convierte la app en mentor: no se pasa a la Montaña
  * por llegar al día 8, se pasa con el reset hecho. Una estación sin eso
  * escrito es una estación que no puede frenar a nadie.
+ *
+ * ═══ POR QUÉ ESTO SE ENDURECIÓ (16 de noviembre) ═══
+ *
+ * Hasta hoy esta parte miraba `.trim()`: que el candado estuviera ESCRITO.
+ * Daba verde, y mientras daba verde el candado del Río decía «Tu app
+ * andando» — y el sistema se llama «Tu propia app», que es el nombre del
+ * impreso y el que usan el seed, los paisajes y los libros. El nombre
+ * viajaba al prompt de los entrenadores (`Agentes.tsx` arma el contexto
+ * desde `CANDADOS`), así que el cliente oía el sistema con el nombre corto.
+ *
+ * Es el mismo error que la cabecera de esta lente ya cuenta con los tramos:
+ * una lente que mira que algo esté escrito pasa en verde el día que lo
+ * escrito queda distinto. Lo que hay que mirar es la RESPUESTA. Así que el
+ * nombre se pide AL SEED —no a `PAISAJES`, que es otra copia— y se compara.
  */
+const sistemasDelSeed = new Map<number, string>(
+  (JSON.parse(readFileSync(new URL('../src/lib/roadmap.seed.json', import.meta.url), 'utf8'))
+    .sistemas as Array<{ n: number; nombre: string }>).map((s) => [s.n, s.nombre]),
+);
+
 for (const p of PAISAJES) {
   const c = CANDADOS[p.id];
   if (!c) { mal(`${p.nombre} no declara su candado`); continue; }
@@ -80,6 +99,32 @@ for (const p of PAISAJES) {
   if (!c.teDeja.trim()) mal(`${p.nombre} no dice qué deja`);
   if (!c.libertad.trim()) mal(`${p.nombre} no dice qué libertad trabaja`);
   if (!p.libro.trim()) mal(`${p.nombre} no tiene libro`);
+
+  /* El candado deja el sistema de SU estación, con el nombre del impreso. */
+  const delSeed = sistemasDelSeed.get(p.n);
+  if (!delSeed) { mal(`${p.nombre} es el sistema ${p.n} y el seed no lo tiene`); continue; }
+  if (!c.teDeja.startsWith(delSeed)) {
+    mal(`${p.nombre} deja «${c.teDeja}» y su sistema se llama «${delSeed}»`);
+  }
+}
+
+/* ── 4b · La cadena: cada estación se abre con lo que dejó la anterior ──
+ *
+ * «Cada estación se abre con el logro de la anterior: no es un calendario,
+ * es una cadena» — eso se le dice al cliente en el contexto de los
+ * entrenadores. Si un eslabón no cierra, la frase miente y nadie lo ve:
+ * las dos puntas están escritas en archivos distintos y las dos pasan el
+ * `.trim()`.
+ */
+for (let i = 1; i < PAISAJES.length; i += 1) {
+  const previa = CANDADOS[PAISAJES[i - 1].id];
+  const actual = CANDADOS[PAISAJES[i].id];
+  if (!previa || !actual) continue;
+  const sinTildes = (t: string) => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  if (!sinTildes(previa.teDeja).includes(sinTildes(actual.seAbreCon))) {
+    mal(`${PAISAJES[i].nombre} se abre con «${actual.seAbreCon}» y `
+      + `${PAISAJES[i - 1].nombre} deja «${previa.teDeja}»: el eslabón no cierra`);
+  }
 }
 
 /* ── 5 · El color sale del libro, y nadie lo escribe a mano ──
