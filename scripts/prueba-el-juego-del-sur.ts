@@ -16,8 +16,12 @@
  * Correr con: npx tsx scripts/prueba-el-juego-del-sur.ts
  */
 import { readFileSync } from 'node:fs';
-import { rachaDe, piedras, piedrasEnElVaso, vasoLleno, VASO } from '../src/lib/elJuegoDelSur';
+import {
+  rachaDe, piedras, piedrasEnElVaso, vasoLleno, VASO,
+  colorDelDia, tramosDelMapa, cualDeLasDiez, encontrarPalabra,
+} from '../src/lib/elJuegoDelSur';
 import { SEED_ROADMAP_V3 } from '../src/lib/roadmapSeed';
+import { PAISAJES, tramoDelPaisaje } from '../src/lib/losCincoPaisajes';
 import { esPasoDelCliente } from '../src/lib/diaPrograma';
 
 let fallas = 0;
@@ -95,9 +99,100 @@ console.log('\n══ ningún mapa de más ══');
 ok(!/insignia|sello/i.test(soloCodigo),
   'el sello por tramo no se duplica: en la app son los grados que ya existen');
 
-/* Y el color de cada día sale del seed, no de rangos copiados acá. */
+/* Y el color de cada día sale de donde la app lo contesta, no de una tabla
+   copiada acá. Esta lente ya estaba, y era la que daba verde mientras el
+   tablero pintaba mal: medía la AUSENCIA de rangos copiados, no el color. */
 ok(!/\b(1 a 7|8 a 14|15 a 35|36 a 84|85 a 90)\b/.test(soloCodigo),
   'los días de cada paisaje no están copiados: salen del seed');
+ok(!/sistemaPorDia|coloresDeSistema/.test(pantalla),
+  'el mapa no se pinta con el sistema de la jornada, que es el trabajo y no el lugar');
+
+console.log('\n══ el mapa, pintado de verdad y comparado con la app ══');
+
+/*
+ * ACÁ ESTABA EL DEFECTO, Y NINGUNA LENTE LO VEÍA.
+ *
+ * El mapa pintaba cada día con el color del `sistema` de la jornada de ese
+ * día. El sistema dice de qué sistema es el TRABAJO; el paisaje dice dónde
+ * está el cliente. Medido el 16 de noviembre sobre main: 55 de los 90 días
+ * pintaban un color distinto del que la app muestra ese mismo día, y 31 días
+ * no podían pintarse nunca —el 90 entre ellos— porque su jornada no trae
+ * sistema.
+ *
+ * Estas cuatro lentes EJECUTAN el color y lo comparan contra una cuenta
+ * independiente: los tramos que `tramoDelPaisaje` calcula. Probadas con el
+ * defecto puesto: las cuatro se ponen rojas.
+ */
+const colores = Array.from({ length: 90 }, (_, i) => colorDelDia(i + 1));
+ok(colores.every((c) => Boolean(c)), `los 90 días tienen color (sin color: ${colores.filter((c) => !c).length})`);
+
+const distintos = new Set(colores);
+ok(distintos.size === 5, `el mapa usa cinco colores, uno por paisaje (usa ${distintos.size})`);
+
+/* Cinco tramos seguidos, en el orden de la colección: si el color vuelve a
+   salir del sistema de la jornada, el mapa queda salpicado y esto se rompe. */
+const corridas: (string | undefined)[] = [];
+for (const c of colores) if (c !== corridas[corridas.length - 1]) corridas.push(c);
+ok(corridas.length === 5, `los cinco paisajes van seguidos, no salpicados (${corridas.length} tramos)`);
+ok(corridas.join('|') === PAISAJES.map((p) => p.color.fondo).join('|'),
+  'y en el orden de la colección: lago, montaña, viento, río, bosque');
+
+/* La cuenta independiente: cada día del tramo de un paisaje se pinta con el
+   color de ESE paisaje. `tramoDelPaisaje` llega al mismo número por otro
+   camino que `paisajeDelDia`. */
+let fueraDeTramo = 0;
+for (const p of PAISAJES) {
+  const { desde, hasta } = tramoDelPaisaje(p.id);
+  for (let d = desde; d <= hasta; d++) if (colorDelDia(d) !== p.color.fondo) fueraDeTramo++;
+}
+ok(fueraDeTramo === 0, `ningún día se pinta con el color de otro paisaje (${fueraDeTramo} días)`);
+
+/* Y la leyenda sale de los mismos tramos que pintan, así que no puede mentir. */
+const tramos = tramosDelMapa();
+ok(tramos.length === 5 && tramos[0].desde === 1 && tramos[4].hasta === 90,
+  `la leyenda cubre los 90 días (${tramos[0].desde} al ${tramos[4].hasta})`);
+ok(tramos.every((t, i) => i === 0 || t.desde === tramos[i - 1].hasta + 1),
+  'y no deja un día sin paisaje entre dos tramos');
+
+console.log('\n══ el sello por tramo: que los grados lo cubran de verdad ══');
+
+/*
+ * El módulo decide no dibujar un sello nuevo porque «los grados ya son el
+ * sello». Eso es una afirmación sobre los datos, así que se ejecuta: se
+ * cuentan los grados que caen dentro de cada tramo. Si un tramo quedara sin
+ * ninguno, el quinto mecanismo del juego no existiría para ese tramo y la
+ * decisión de no dibujarlo estaría apoyada en nada.
+ */
+const grados = SEED_ROADMAP_V3
+  .flatMap((p) => p.metas ?? [])
+  .filter((m) => m.cinturon && m.dia_asignado)
+  .map((m) => ({ dia: m.dia_asignado as number, id: m.cinturon as string }));
+ok(grados.length === 11, `el Camino reparte ${grados.length} grados`);
+for (const p of PAISAJES) {
+  const { desde, hasta } = tramoDelPaisaje(p.id);
+  const suyos = grados.filter((g) => g.dia >= desde && g.dia <= hasta);
+  ok(suyos.length > 0,
+    `${p.nombre} (${desde}–${hasta}) cierra con grado: ${suyos.map((g) => `${g.id}@${g.dia}`).join(', ') || 'NINGUNO'}`);
+}
+
+console.log('\n══ las diez palabras, escritas en un teléfono ══');
+
+/*
+ * «ESCÁNER» lleva tilde y se escribe sin ella nueve de diez veces. La
+ * comparación exacta la rechazaba y la pantalla no decía nada: el campo se
+ * vaciaba y el cliente no sabía si la había sumado. Probado con el defecto
+ * puesto (comparación exacta): las tres primeras se ponen rojas.
+ */
+ok(cualDeLasDiez('escaner') === 'ESCÁNER', 'sin tilde cuenta igual');
+ok(cualDeLasDiez(' Escáner ') === 'ESCÁNER', 'con espacios y en minúscula, también');
+ok(cualDeLasDiez('ESCANER') === 'ESCÁNER', 'y en mayúsculas sin tilde');
+ok(cualDeLasDiez('hora') === 'HORA', 'las otras nueve siguen entrando');
+ok(cualDeLasDiez('embudo') === null, 'y una que no es de las diez no entra');
+ok(cualDeLasDiez('   ') === null, 'el campo vacío no suma nada');
+/* Y la pantalla tiene qué contestar en los dos casos. */
+ok(/cualDeLasDiez\(escribiendo\)/.test(pantalla), 'la pantalla pregunta antes de sumar');
+ok(/Esa no es una de las diez/.test(pantalla), 'y dice que no cuando no es');
+ok(encontrarPalabra('escaner').includes('ESCÁNER'), 'la que se suma queda escrita como en el libro');
 
 console.log('\n══ y las cuentas, corridas de verdad ══');
 
@@ -112,8 +207,21 @@ console.log('\n══ y las cuentas, corridas de verdad ══');
  *   · el Camino da 120 piedras y el vaso tiene 100, así que la línea decía
  *     «120 piedras» debajo de una grilla de 100.
  */
-const posibles = [1, 2, 3, 4, 8, 9, 10, 12, 18, 19, 25, 30, 32, 43, 51, 52,
-  59, 60, 65, 66, 73, 74, 82, 85, 87, 88, 89, 90];
+/*
+ * LOS DÍAS QUE TIENEN PASO AFUERA SALEN DEL SEED.
+ *
+ * Estaban escritos a mano acá —los 28, uno por uno— y coincidían con el seed
+ * el día que se escribieron. Eso es un segundo calendario: el día que el seed
+ * mueva un paso afuera, esta lente sigue verde contra la lista vieja. Es la
+ * misma cuenta que hace la pantalla, y se hace en el mismo lugar.
+ */
+const posibles = [...new Set(
+  SEED_ROADMAP_V3
+    .flatMap((p) => p.metas ?? [])
+    .filter((m) => m.paso_afuera && m.dia_asignado)
+    .map((m) => m.dia_asignado as number),
+)].sort((a, b) => a - b);
+ok(posibles.length === 28, `${posibles.length} días del Camino tienen paso afuera, y salen del seed`);
 
 ok(rachaDe([1, 2, 3], posibles, 3).actual === 3, 'tres días seguidos hasta hoy son racha de tres');
 ok(rachaDe([1, 2, 3], posibles, 4).actual === 0, 'y si hoy es un día posible sin marcar, se cortó');

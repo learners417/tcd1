@@ -342,6 +342,95 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 | **15 nov, 18:30** · `5af53b5` | se tomó el **T4: las micro-tareas del papel**, y al empujarlo apareció lo que ninguna lente mira: **otra sesión había hecho el T3 en paralelo** (`df84d81`) y el remoto rechazó el commit. Dos archivos de datos, dos lentes y dos pantallas para lo mismo. Comparadas antes de tocar: su capa de lecciones y pausas es mejor —cada pausa con su marca y su fuente—, y **sus 28 pasos afuera eran cinco textos rotando**, así que «Cambia una línea de tu perfil» le salía seis veces en los 90 días. Quedó su capa con mis 28 pasos adentro, una sola de cada cosa. Y el campo `checklist` que el plan mandaba llenar **no lo dibujaba ninguna pantalla**: era copia textual de `pasos` (abajo, en «El 15 de noviembre a las 18:30») |
 | **15 nov, 21:40** · `7bb7835` | se tomó el **T5: Mi protocolo, las 33 piezas**, y la premisa ya no era cierta: el plan dice «Mi protocolo no existe» y existía desde esa misma mañana —`miProtocolo.ts`, su pantalla en El Camino, la pista de 66, las tres señales de la OMS— con su lente en verde. Lo que no existía era que funcionara. **Tres de las 33 piezas eran imposibles de escribir**: las lecciones 7, 15 y 27 caen en los días 6 y 13, que son fin de semana y no se completan, así que su pieza no se pedía nunca y la pantalla decía «cada una llega con su lección». Y el mismo agujero por el otro lado: **la única pieza escribible era la de hoy**, así que las otras 30 tenían una sola oportunidad cada una. Más la pista de 66 clavada en cero porque `diasSostenidos` no se pasaba (abajo, en «El 15 de noviembre a las 21:40») |
 
+| **16 nov, 00:30** · `PENDIENTE` | la cola vieja seguía con sus 17 filas cerradas y el plan de la piel tenía T1 a T5 cerrados, así que se tomó el **T6: el juego del sur**. La premisa se cayó entera: el plan dice «hay una pieza y media» y las cinco mecánicas estaban construidas desde la mañana del 15. Lo que no estaba era el mapa pintando bien: **55 de los 90 días se pintaban con el color de otro paisaje, y 31 días no podían pintarse nunca** —el 90 entre ellos— porque su jornada no trae sistema (abajo, en «El 16 de noviembre a las 00:30») |
+
+### El 16 de noviembre a las 00:30: el mapa pintaba el trabajo, no el lugar
+
+Se tomó el **T6 del plan de la piel: el juego del sur** —el vaso, el mapa, la
+racha, el sello y las diez palabras—. El plan decía «hay una pieza y media:
+`racha.ts` cuenta días hábiles con sesión y no hay vaso, ni mapa, ni sellos, ni
+palabras». **Eso dejó de ser cierto el 15 a la mañana:** las cinco estaban
+construidas (`src/lib/elJuegoDelSur.ts`, su pantalla en El Camino, su prueba),
+y la revisión de las 23:40 ya les había arreglado tres cosas. Así que el turno
+no fue construir: fue medir lo construido.
+
+**Lo que se midió, ejecutando el color de los 90 días contra lo que la app
+dice de cada día:**
+
+| | |
+|---|---|
+| días que el tablero pintaba con el color de OTRO paisaje | **55 de 90** |
+| días que no podían pintarse nunca | **31** — el 48, 49, 55, 56, 62, 63, 69, 70, 75 a 77, 81 a 84 y 87 a 90 |
+
+El día 90 entre ellos: el cliente cerraba el Camino entero y su último
+casillero se quedaba gris.
+
+**Por qué.** El mapa tomaba el color del `sistema` de la jornada de ese día. El
+`sistema` dice de qué sistema es EL TRABAJO —y el trabajo del sistema 1 vuelve
+a aparecer en el día 80—; el paisaje dice DÓNDE ESTÁ el cliente, y en el día 80
+está en el río. Son dos cosas distintas y el mapa pintaba la primera: le salía
+un confeti de 47 tramos en vez de los cinco paisajes de la guarda. Los 31 días
+sin color son las jornadas que no traen sistema (o traen 0).
+
+**Es el mismo defecto que ya había pasado, y está escrito tres líneas más
+arriba del código que lo repetía:** cuando `estaciones.ts` se escribió sus
+propios rangos, 21 de los 90 días mostraban un paisaje en Hoy y nombraban otro
+en El Camino. Por eso existe `paisajeDelDia`, que lo contesta en un solo lugar.
+El tablero no lo usaba.
+
+**Y la lente que miraba justo eso daba verde.** Decía «los días de cada paisaje
+no están copiados: salen del seed» — y lo que medía era la AUSENCIA de rangos
+escritos a mano, no el color que sale. Es exactamente lo que la revisión de las
+23:40 dejó anotado: las lentes verificaban que algo no estuviera escrito, no
+que la cuenta diera bien.
+
+**Lo arreglado.** El mapa pregunta el color a `paisajeDelDia`, como el resto de
+la app, y la leyenda («El lago 1–7 · La montaña 8–14 · El viento 15–35 · El río
+36–84 · El bosque 85–90») sale de los mismos tramos que pintan, así que no
+puede mentir. Se fueron los dos props que lo traían por el otro camino.
+
+**Y una segunda, más chica y más seguida:** de las diez palabras escondidas,
+**ESCÁNER lleva tilde**, y en un teléfono se escribe sin ella nueve de diez
+veces. La comparación era exacta: la rechazaba, el campo se vaciaba y la
+pantalla no decía nada — el cliente no podía saber si la había sumado o si la
+palabra estaba mal. Ahora la tilde no decide y la pantalla contesta las dos
+cosas: «ESCÁNER, sumada» o «esa no es una de las diez».
+
+**Seis lentes nuevas que ejecutan** (y una lista que dejó de estar escrita a
+mano): los 90 días tienen color · son cinco colores · van en cinco tramos
+seguidos · en el orden de la colección · ningún día se pinta con el color de
+otro paisaje —comparado contra `tramoDelPaisaje`, que llega al mismo número por
+otro camino— · la leyenda cubre los 90 sin dejar un día afuera. Más las de la
+palabra sin tilde y las del sello. Y los 28 días que tienen paso afuera, que
+estaban escritos uno por uno en la prueba, ahora salen del seed.
+
+**Probadas contra su propio fallo:** con el color volviendo a salir del
+`sistema` de la jornada, las cinco del mapa se ponen rojas y cuentan lo mismo
+que la medición —31 sin color, 55 con el color de otro—; con la comparación
+exacta de la palabra, tres de las de las diez.
+
+**El sello por tramo, verificado y no inventado.** El módulo decide no dibujar
+un sello nuevo porque «los grados ya son el sello». Eso es una afirmación sobre
+los datos, así que ahora se ejecuta: cada uno de los cinco paisajes tiene al
+menos un grado adentro (lago 10gup@1 y 9gup@5 · montaña 8gup@12 · viento
+7gup@16, 6gup@19, 5gup@26 y 4gup@31 · río 3gup@38, 2gup@45 y 1gup@47 · bosque
+1dan@90). **Queda una cosa para tu clic, y no se tocó:** el río va del día 36 al
+84 y su último grado cae en el 47, así que el tramo más largo del Camino tiene
+**37 días seguidos sin ningún sello**. Mover o agregar un grado ahí es decisión
+de producto —cambia lo que el cliente gana y cuándo—, así que queda anotado y
+no hecho.
+
+**Lo que NO se tocó, y es tuyo:** el vaso del Camino da para 120 piedras y el
+del libro tiene 100 (está bien así: se llena cerca del día 70). Y las palabras
+y los pasos afuera se guardan en el teléfono, como el protocolo del T5: si el
+cliente cambia de aparato, los pierde. Pasarlos a la base es una migración, no
+un arreglo.
+
+Batería entera en verde antes de subir: `tsc` y `npm run build` limpios, **143
+de 143** `prueba-*.ts`, `auditoria.py` con **908 miradas** y cero faltas de
+diseño en las 93 vistas del cliente y las 17 del Admin. Captura del tablero en
+un teléfono de 390, con la cuenta llena: los cinco paisajes, seguidos.
+
 ### El 15 de noviembre a las 21:40: tres piezas que no se podían escribir
 
 Turno **T5 de los siete** del plan de la piel: Mi protocolo, las 33 piezas.
@@ -3414,6 +3503,13 @@ el libro; la guarda se va llenando; la pista de 66 con sus marcas en 21, 44 y
 66; y el chequeo semanal de tres preguntas contra el burnout (las tres
 dimensiones de la OMS, CIE-11).
 
+**T6 · El juego del sur.** — **CERRADO el 16 de noviembre** · `PENDIENTE`
+(arriba, en «El 16 de noviembre a las 00:30»). Las cinco mecánicas estaban
+construidas desde el 15 a la mañana; lo que no estaba era el mapa pintando
+bien: 55 de los 90 días con el color de otro paisaje y 31 que no podían
+pintarse nunca, el 90 entre ellos.
+
+El plan decía:
 **T6 · El juego del sur.** Tu vaso de 100 piedras (logro 1, paso afuera 2; la
 orilla en 33, la travesía en 66, la otra orilla en 100), el mapa de 90 días que
 se pinta, la racha de pasos afuera con la regla de reenganche, un sello por

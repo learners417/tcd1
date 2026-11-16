@@ -19,9 +19,14 @@
  * que hay que sacar. En el libro el sello es una pegatina, porque el papel
  * no tiene grados.
  *
- * EL COLOR DE CADA DÍA SALE DEL SEED, no de una tabla de rangos acá. Cada
- * jornada ya dice de qué sistema es; copiar los rangos a mano era tener dos
- * calendarios para pelearse.
+ * EL COLOR DE CADA DÍA LO DICE LA APP UNA SOLA VEZ, en `paisajeDelDia`. No
+ * se copia una tabla de rangos acá —eso era el defecto de `estaciones.ts`— y
+ * tampoco se lee el `sistema` de la jornada de ese día, que era el defecto
+ * de este tablero: medido el 16 de noviembre, el `sistema` de la jornada y el
+ * paisaje del día decían distinto en 55 de los 90 días, y 31 días no se
+ * podían pintar nunca —el 90 entre ellos— porque su jornada no trae sistema.
+ * El sistema de una jornada es de qué sistema es EL TRABAJO; el paisaje es
+ * dónde está el cliente ese día. Son dos cosas, y el mapa pinta la segunda.
  *
  * ═══ QUÉ ABREN LAS DIEZ PALABRAS (lo definía APP) ═══
  *
@@ -35,6 +40,8 @@
  * no cuesta nada de construir — los dos números ya están medidos, el día 1
  * y el día 74.
  */
+
+import { PAISAJES, paisajeDelDia, tramoDelPaisaje } from './losCincoPaisajes';
 
 /* ═══════════════ 1 · TU VASO ═══════════════ */
 
@@ -73,6 +80,45 @@ export function marcaAlcanzada(piedras: number): MarcaDelVaso | null {
   let ultima: MarcaDelVaso | null = null;
   for (const m of MARCAS) if (piedras >= m.en) ultima = m;
   return ultima;
+}
+
+/* ═══════════════ 2 · EL MAPA ═══════════════
+ *
+ * Los 90 días en cinco paisajes. Se pinta el día hecho, con el color del
+ * paisaje en el que está ese día.
+ *
+ * ═══ POR QUÉ NO SALE DEL `sistema` DE LA JORNADA ═══
+ *
+ * Es lo que hacía, y pintaba mal. El `sistema` de una jornada dice de qué
+ * sistema es el trabajo de ese día, y el trabajo del sistema 1 vuelve a
+ * aparecer en el día 80. El paisaje dice dónde está el cliente, y en el día
+ * 80 está en el río. Medido el 16 de noviembre, sobre el código que estaba
+ * en main:
+ *
+ *   · 55 de los 90 días pintaban un color distinto del que la app muestra
+ *     ese mismo día en Hoy, en la tarjeta y en la cabecera;
+ *   · 31 días no podían pintarse nunca, porque su jornada no trae sistema
+ *     (o trae 0): los días 48, 49, 55, 56, 62, 63, 69, 70, 75 a 77, 81 a 84
+ *     y 87 a 90. El último día del Camino se quedaba gris después de
+ *     cerrarlo.
+ *
+ * `paisajeDelDia` ya contesta esto para toda la app, y parsea los tramos del
+ * seed en un solo lugar. El mapa pregunta ahí.
+ */
+
+/** El color con que se pinta el día `dia`, si está hecho. */
+export function colorDelDia(dia: number): string | undefined {
+  return paisajeDelDia(dia)?.color.fondo;
+}
+
+/** Los cinco tramos del mapa, con su nombre y sus días. Para la leyenda. */
+export function tramosDelMapa(): { id: string; nombre: string; desde: number; hasta: number; color: string }[] {
+  return PAISAJES.map((p) => ({
+    id: p.id,
+    nombre: p.nombre,
+    ...tramoDelPaisaje(p.id),
+    color: p.color.fondo,
+  }));
 }
 
 /* ═══════════════ 3 · LA RACHA ═══════════════
@@ -164,13 +210,30 @@ export function leerPalabras(): string[] {
   }
 }
 
+/*
+ * SE ESCRIBE EN UN TELÉFONO, Y UNA DE LAS DIEZ LLEVA TILDE.
+ *
+ * «ESCÁNER» se tipea «escaner» nueve de diez veces, y la comparación exacta
+ * la rechazaba sin decir nada: el campo se vaciaba y no pasaba nada. El
+ * cliente no podía saber si la había sumado o si la palabra estaba mal.
+ * Ahora la tilde no decide, y quien pregunta recibe un sí o un no.
+ */
+const sinTilde = (t: string): string =>
+  t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
+
+/** La de las diez que coincide con lo escrito, sin que la tilde decida. */
+export function cualDeLasDiez(escrito: string): string | null {
+  const limpia = sinTilde(escrito.trim());
+  if (!limpia) return null;
+  return PALABRAS.find((p) => sinTilde(p.palabra) === limpia)?.palabra ?? null;
+}
+
 /** Marca una palabra como encontrada. Devuelve la lista nueva. */
 export function encontrarPalabra(palabra: string): string[] {
-  const limpia = palabra.trim().toUpperCase();
-  const existe = PALABRAS.some((p) => p.palabra === limpia);
-  if (!existe) return leerPalabras();
+  const cual = cualDeLasDiez(palabra);
+  if (!cual) return leerPalabras();
   const todas = new Set(leerPalabras());
-  todas.add(limpia);
+  todas.add(cual);
   const lista = [...todas];
   try { localStorage.setItem(CLAVE_PALABRAS, JSON.stringify(lista)); } catch { /* noop */ }
   return lista;

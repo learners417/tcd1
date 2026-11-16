@@ -16,9 +16,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   VASO, MARCAS, piedras, piedrasEnElVaso, vasoLleno, marcaAlcanzada,
-  rachaDe, SI_SE_CORTA, alMarcarPasoAfuera,
+  rachaDe, SI_SE_CORTA, alMarcarPasoAfuera, colorDelDia, tramosDelMapa,
   PALABRAS, ECUACION, LO_QUE_ABRE,
-  leerPalabras, encontrarPalabra, estanLasDiez,
+  leerPalabras, encontrarPalabra, cualDeLasDiez, estanLasDiez,
 } from '../../lib/elJuegoDelSur';
 
 interface Props {
@@ -30,16 +30,12 @@ interface Props {
   diaActual: number;
   /** Los días que tienen paso afuera, para medir la racha contra ellos. */
   diasConPasoAfuera: number[];
-  /** Día del camino → número de sistema (1 a 5), para pintar el mapa. */
-  sistemaPorDia: Record<number, number | null>;
-  /** El color de cada sistema, en orden. */
-  coloresDeSistema: string[];
   /** Su hora real de entrada y la de hoy, para lo que abren las diez palabras. */
   horaReal?: { entrada: number | null; hoy: number | null };
 }
 
 export default function ElJuegoDelSur({
-  diasHechos, pasosAfuera, diasConPasoAfuera, diaActual, sistemaPorDia, coloresDeSistema, horaReal,
+  diasHechos, pasosAfuera, diasConPasoAfuera, diaActual, horaReal,
 }: Props) {
   /* Lo que marca la sesión, en la misma pantalla: sin esto el vaso y la racha
      se quedaban quietos hasta recargar. */
@@ -48,6 +44,9 @@ export default function ElJuegoDelSur({
   useEffect(() => alMarcarPasoAfuera(setMarcados), []);
   const [palabras, setPalabras] = useState<string[]>(() => leerPalabras());
   const [escribiendo, setEscribiendo] = useState('');
+  /* Sin esto el campo se vaciaba y no pasaba nada: ni «la sumaste» ni «esa
+     no es». Una de las diez lleva tilde, así que pasaba seguido. */
+  const [aviso, setAviso] = useState<string | null>(null);
 
   const ganadas = piedras(diasHechos.length, marcados.length);
   const cuantas = piedrasEnElVaso(ganadas);
@@ -57,6 +56,7 @@ export default function ElJuegoDelSur({
     [marcados, diasConPasoAfuera, diaActual],
   );
   const hechos = useMemo(() => new Set(diasHechos), [diasHechos]);
+  const tramos = useMemo(() => tramosDelMapa(), []);
   const lasDiez = estanLasDiez(palabras);
 
   return (
@@ -107,8 +107,11 @@ export default function ElJuegoDelSur({
         <div className="grid grid-cols-10 gap-[3px]" aria-hidden="true">
           {Array.from({ length: 90 }, (_, i) => {
             const dia = i + 1;
-            const sis = sistemaPorDia[dia];
-            const color = sis ? coloresDeSistema[sis - 1] : undefined;
+            /* El color lo dice la app en un solo lugar. Leerlo del `sistema`
+               de la jornada pintaba 55 de los 90 días con el color de otro
+               paisaje, y dejaba 31 días —el 90 entre ellos— sin poder
+               pintarse nunca. */
+            const color = colorDelDia(dia);
             return (
               <span
                 key={dia}
@@ -122,8 +125,11 @@ export default function ElJuegoDelSur({
             );
           })}
         </div>
+        {/* La leyenda sale de los mismos tramos que pintan: si se mueve un
+            paisaje, se mueven los dos juntos. */}
         <p className="text-[15px] leading-snug text-cream/60">
-          Se pinta el día que hiciste, con el color de su paisaje.
+          Se pinta el día que hiciste, con el color del paisaje en el que estás.{' '}
+          {tramos.map((t) => `${t.nombre} ${t.desde}–${t.hasta}`).join(' · ')}.
         </p>
       </div>
 
@@ -149,7 +155,14 @@ export default function ElJuegoDelSur({
         </p>
         {!lasDiez && (
           <form
-            onSubmit={(e) => { e.preventDefault(); setPalabras(encontrarPalabra(escribiendo)); setEscribiendo(''); }}
+            onSubmit={(e) => {
+              e.preventDefault();
+              const cual = cualDeLasDiez(escribiendo);
+              if (!cual) { setAviso('Esa no es una de las diez. Mira otra vez los dibujos.'); return; }
+              setPalabras(encontrarPalabra(escribiendo));
+              setAviso(`${cual}, sumada.`);
+              setEscribiendo('');
+            }}
             className="flex gap-2"
           >
             <input
@@ -165,6 +178,9 @@ export default function ElJuegoDelSur({
               Sumar
             </button>
           </form>
+        )}
+        {aviso && (
+          <p className="text-[15px] leading-snug text-cream/70" role="status">{aviso}</p>
         )}
         <div className="flex flex-wrap gap-2">
           {PALABRAS.map((p) => {

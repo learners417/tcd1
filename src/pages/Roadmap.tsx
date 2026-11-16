@@ -78,7 +78,7 @@ import MiProtocolo from '../components/camino/MiProtocolo';
 import { leccionesDelDia } from '../lib/miProtocolo';
 import ElJuegoDelSur from '../components/camino/ElJuegoDelSur';
 import { leerPasosAfuera } from '../lib/elJuegoDelSur';
-import { PAISAJES } from '../lib/losCincoPaisajes';
+
 import { leer as leerMedicion, horaReal as horaRealDe, KEY_ENTRADA, KEY_SALIDA } from '../lib/medicion';
 import TaskFotoPartida from '../components/tasks/TaskFotoPartida';
 import TaskMapaMamuska from '../components/tasks/TaskMapaMamuska';
@@ -717,9 +717,13 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
   /* ─── EL JUEGO DEL SUR: todo sale de lo que ya hay, nada se guarda doble ───
    *
    * Los días hechos salen de `completadas`, que es la misma cuenta que mueve
-   * el anillo; el color de cada día, del sistema que cada jornada ya trae; y
-   * los días que tienen paso afuera, del propio seed. Copiar cualquiera de
-   * las tres a una tabla acá era abrir un segundo calendario.
+   * el anillo, y los días que tienen paso afuera, del propio seed. Copiar
+   * cualquiera de los dos a una tabla acá era abrir un segundo calendario.
+   *
+   * El color de cada día NO se pasa desde acá: lo pregunta el tablero a
+   * `paisajeDelDia`, que es donde la app lo contesta para todos. Pasarle el
+   * `sistema` de la jornada —que es lo que hacía— pintaba 55 de los 90 días
+   * con el color de otro paisaje.
    */
   const diasHechosDelCamino = useMemo(() => {
     const dias: number[] = [];
@@ -730,16 +734,6 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
     }
     return [...new Set(dias)].sort((a, b) => a - b);
   }, [seedConVideos, completadas]);
-
-  const sistemaPorDia = useMemo(() => {
-    const mapa: Record<number, number | null> = {};
-    for (const pil of seedConVideos) {
-      for (const m of pil.metas ?? []) {
-        if (m.dia_asignado) mapa[m.dia_asignado] = m.sistema ?? null;
-      }
-    }
-    return mapa;
-  }, [seedConVideos]);
 
   const diasQueTienenPasoAfuera = useMemo(() => {
     const dias: number[] = [];
@@ -1508,8 +1502,6 @@ export default function Roadmap({ userId, perfil, onNavigate, onProfileFieldUpda
         pasosAfuera={pasosAfueraMarcados}
         diaActual={diaActual}
         diasConPasoAfuera={diasQueTienenPasoAfuera}
-        sistemaPorDia={sistemaPorDia}
-        coloresDeSistema={PAISAJES.map((p) => p.color.fondo)}
         horaReal={horaRealDeLosDos}
       />
 
