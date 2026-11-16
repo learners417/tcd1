@@ -234,12 +234,20 @@ diecisiete están cerrados; en cinco —5, 9, 10, 13 y 14— lo cerrado es el fl
 y lo que queda adentro es tu clic, no trabajo. Así que la tarea programada
 sigue encendida y sin nada que tomar.
 
-**Dos premisas del encargo de la tarea ya no son ciertas.** Dice «los diez
+**Tres premisas del encargo de la tarea ya no son ciertas.** Dice «los diez
 turnos» —son diecisiete— y dice que MCD «hoy NO tiene batería de ningún tipo:
 ése es su primer turno». MCD tiene su batería desde el 9 de noviembre:
 `auditoria.py` en su raíz, nueve bloques, 46 lentes, cerrada por el turno 6
-(`f3e9ddc`), más las 5 del puente del turno 7 (`7c6e524`). Lo que MCD no tiene
-es `prueba-*.ts`: su batería es toda Python.
+(`f3e9ddc`), más las 5 del puente del turno 7 (`7c6e524`). Y desde el 16 de
+noviembre a las 11:40 tiene además tres `prueba-*.ts` que **ejecutan** código,
+así que lo de «su batería es toda Python» tampoco vale ya.
+
+Y la tercera, medida el 16 a las 15:30: dice que las dos apps **«comparten
+Supabase»**, y no lo comparten. El comentario de la propia ruta de MCD lo dice
+—«TCD (proyecto Supabase distinto)»— y las tablas no se cruzan. Lo único que
+une a las dos apps es **el puente HTTP**, que es por lo tanto el único lugar
+donde pueden dejar de entenderse — y era justo lo que nadie medía (abajo, en
+«El 16 de noviembre a las 15:30»).
 
 **Decisión tuya, y es un botón de tres:** apagar la tarea, espaciarla (de cada
 cuatro horas a una vez al día, mientras decides), o escribirle turnos nuevos a
@@ -348,6 +356,96 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 
 | **16 nov, 07:25** · `16ca4a8` | las dos colas cerradas —las 17 filas y los siete turnos de la piel—, así que esta despertada fue a la pregunta de atrás: **¿la batería VE el defecto?** Dieciséis defectos puestos a propósito, las 143 lentes con cada uno. Los nueve de número, vistos; de los siete de mecanismo, **cuatro no los vio nadie**: las tres reglas de la racha —la constancia del Diario, del Admin y de la pista de 66— y el último día de la ventana de acceso, que con `>` por `>=` se llevaba el día 90 del que pagó La Base. La racha no se podía medir (preguntaba el día adentro) y la ventana se medía por el medio, nunca por el borde (abajo, en «El 16 de noviembre a las 07:25») |
 | **16 nov, 11:40** · `b648008` (MCD) + `d977776` | las dos colas seguían cerradas y cero commits de Javo (`deb5536` en TCD, `d7b905a` en MCD), `node_modules` en cero en los dos. La despertada de las 07:25 preguntó si **la batería de TCD** ve el defecto; esta hizo la misma pregunta en **el otro repo**, donde nadie la había hecho nunca: las dos veces que se midió la batería de MCD (13 y 14 de nov) preguntaron si una lente se podía *engañar* con un comentario, no si **ve el defecto de verdad**. Diez defectos puestos, las 74 lentes con cada uno: **ocho no los vio nadie**, y uno de los ocho es textualmente lo que el bloque 6 dice que existe para evitar (abajo, en «El 16 de noviembre a las 11:40»)
+| **16 nov, 15:30** · `PENDIENTE` + `75f617e` (MCD) | las dos colas seguían cerradas y cero commits de Javo (`58f890c` en TCD, `b648008` en MCD), `node_modules` en cero en los dos y la trampa del `HEAD` suelto con la `main` local de TCD atrás **y el clon en shallow**, que hace que `git merge-base` diga «unrelated histories» y un `merge --ff-only` se niegue (se arregló con `fetch --unshallow` antes de medir). Las dos despertadas anteriores preguntaron si cada batería ve el defecto **en su propio repo**; esta preguntó por **la costura**, que es lo único que las dos comparten: el contrato del puente estaba en **tres copias escritas a mano** que nadie ataba, y renombrar un campo del lado de MCD dejaba **las dos baterías en verde** con el Cinturón Rojo sin llegar nunca (abajo, en «El 16 de noviembre a las 15:30»)
+
+### El 16 de noviembre a las 15:30: el contrato del puente vivía en tres copias
+
+Las dos colas siguen cerradas y Javo no subió nada. Las dos despertadas
+anteriores preguntaron si cada batería **ve el defecto** en su propio repo.
+Esta preguntó por **la costura**: el puente entre las dos apps tiene un lado en
+cada repo, y cada batería lee solo el suyo.
+
+**Y de paso se cayó una premisa del encargo de la tarea.** Dice que las dos
+apps «comparten Supabase». No lo comparten: el comentario de la propia ruta de
+MCD lo dice —«TCD (proyecto Supabase distinto)»— y las tablas no se cruzan
+(`practitioners`, `cobros`, `patients` de un lado; `profiles`, `hoja_de_ruta`,
+`mensajes` del otro). Lo único que une a las dos apps es **el puente HTTP**, y
+por eso es el único lugar donde pueden dejar de entenderse.
+
+**La premisa del mapa que se cayó:** «el contrato se cuida de los dos lados»
+(turno 7). Lo que se cuida de los dos lados es el **comportamiento**. El
+**contrato** —los nombres de los campos que viajan— estaba escrito a mano en
+**tres copias que nadie ataba entre sí**:
+
+| la copia | dónde vive | qué dice |
+|---|---|---|
+| lo que MCD escribe de verdad | `NextResponse.json({…})` en el repo de MCD | los 6 campos |
+| la lista que dice cuidarlo | `CONTRATO = [...]` en la auditoría de MCD | 5 nombres a mano |
+| lo que TCD lee | `data?.…` en `api/mcd-bridge.ts` | 3 campos |
+| y el MCD **falso** | `prueba-el-puente-de-las-dos-apps.ts`, en el repo de TCD | copia congelada de los 6 |
+
+La cuarta es la peor: el MCD falso que ejecuta las 15 lentes del puente es una
+copia a mano de la respuesta de MCD, **guardada en el otro repo**. Mientras no
+la ate nada, las 15 lentes pueden seguir en verde para siempre contra un MCD
+que ya no existe.
+
+**Cómo se midió: los dos defectos puestos de verdad, uno por lado.**
+
+| el defecto puesto | lo que le pasa al cliente | las dos baterías |
+|---|---|---|
+| TCD lee `data?.totalUsd` (renombra de su lado) | el X/10 y el total se calculan sobre `undefined` | **roja** — la lente 15 del puente |
+| MCD emite `fecha_primer_cobro` y arregla su propia lista `CONTRATO` | **el Cinturón Rojo no llega nunca y el candado del día 31 no se abre nunca, para todo cliente que cobró** | **las dos EN VERDE**: MCD 74, `tsc` y `next build` limpios; TCD con sus 15 |
+
+**El segundo es el que pasa en la vida real**, y es lo que hace que la
+simetría no exista: el que renombra el campo está editando MCD, y arreglar la
+lista de su propia batería es el movimiento natural del que renombra. Después
+de eso las dos baterías dicen «verde» y el puente contesta
+`cobro_verificado: false` para todo el que vendió, en silencio y para siempre
+—que es textualmente la ceguera que el encabezado de `api/mcd-bridge.ts` dice
+que existe para evitar: «el Cinturón Rojo no llega nunca y el candado del día
+31 no se abre nunca, en silencio y para siempre. Por eso `mcd_status` viaja
+SIEMPRE»—. El motivo viaja; el **nombre del campo** no lo miraba nadie.
+
+**Lo construido: la lente que compara los dos textos**, que es lo único que
+puede verlo. Está en las dos baterías, de los dos lados, y en las dos sale del
+objeto de la respuesta **leído**, no de una lista escrita a mano:
+
+| la lente | dónde | qué ata |
+|---|---|---|
+| `el puente lee solo campos que MCD escribe de verdad` | TCD | lo que `data?.…` lee ⊆ lo que la ruta de MCD escribe |
+| `y el MCD falso de la prueba no se quedó con un nombre que MCD ya no manda` | TCD | el falso de la prueba == lo que MCD escribe |
+| `el MCD falso de la prueba escribe todo lo que el puente lee` | TCD | **sin MCD al lado**: el falso cubre lo que el puente lee |
+| `esta ruta escribe todos los campos que TCD lee del puente` | MCD | el espejo, y es el que caza el renombre **en el momento** |
+| `y los cinco de la lista están entre los que escribe, no solo en el texto` | MCD | la lista `CONTRATO` contra el objeto de verdad |
+
+Las claves se sacan del objeto literal **a mano y no con una regex**, porque el
+valor de una clave trae comas y paréntesis (`lista.reduce((s, c) => …, 0)`) y
+porque las de un `type` se separan con `;` y llevan `?`. Y las dos puntas se
+leen **sin comentarios**: un campo nombrado en un comentario no viaja en el
+JSON, que es el agujero por el que este frente ya se cayó cuatro veces.
+
+**Y lo que queda cuidando esto para siempre, en los dos repos:**
+
+- en TCD, `scripts/probar-el-contrato-del-puente.py`, dentro de la batería: le
+  saca a `auditoria.py` el trozo marcado —`#.LENTE.CONTRATO.INI/FIN`— y lo
+  evalúa con un lector que sirve el archivo **parcheado**, con las cuatro
+  derivas puestas. No corre la batería entera y no toca nada del disco;
+- en MCD, el defecto `contrato-renombrado` dentro de
+  `probar-que-la-bateria-ve-el-defecto.py`, que ya existía: **once** defectos
+  en vez de diez.
+
+**Probado contra su propio fallo, tres veces.** Ablandadas las dos
+comparaciones de TCD, el arnés salió rojo y nombró las tres derivas que habían
+vuelto a ser invisibles. Sacada la marca `#.LENTE.CONTRATO.INI`, el arnés
+avisa que no encontró su lente y sale en rojo en vez de dar verde por no medir
+nada. Y en MCD, puesto el renombre de verdad, las dos lentes nuevas se pusieron
+rojas nombrando el campo (`primer_cobro`), donde antes las 74 daban verde.
+
+**Lo que no se tocó:** el `?email=` de la ruta sigue siendo el `?email=`. Esta
+despertada no cerró `/api/mcd-bridge` —sigue siendo tu clic, con su botón de
+dos en «Lo que queda, y es tu clic»—; lo que hizo es que el día que la cierres,
+o el día que alguien renombre un campo de cualquiera de los dos lados, **una
+batería se ponga roja antes de que el cliente se quede sin su Cinturón Rojo**.
 
 ### El 16 de noviembre a las 11:40: MCD leía su código, no lo corría
 
@@ -2701,9 +2799,15 @@ Ninguna de estas la puede hacer Claude. Van en cada parte que se le dé.
 La duda de los «dos repos» era de Clínica del Líder, no de MCD: el duplicado
 de MCD ya estaba archivado.
 
-**MCD se trabaja en la misma sesión que TCD**, no en un chat aparte: comparten
-el mismo Supabase y el puente tiene un lado en cada repo —`api/mcd-bridge.ts`
-en TCD y `/api/integrations/tcd` en MCD—. Tocar un lado a ciegas rompe el otro.
+**MCD se trabaja en la misma sesión que TCD**, no en un chat aparte: el puente
+tiene un lado en cada repo —`api/mcd-bridge.ts` en TCD y
+`/api/integrations/tcd` en MCD—. Tocar un lado a ciegas rompe el otro.
+
+Lo que **no** comparten es la base: son **dos proyectos de Supabase distintos**
+—lo dice el comentario de la ruta de MCD, y las tablas no se cruzan—, medido el
+16 de noviembre a las 15:30. El puente HTTP es todo lo que las une, y por eso
+el **contrato** de ese puente es lo único que puede desfasarse sin que ninguna
+de las dos baterías se entere. Desde esa fecha, se entera.
 
 ### La batería de MCD — turno 6, cerrado el 9 de noviembre
 

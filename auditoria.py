@@ -4782,6 +4782,141 @@ check('el puente con MiClínica anda y se puede ver si no anda',
       _pte.returncode == 0,
       ' · '.join(l.strip() for l in _pte.stdout.split('\n') if l.strip().startswith('✗'))[:220])
 
+# ── EL CONTRATO DEL PUENTE, ATADO AL OTRO REPO ────────────────────────
+#
+# LO QUE SE MIDIÓ (16 de noviembre de 2026): el contrato del puente se
+# cuidaba en TRES copias que nadie ataba entre sí.
+#
+#   · lo que MCD escribe de verdad      → `NextResponse.json({…})` en su repo
+#   · la lista de MCD que dice cuidarlo → `CONTRATO = [...]` en SU auditoría
+#   · lo que TCD lee                    → `data?.…` acá, y el MCD FALSO de
+#                                          `prueba-el-puente-de-las-dos-apps.ts`
+#
+# El MCD falso es una copia a mano del contrato, congelada en ESTE repo. Así
+# que la deriva tiene un lado ciego y uno visto, y se midió poniendo los dos
+# defectos:
+#
+#   | el defecto puesto                              | las dos baterías |
+#   |------------------------------------------------|------------------|
+#   | TCD lee `data?.totalUsd` (renombra de su lado) | **roja** (la 15) |
+#   | MCD emite `fecha_primer_cobro` y arregla su    | las dos EN VERDE |
+#   |   propia lista `CONTRATO`                      |                  |
+#
+# El segundo es el que importa, porque es el que pasa: el que renombra el
+# campo está editando MCD, y arreglar la lista de su propia batería es el
+# movimiento natural. Después de eso MCD da sus 74 en verde, TCD da sus 15 en
+# verde, y en producción el puente contesta `cobro_verificado: false` para
+# TODO cliente que cobró: el Cinturón Rojo no llega nunca y el candado del
+# día 31 no se abre nunca, en silencio y para siempre — exactamente la
+# ceguera que el encabezado de `api/mcd-bridge.ts` dice que existe para
+# evitar.
+#
+# Lo que ata las copias es comparar los DOS TEXTOS, que solo se puede donde
+# los dos repos están. Así que esto mira el repo de MCD cuando está al lado
+# (o donde diga `MCD_REPO`), y cuando no está, ata lo que sí alcanza: que el
+# MCD falso de la prueba cubra todo lo que este repo lee del puente.
+
+
+#.LENTE.CONTRATO.INI
+def _claves_del_objeto(_t, _i):
+    """Las claves de primer nivel del objeto literal que ABRE en `_t[_i]`.
+
+    A mano y no con una regex porque el valor de una clave trae comas,
+    paréntesis y llaves (`lista.reduce((s, c) => …, 0)`), y porque las de un
+    `type` se separan con `;` y llevan `?`.
+    """
+    if _i >= len(_t) or _t[_i] != '{': return None
+    _prof, _j, _q, _partes, _ini = 0, _i, None, [], _i + 1
+    while _j < len(_t):
+        _c = _t[_j]
+        if _q:
+            if _c == '\\': _j += 2; continue
+            if _c == _q: _q = None
+            _j += 1; continue
+        if _c in '\'"`': _q = _c; _j += 1; continue
+        if _c in '{[(': _prof += 1
+        elif _c in '}])':
+            _prof -= 1
+            if _prof == 0: _partes.append(_t[_ini:_j]); break
+        elif _c in ',;' and _prof == 1: _partes.append(_t[_ini:_j]); _ini = _j + 1
+        _j += 1
+    _out = set()
+    for _p in _partes:
+        _m = re.match(r'^([A-Za-z_$][\w$]*)\s*\??\s*(?::|$)', _p.strip())
+        if _m: _out.add(_m.group(1))
+    return _out
+
+
+def _objeto_mayor(_t, _abridor, _minimo=3):
+    """El objeto literal más grande de los que siguen a `_abridor`.
+
+    En las dos puntas del puente el objeto de la respuesta BUENA es el que
+    tiene más claves: los otros son `{ error }` de una sola.
+    """
+    _objs = []
+    for _m in re.finditer(re.escape(_abridor), _t):
+        _k = _m.end()
+        while _k < len(_t) and _t[_k] in ' \n\t': _k += 1
+        _cl = _claves_del_objeto(_t, _k)
+        if _cl and len(_cl) >= _minimo: _objs.append(_cl)
+    return max(_objs, key=len) if _objs else None
+
+
+# Sin comentarios en las dos puntas: un nombre que vive en un comentario no
+# es un campo que viaja, y este frente ya se cayó cuatro veces por ahí.
+_pteT = cod(rd('api/mcd-bridge.ts'))
+_pruT = cod(rd('scripts/prueba-el-puente-de-las-dos-apps.ts'))
+
+# Lo que este repo lee de la respuesta de MCD, y lo que su tipo declara.
+_leeT = set(re.findall(r'\bdata\s*\??\.\s*([A-Za-z_$][\w$]*)', _pteT))
+_mtipoT = re.search(r'type RespuestaDeMCD\s*=\s*', _pteT)
+_tipoT = (_claves_del_objeto(_pteT, _mtipoT.end()) or set()) if _mtipoT else set()
+# Y lo que el MCD falso de la prueba finge escribir.
+_fingeT = _objeto_mayor(_pruT, 'json: async () => (')
+
+# Una lente que no encontró qué medir no está verde: está ciega.
+check('el puente declara su contrato y la prueba finge uno (hay qué comparar)',
+      bool(_leeT) and bool(_tipoT) and bool(_fingeT),
+      f'lee={sorted(_leeT)} tipo={sorted(_tipoT)} finge={sorted(_fingeT or [])}')
+
+if _fingeT:
+    _sueltoT = sorted((_leeT | _tipoT) - _fingeT)
+    check('el MCD falso de la prueba escribe todo lo que el puente lee',
+          not _sueltoT,
+          'el puente lee ' + ', '.join(_sueltoT) + ' y el falso no lo manda: '
+          'la prueba pasa con un campo que nadie llena')
+
+_MCD_REPO = os.environ.get('MCD_REPO') or '../mcd'
+_rutaMCD = _MCD_REPO + '/src/app/api/integrations/tcd/route.ts'
+if os.path.exists(_rutaMCD):
+    _emiteT = _objeto_mayor(cod(rd(_rutaMCD)), 'NextResponse.json(')
+    check('se pudo leer qué campos escribe MCD de verdad', bool(_emiteT),
+          'no se encontró el objeto de la respuesta buena en ' + _rutaMCD)
+    if _emiteT:
+        _inventaT = sorted((_leeT | _tipoT) - _emiteT)
+        check('el puente lee solo campos que MCD escribe de verdad',
+              not _inventaT,
+              ', '.join(_inventaT) + ' — MCD manda ' + ', '.join(sorted(_emiteT))
+              + ': el puente los lee `undefined` y contesta «todavía no cobró»')
+        _derivaT = sorted(_fingeT - _emiteT) if _fingeT else []
+        check('y el MCD falso de la prueba no se quedó con un nombre que MCD ya no manda',
+              not _derivaT,
+              ', '.join(_derivaT) + ' — el falso finge un campo que el MCD real no escribe')
+else:
+    print('  · MCD no está clonado al lado — lo que escribe de verdad no se mira desde acá')
+#.LENTE.CONTRATO.FIN
+
+# Y la prueba de que esta lente sirve, corrida de verdad: cuatro derivas del
+# contrato puestas a propósito —dos en la respuesta de MCD, una en el MCD
+# falso de la prueba, una en lo que este puente lee— y la lente tiene que
+# ponerse roja en las cuatro. Las dos primeras son las que el 16 de noviembre
+# dejaban las DOS baterías en verde.
+_pcp = subprocess.run([sys.executable, 'scripts/probar-el-contrato-del-puente.py'],
+                      capture_output=True, text=True)
+check('la deriva del contrato del puente: verde ayer, roja hoy (probado ejecutando)',
+      _pcp.returncode == 0,
+      (_pcp.stdout + _pcp.stderr).strip().split('\n')[-1][:170])
+
 # ── La cadena del pago, ejecutada ─────────────────────────────────────
 # Las dos rutas que convierten a un desconocido en cliente y después en
 # cliente de $1.000: /api/alta-numero y /api/ghl-webhook. Nadie las ejecutaba:
