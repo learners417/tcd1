@@ -342,7 +342,7 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 | **15 nov, 18:30** · `5af53b5` | se tomó el **T4: las micro-tareas del papel**, y al empujarlo apareció lo que ninguna lente mira: **otra sesión había hecho el T3 en paralelo** (`df84d81`) y el remoto rechazó el commit. Dos archivos de datos, dos lentes y dos pantallas para lo mismo. Comparadas antes de tocar: su capa de lecciones y pausas es mejor —cada pausa con su marca y su fuente—, y **sus 28 pasos afuera eran cinco textos rotando**, así que «Cambia una línea de tu perfil» le salía seis veces en los 90 días. Quedó su capa con mis 28 pasos adentro, una sola de cada cosa. Y el campo `checklist` que el plan mandaba llenar **no lo dibujaba ninguna pantalla**: era copia textual de `pasos` (abajo, en «El 15 de noviembre a las 18:30») |
 | **15 nov, 21:40** · `7bb7835` | se tomó el **T5: Mi protocolo, las 33 piezas**, y la premisa ya no era cierta: el plan dice «Mi protocolo no existe» y existía desde esa misma mañana —`miProtocolo.ts`, su pantalla en El Camino, la pista de 66, las tres señales de la OMS— con su lente en verde. Lo que no existía era que funcionara. **Tres de las 33 piezas eran imposibles de escribir**: las lecciones 7, 15 y 27 caen en los días 6 y 13, que son fin de semana y no se completan, así que su pieza no se pedía nunca y la pantalla decía «cada una llega con su lección». Y el mismo agujero por el otro lado: **la única pieza escribible era la de hoy**, así que las otras 30 tenían una sola oportunidad cada una. Más la pista de 66 clavada en cero porque `diasSostenidos` no se pasaba (abajo, en «El 15 de noviembre a las 21:40») |
 
-| **16 nov, 00:30** · `PENDIENTE` | la cola vieja seguía con sus 17 filas cerradas y el plan de la piel tenía T1 a T5 cerrados, así que se tomó el **T6: el juego del sur**. La premisa se cayó entera: el plan dice «hay una pieza y media» y las cinco mecánicas estaban construidas desde la mañana del 15. Lo que no estaba era el mapa pintando bien: **55 de los 90 días se pintaban con el color de otro paisaje, y 31 días no podían pintarse nunca** —el 90 entre ellos— porque su jornada no trae sistema (abajo, en «El 16 de noviembre a las 00:30») |
+| **16 nov, 00:30** · `b14f4d8` | la cola vieja seguía con sus 17 filas cerradas y el plan de la piel tenía T1 a T5 cerrados, así que se tomó el **T6: el juego del sur**. La premisa se cayó entera: el plan dice «hay una pieza y media» y las cinco mecánicas estaban construidas desde la mañana del 15. Lo que no estaba era el mapa pintando bien: **55 de los 90 días se pintaban con el color de otro paisaje, y 31 días no podían pintarse nunca** —el 90 entre ellos— porque su jornada no trae sistema (abajo, en «El 16 de noviembre a las 00:30») |
 
 ### El 16 de noviembre a las 00:30: el mapa pintaba el trabajo, no el lugar
 
@@ -3503,7 +3503,7 @@ el libro; la guarda se va llenando; la pista de 66 con sus marcas en 21, 44 y
 66; y el chequeo semanal de tres preguntas contra el burnout (las tres
 dimensiones de la OMS, CIE-11).
 
-**T6 · El juego del sur.** — **CERRADO el 16 de noviembre** · `PENDIENTE`
+**T6 · El juego del sur.** — **CERRADO el 16 de noviembre** · `b14f4d8`
 (arriba, en «El 16 de noviembre a las 00:30»). Las cinco mecánicas estaban
 construidas desde el 15 a la mañana; lo que no estaba era el mapa pintando
 bien: 55 de los 90 días con el color de otro paisaje y 31 que no podían
