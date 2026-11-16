@@ -62,6 +62,12 @@ DEFECTOS = [
      'if (hoy > cierra) {', 'if (hoy >= cierra) {',
      'prueba-acceso.ts',
      'la ventana cierra un dia antes: se cae el dia 90 del que pago La Base'),
+    ('dia-de-la-pieza', 'src/lib/roadmap.seed.json',
+     '"codigo": "P2.1",\n      "titulo": "Tu método propio",\n      "dia": 9,',
+     '"codigo": "P2.1",\n      "titulo": "Tu método propio",\n      "dia": 15,',
+     'prueba-el-dia-de-cada-pieza.ts',
+     'el dia de una pieza vuelve al que tenia antes de reordenarse el Camino: '
+     'el video aparece en otro dia y la leccion de su dia queda sin video'),
     # ── y los que SÍ se veían, para que sigan viéndose ─────────────────────
     ('precio-de-arriba', 'src/lib/planes.ts',
      "negro: '$1.000'", "negro: '$997'",

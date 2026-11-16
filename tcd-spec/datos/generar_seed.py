@@ -929,6 +929,58 @@ if _huerfanos:
         + ", ".join(_huerfanos)
         + ". Agregarlos a la jornada que corresponde en hoja_de_ruta.py.")
 
+# ── EL DÍA DE CADA PIEZA: LA JORNADA QUE LA PIDE, NO UN NÚMERO A MANO ──────
+#
+# Mismo arreglo que el de arriba, y por el mismo motivo. Los tutoriales, los
+# grados y los entrenadores ya sacaban su día del Camino; las piezas eran la
+# única lista que seguía escribiéndolo a mano en `PIEZAS`, y se desfasó en 35
+# de las 43 cuando el Camino se reordenó el 24 de septiembre.
+#
+# Lo que hacía el desfase, medido el 16 de noviembre de 2026: el Tablero de
+# Grabación guarda el enlace de cada fila con la clave del día de la fila
+# (turno 12), y ese día salía de acá. Así que Javo grababa «Tu método propio»
+# (P2.1), pegaba el enlace en su fila —que decía día 15— y el cliente lo veía
+# el día 15, mientras el día 9, cuya lección es «Tu método, escrito con sus
+# etapas», se quedaba sin video para siempre. Y al revés: seis filas se veían
+# cargadas con el video de otro día y cinco se veían vacías teniendo el suyo
+# ya cargado.
+#
+# Los videos ya cargados (`videosCargados.ts`) están puestos por día y
+# coinciden con el Camino, no con esta lista: son el tercer testigo de que el
+# día de la jornada es el que vale.
+DIA_DE_LA_PIEZA = {}
+for _d in sorted(J):
+    for _p in J[_d]["piezas"]:
+        DIA_DE_LA_PIEZA.setdefault(_p, _d)
+
+# Las dos deudas que quedan son de Javo, no de la máquina, y se declaran acá
+# para que ninguna crezca en silencio: si aparece una más, el generador se
+# niega y nadie puede regenerar el seed sin enterarse.
+#
+#  · SIN_FICHA: códigos que el Camino declara y que el catálogo no tiene. No
+#    hay fila donde grabarlos ni título que mostrar, y solo Javo sabe si cada
+#    uno es una pieza que falta fichar o una referencia que el Camino tiene que
+#    dejar de pedir.
+#  · SIN_JORNADA: piezas fichadas que ninguna jornada pide, así que el cliente
+#    no las ve nunca.
+SIN_FICHA = ["P1.2", "P1.2b", "P1.3", "P1.5", "P1.6", "P2.3", "P2.5",
+             "P3.3", "P3.4", "P4.3", "P4.8", "P5.4", "P7.2", "P7.3"]
+SIN_JORNADA = ["P1.1"]
+
+_fichadas = {c for c, *_ in PIEZAS}
+_sin_ficha = sorted(c for c in DIA_DE_LA_PIEZA if c not in _fichadas)
+_sin_jornada = sorted(c for c in _fichadas if c not in DIA_DE_LA_PIEZA)
+if _sin_ficha != sorted(SIN_FICHA):
+    raise SystemExit(
+        "Códigos que el Camino declara y el catálogo no ficha, distintos de los "
+        f"declarados: {_sin_ficha} contra {sorted(SIN_FICHA)}. Fichar la pieza en "
+        "PIEZAS, o sacarla de la jornada en hoja_de_ruta.py.")
+if _sin_jornada != sorted(SIN_JORNADA):
+    raise SystemExit(
+        "Piezas fichadas que ninguna jornada pide, distintas de las declaradas: "
+        f"{_sin_jornada} contra {sorted(SIN_JORNADA)}. El cliente no las ve nunca: "
+        "agregarlas a su jornada en hoja_de_ruta.py.")
+
 # ── los tres hilos de cada día ──────────────────────────────────────────────
 # Adentro (la lección y la pausa de 5), afuera (el paso afuera) y sistema (los
 # `pasos`, que ya estaban). Las tablas las pasa LIBROS y viven en
@@ -960,7 +1012,10 @@ out = {
     {"n":3,"nombre":"Tu captación","dias":"15-33"},
     {"n":4,"nombre":"Tu propia app","dias":"36-44"},
     {"n":5,"nombre":"Tu ecosistema","dias":"85-86"}],
-  "piezas":[{"codigo":c,"titulo":t,"dia":d,"sistema":s,"set":st,"minutos":m,"estado":e}
+  # El día SALE del Camino (DIA_DE_LA_PIEZA). El de la lista queda solo para
+  # la pieza que ninguna jornada pide, que está declarada en SIN_JORNADA.
+  "piezas":[{"codigo":c,"titulo":t,"dia":DIA_DE_LA_PIEZA.get(c,d),
+             "sistema":s,"set":st,"minutos":m,"estado":e}
             for c,t,d,s,st,m,e in PIEZAS],
   # El día de cada tutorial SALE de la jornada que lo pide, no de un número
   # escrito a mano acá. Estaba a mano y se desfasó en 14 de los 21: la app
@@ -990,6 +1045,12 @@ out = {
   "frenos":[{"id":i,"regla":r,"apertura":a,"mensaje":m} for i,r,a,m in FRENOS],
   # El repertorio de pausas de 5, con su marca de evidencia. Vive una sola
   # vez: la lección nombra su pausa por id y la app lee el nombre de acá.
+  # Las dos deudas del catálogo, emitidas acá para que no haya que copiarlas a
+  # mano en ningún otro lado: la batería, la lente del Tablero y validar.py las
+  # leen DE ACÁ. La lista a mano vive una sola vez, arriba, y se compara contra
+  # la realidad antes de escribir este archivo.
+  "deudas_del_catalogo":{"sin_ficha":sorted(SIN_FICHA),
+                         "sin_jornada":sorted(SIN_JORNADA)},
   "pausas":pausas_del_seed(),
   "jornadas":[J[d] for d in sorted(J)]
 }

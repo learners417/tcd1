@@ -28,9 +28,14 @@ dias = [j["dia"] for j in seed["jornadas"]]
 if dias != list(range(0, 91)):
     errores.append(f"jornadas con hueco o fuera de orden: {len(dias)} entradas")
 
+# Las deudas del catálogo las declara el generador y viajan en el seed: acá se
+# leen de ahí, no se copian. Lo que importa es que no CREZCAN.
+DEUDAS = seed.get("deudas_del_catalogo", {"sin_ficha": [], "sin_jornada": []})
+SIN_FICHA, SIN_JORNADA = set(DEUDAS["sin_ficha"]), set(DEUDAS["sin_jornada"])
+
 for j in seed["jornadas"]:
     for c in j["piezas"]:
-        if c not in {p["codigo"] for p in seed["piezas"]}:
+        if c not in {p["codigo"] for p in seed["piezas"]} and c not in SIN_FICHA:
             errores.append(f"día {j['dia']}: pieza {c} no existe en el catálogo")
     for c in j["tutoriales"]:
         if c not in {t["codigo"] for t in seed["tutoriales"]}:
@@ -52,17 +57,24 @@ for j in seed["jornadas"]:
         usada.setdefault(c, j["dia"])
 for p in seed["piezas"]:
     if p["codigo"] not in usada:
-        errores.append(f"pieza {p['codigo']} no se usa en ninguna jornada")
+        if p["codigo"] not in SIN_JORNADA:
+            errores.append(f"pieza {p['codigo']} no se usa en ninguna jornada")
     elif usada[p["codigo"]] != p["dia"]:
         errores.append(
             f"pieza {p['codigo']}: catálogo dice día {p['dia']}, "
             f"jornadas la usan el {usada[p['codigo']]}")
 
 # ── 3 · cada agente se abre en su día ───────────────────────────────────────
+#
+# El campo se llama `dia_estimado` desde que el día del entrenador sale del
+# Camino y no de una lista aparte. Acá seguía pidiendo `dia`, así que este
+# archivo se caía con un KeyError en esta línea y no llegaba a imprimir ni uno
+# de los problemas de arriba. Nadie se enteró porque nadie lo corría: lo
+# corre la batería desde el 16 de noviembre de 2026.
 for a in seed["agentes"]:
-    j = next((x for x in seed["jornadas"] if x["dia"] == a["dia"]), None)
+    j = next((x for x in seed["jornadas"] if x["dia"] == a["dia_estimado"]), None)
     if not j:
-        errores.append(f"agente {a['id']}: no hay jornada el día {a['dia']}")
+        errores.append(f"agente {a['id']}: no hay jornada el día {a['dia_estimado']}")
 
 # ── 4 · los documentos nombran todo lo del seed ─────────────────────────────
 piezas_md = leer("01-PIEZAS.md")
@@ -78,34 +90,91 @@ for c in seed["cinturones"]:
     if c["nombre"] not in cint_md:
         errores.append(f"03-CINTURONES.md no nombra {c['nombre']}")
 
+# ── 4b · LOS NUEVE ENTRENADORES ────────────────────────────────────────────
+#
+# Esto pedía un `agentes/prompts/NN-id.md` por entrenador, y los ocho que hay
+# en esa carpeta son los nombres VIEJOS (critico, escriba, camara, sparring,
+# tablero, arquitecto, estratega): los prompts de verdad viven desde hace
+# tiempo en `src/lib/agents/<id>.ts`, que es lo que la app carga. Así que el
+# archivo pedía una copia muerta y no miraba la viva. Ahora mira la viva.
+#
+# Las dos deudas que quedan son de Javo y están declaradas: mientras sean
+# exactamente éstas, pasa; si aparece una más, esto se pone rojo.
+#  · 02-AGENTES.md no nombra a Vera ni a Sofi (texto de los entrenadores);
+#  · Espejo es el entrenador de ocho jornadas en el seed —los días 1, 2, 3, 4,
+#    19, 25, 32 y 66— y es el único de los nueve sin módulo vivo: el registro
+#    `AGENTES` de la app tiene ocho. Si Espejo es un entrenador o no, lo dice
+#    Javo.
+SIN_NOMBRE_EN_EL_DOC = {"Vera", "Sofi"}
+SIN_MODULO_VIVO = {"espejo"}
+
 ag_md = leer("agentes/02-AGENTES.md")
 for a in seed["agentes"]:
-    if a["nombre"] not in ag_md:
+    if a["nombre"] not in ag_md and a["nombre"] not in SIN_NOMBRE_EN_EL_DOC:
         errores.append(f"02-AGENTES.md no nombra {a['nombre']}")
-    f = f"agentes/prompts/{'%02d' % (seed['agentes'].index(a)+1)}-{a['id']}.md"
-    if not os.path.exists(os.path.join(RAIZ, f)):
-        errores.append(f"falta el prompt suelto {f}")
+    vivo = os.path.join(RAIZ, "..", "src", "lib", "agents", f"{a['id']}.ts")
+    if not os.path.exists(vivo) and a["id"] not in SIN_MODULO_VIVO:
+        errores.append(f"el entrenador {a['id']} no tiene su módulo en src/lib/agents/{a['id']}.ts")
+_nombrados = {n for n in SIN_NOMBRE_EN_EL_DOC if n in ag_md}
+if _nombrados:
+    avisos.append(f"02-AGENTES.md ya nombra a {', '.join(sorted(_nombrados))}: "
+                  "sacarlos de SIN_NOMBRE_EN_EL_DOC")
+_conModulo = {i for i in SIN_MODULO_VIVO
+              if os.path.exists(os.path.join(RAIZ, "..", "src", "lib", "agents", f"{i}.ts"))}
+if _conModulo:
+    avisos.append(f"{', '.join(sorted(_conModulo))} ya tiene módulo vivo: "
+                  "sacarlo de SIN_MODULO_VIVO")
 
 # ── 5 · los números declarados en prosa ─────────────────────────────────────
 carga = sum(j["minutos"] for j in seed["jornadas"])
 evid = sum(len(j["evidencias"]) for j in seed["jornadas"])
 minutos_piezas = sum(p["minutos"] for p in seed["piezas"])
 
+# Los conteos estructurales: una pieza, un grado o un freno que desaparece sin
+# que nadie lo decida tiene que doler acá.
 esperado = {
-    "4.265": carga == 4265,
-    "71 horas": round(carga/60) == 71,
-    "69 evidencias": evid == 69,
-    "279 minutos de piezas": minutos_piezas == 279,
     "43 piezas": len(seed["piezas"]) == 43,
     "21 tutoriales": len(seed["tutoriales"]) == 21,
     "11 cinturones": len(seed["cinturones"]) == 11,
-    "8 agentes": len(seed["agentes"]) == 8,
-    "9 frenos": len(seed["frenos"]) == 9,
+    "9 entrenadores": len(seed["agentes"]) == 9,
+    "10 frenos": len(seed["frenos"]) == 10,
     "91 jornadas": len(seed["jornadas"]) == 91,
+    "279 minutos de piezas": round(minutos_piezas) == 279,
 }
 for k, ok in esperado.items():
     if not ok:
         errores.append(f"el total '{k}' ya no coincide con el seed")
+
+# ── 5b · LO QUE LA PROSA DICE Y EL SEED NO ─────────────────────────────────
+#
+# Esta lista decía "4.265 minutos", "71 horas", "69 evidencias", "8 agentes" y
+# "9 frenos", y el seed dice otra cosa desde que el Camino se reordenó. O sea:
+# el archivo que existe para que "un número de la documentación no deje de
+# coincidir con el seed" tenía él mismo los números viejos, y como nadie lo
+# corría nadie lo vio.
+#
+# Cuál de los dos lados se corrige NO lo decide esta máquina: 71 horas contra
+# 56 es cuánto trabajo dice el programa que lleva, y eso lo dice Javo. Así que
+# el desacuerdo queda DECLARADO, con los dos números: mientras sea exactamente
+# éste, pasa; si cualquiera de los dos lados se mueve, esto se pone rojo y
+# alguien decide. Los documentos que lo dicen: 00-MAESTRO.md §3,
+# 11-REVISION-FINAL.md y README.md.
+DESACUERDO = {
+    "carga del cliente": (carga, 4265),
+    "horas de carga": (round(carga / 60), 71),
+    "evidencias": (evid, 69),
+    "entrenadores nombrados en README y MAESTRO": (len(seed["agentes"]), 8),
+}
+for que, (en_el_seed, en_la_prosa) in DESACUERDO.items():
+    if en_el_seed == en_la_prosa:
+        avisos.append(f"{que}: la prosa y el seed ya coinciden ({en_el_seed}). "
+                      "Sacar la fila de DESACUERDO.")
+    elif en_el_seed != {"carga del cliente": 3375, "horas de carga": 56,
+                        "evidencias": 87,
+                        "entrenadores nombrados en README y MAESTRO": 9}[que]:
+        errores.append(f"{que}: el seed dice {en_el_seed} y el desacuerdo declarado "
+                       f"era contra {en_la_prosa}. Se movió un lado: decidir cuál "
+                       "manda y corregir el otro.")
 
 # ── 6 · contradicciones conocidas que no pueden volver ──────────────────────
 prohibidas = [

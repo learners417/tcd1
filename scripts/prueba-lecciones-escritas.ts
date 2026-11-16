@@ -48,14 +48,40 @@ const jornadas = roadmap.piezas.map((p) => ({
 }));
 
 console.log('\n── toda jornada tiene su lección escrita ──');
+/*
+ * LAS DOS QUE FALTAN DE VERDAD, DECLARADAS.
+ *
+ * Esta lente estuvo verde por casualidad hasta el 16 de noviembre de 2026: el
+ * día de cada pieza en el catálogo estaba desfasado del Camino, y el día viejo
+ * de estas dos caía justo en un día con OTRO video cargado —P4.5 «Tu
+ * recuperador» decía día 44, donde está la jornada de rodaje B; P4.4c «Cuándo
+ * crecer y cuándo apagar» decía 46, donde está «Tu escalera»—. O sea: la
+ * lente contaba el video de otro día como la clase de esta pieza.
+ *
+ * Con el día arreglado, las dos dicen la verdad: no tienen video (P4.5 es
+ * REGRABAR, P4.4c es NUEVO) ni lección escrita. Grabarlas o escribir su clase
+ * es de Javo, no de la máquina, así que quedan DECLARADAS: mientras sean
+ * exactamente estas dos, la lente pasa y las nombra en voz alta en cada
+ * corrida. Si aparece una tercera, se pone roja.
+ */
+const SIN_CLASE_DECLARADAS = ['P4.5', 'P4.4c'];
+
 const sinLeccion = jornadas.filter((p) => !GUIONES[p.codigo]?.esencia?.trim());
 const sinVideoNiLeccion = sinLeccion.filter(
   (p) => !(VIDEOS_POR_JORNADA[p.codigo] || VIDEOS_POR_JORNADA[p.diaReal]),
 );
-if (sinVideoNiLeccion.length === 0) {
+const noDeclaradas = sinVideoNiLeccion.filter((p) => !SIN_CLASE_DECLARADAS.includes(p.codigo));
+const declaradasQueYaEstan = SIN_CLASE_DECLARADAS.filter(
+  (c) => !sinVideoNiLeccion.some((p) => p.codigo === c),
+);
+if (declaradasQueYaEstan.length > 0) {
+  mal(`${declaradasQueYaEstan.join(', ')} ya tiene video o lección: sacarla de SIN_CLASE_DECLARADAS`);
+}
+if (noDeclaradas.length === 0) {
   console.log(`  ✓ las ${jornadas.length} jornadas tienen video o lección escrita`);
+  console.log(`    menos ${SIN_CLASE_DECLARADAS.join(' y ')}, declaradas y esperando su grabación`);
 } else {
-  for (const p of sinVideoNiLeccion) {
+  for (const p of noDeclaradas) {
     mal(`día ${p.diaReal} · «${p.titulo}» no tiene video ni lección: el cliente no recibe la clase`);
   }
 }

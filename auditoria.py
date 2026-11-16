@@ -631,6 +631,46 @@ with _tf64.TemporaryDirectory() as _tmp64:
 check('el seed de la app es exactamente el que genera hoy generar_seed.py',
       _g.returncode == 0 and _regen == rd('src/lib/roadmap.seed.json'), (_g.stderr or 'difiere: correr generar_seed.py y copiar')[-160:])
 
+# ── 6.4d · EL VALIDADOR DEL PAQUETE, QUE NADIE CORRÍA ──────────────────
+#
+# `tcd-spec/datos/validar.py` existe desde el 24 de septiembre y su propio
+# encabezado dice «Sirve como paso de CI: si un número de la documentación
+# deja de coincidir con el seed, esto lo encuentra antes que un cliente». El
+# README del paquete lo lista igual. **Nada lo corría.** Medido el 16 de
+# noviembre de 2026: se caía con un KeyError en su línea 63 —pedía el `dia` del
+# entrenador y el campo se llama `dia_estimado` desde que el día sale del
+# Camino—, así que no llegaba a imprimir ni uno de los problemas que había
+# encontrado arriba. Y abajo tenía la tabla de totales de otra época (4.265
+# minutos, 8 entrenadores, 9 frenos).
+#
+# Era además lo ÚNICO que miraba la regla que se rompió: que el día del
+# catálogo de piezas coincida con la jornada que la pide. Estaba roto en 35 de
+# las 43 desde el 24 de septiembre.
+#
+# Desde acá lo corre la batería. Un validador que nadie corre no es un
+# validador: es un cartel que dice que alguien mira.
+_val = subprocess.run([sys.executable, 'datos/validar.py'], cwd='tcd-spec',
+                      capture_output=True, text=True)
+_malVal = [l.strip() for l in (_val.stdout + _val.stderr).splitlines()
+           if l.strip().startswith('·') or '✗' in l or 'Error' in l]
+check('el paquete de la spec cierra contra sí mismo (tcd-spec/datos/validar.py)',
+      _val.returncode == 0, '; '.join(_malVal)[:400])
+
+# Y que siga siendo la batería la que lo corre: si alguien saca la línea de
+# arriba, el validador vuelve a ser huérfano y nadie se entera.
+check('y es la batería la que lo corre, no un README',
+      "'datos/validar.py'" in rdc('auditoria.py'))
+
+# Y la pregunta de atrás, que es la que faltó dos meses: ¿se pone ROJO cuando
+# el defecto está puesto? Seis defectos sobre una copia del paquete, cada uno
+# nombrando lo que el validador tiene que decir. Entre ellos, el que estuvo
+# vivo: el día del catálogo de vuelta en el viejo.
+_vve = subprocess.run([sys.executable, 'scripts/probar-que-el-validador-ve-el-defecto.py'],
+                      capture_output=True, text=True)
+_malVve = [l.strip() for l in (_vve.stdout + _vve.stderr).splitlines() if '✗' in l]
+check('y el validador se pone rojo con cada defecto conocido',
+      _vve.returncode == 0, '; '.join(_malVve)[:400])
+
 # El plan de los 90 días que se entrega por escrito también se genera: un plan
 # escrito a mano es una segunda verdad, y el día que una jornada cambia el
 # documento sigue diciendo lo de antes y alguien lo lee.
