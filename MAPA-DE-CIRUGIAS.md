@@ -347,6 +347,99 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 | **16 nov, 05:10** · `ee5a72a` | la cola vieja seguía con sus 17 filas cerradas y el plan de la piel tenía T1 a T6 cerrados, así que se tomó el **T7: los arreglos de LIBROS**, el último. **La premisa se cayó casi entera**: de los siete encargos del 12 de noviembre, seis ya estaban hechos —la escalera (1.000 y 6.000), los cinco sistemas con el nombre del impreso, el Limay, el alerce, las etiquetas de días, los cinco libros publicados con enlace y «el sexto mapa»—, y el cóndor que volvía a mitad de camino **no está en el repo**. Lo que no estaba era quien los cuide: **los cinco nombres del impreso están escritos tres veces y solo una copia tenía lente**. Y ya se había desfasado: el candado del Río dejaba «Tu app andando» con el sistema llamándose «Tu propia app», y ese texto viaja al prompt de los entrenadores (abajo, en «El 16 de noviembre a las 05:10») |
 
 | **16 nov, 07:25** · `16ca4a8` | las dos colas cerradas —las 17 filas y los siete turnos de la piel—, así que esta despertada fue a la pregunta de atrás: **¿la batería VE el defecto?** Dieciséis defectos puestos a propósito, las 143 lentes con cada uno. Los nueve de número, vistos; de los siete de mecanismo, **cuatro no los vio nadie**: las tres reglas de la racha —la constancia del Diario, del Admin y de la pista de 66— y el último día de la ventana de acceso, que con `>` por `>=` se llevaba el día 90 del que pagó La Base. La racha no se podía medir (preguntaba el día adentro) y la ventana se medía por el medio, nunca por el borde (abajo, en «El 16 de noviembre a las 07:25») |
+| **16 nov, 11:40** · `b648008` (MCD) | las dos colas seguían cerradas y cero commits de Javo (`deb5536` en TCD, `d7b905a` en MCD), `node_modules` en cero en los dos. La despertada de las 07:25 preguntó si **la batería de TCD** ve el defecto; esta hizo la misma pregunta en **el otro repo**, donde nadie la había hecho nunca: las dos veces que se midió la batería de MCD (13 y 14 de nov) preguntaron si una lente se podía *engañar* con un comentario, no si **ve el defecto de verdad**. Diez defectos puestos, las 74 lentes con cada uno: **ocho no los vio nadie**, y uno de los ocho es textualmente lo que el bloque 6 dice que existe para evitar (abajo, en «El 16 de noviembre a las 11:40»)
+
+### El 16 de noviembre a las 11:40: MCD leía su código, no lo corría
+
+Las dos colas siguen cerradas y Javo no subió nada. La despertada de las 07:25
+preguntó, por primera vez sobre el producto, si **la batería de TCD ve el
+defecto**. Esta hizo la misma pregunta en el otro repo. Y hacía falta, porque
+**las dos veces que se midió la batería de MCD —el 13 y el 14— se preguntó otra
+cosa**: si una lente se podía *engañar* dejando el mecanismo en un comentario.
+Nunca si, puesto el defecto de verdad, se pone roja alguna.
+
+**La premisa que se cayó:** la batería de MCD es entera de lectura. Los nueve
+bloques miran el código escrito —que `aes-256-gcm` esté, que `getContacts`
+nombre `startAfterId`, que el techo se declare una sola vez— y eso cuida la
+**forma**. No cuida la **cuenta**: `crypto.ts`, `normalize.ts` y el lazo de la
+paginación **no los ejecutaba nada**. MCD no tenía una sola prueba que corriera
+código: sus 75 lentes eran `grep` con disciplina, más `tsc` y `next build`.
+
+**Cómo se midió:** diez defectos puestos a propósito en los archivos de verdad,
+uno por vez, sobre una copia, con las 74 lentes corriendo contra cada uno.
+
+| el defecto puesto | lo que le pasa al cliente | la batería |
+|---|---|---|
+| el IV del cifrado fijo en doce ceros | nonce repetido en AES-GCM: el PIT —acceso total a sus pacientes y su WhatsApp— se puede despejar y falsificar | 74 en verde |
+| el descifrado devuelve lo guardado, sin descifrar | GHL recibe el texto cifrado como token: **401 para todos los clientes** | 74 en verde |
+| la etiqueta del GCM leída un byte corta | el último byte de la etiqueta no lo verifica nadie | 74 en verde |
+| `page.length < 100` por `<= 100` | **el cliente con 300 contactos ve 100, en silencio** | 74 en verde |
+| la bandeja marca cero sin leer siempre | la doctora no ve que la esperan y deja de contestar | 74 en verde |
+| toda venta abierta cuenta como paciente | el tablero le dice que todos son pacientes | 74 en verde |
+| el que no vino cuenta como que vino | la tasa de asistencia infla | 74 en verde |
+| el hilo anidado de GHL sin desanidar | la conversación se dibuja vacía | 74 en verde |
+| el `429` fuera de la condición del reintento | el sync se cae por rate-limit | **roja** |
+| un segundo `const MAX_ITEMS` | el techo declarado dos veces | **roja** |
+
+**Los dos que sí se vieron eran de texto.** El `429` es un literal y el segundo
+`const` es una línea de más: eso la batería lo lee. La cuenta, no.
+
+**Y el cuarto de la tabla es el peor, porque está escrito en el propio README de
+la batería:** el bloque 6 dice que existe para que «los contactos no se truncan
+en 100 **en silencio**: faltan personas». Un carácter —`<` por `<=`— corta
+siempre en la primera página, porque una página nunca trae más de 100. La lente
+que dice cuidarlo leía el cuerpo de la función y veía `startAfterId` escrito,
+que seguía estando.
+
+**Lo construido: las tres primeras pruebas de MCD que ejecutan código**, 71
+escenarios, y el **bloque 10** que las corre.
+
+| la prueba | qué ejecuta de verdad |
+|---|---|
+| `prueba-el-token-cifrado.ts` | cifra y descifra: la vuelta completa, el IV que no se repite, **los 16 bytes de la etiqueta uno por uno**, la clave equivocada, el passthrough de datos viejos, el sobre de 12+16 |
+| `prueba-las-listas-completas.ts` | la paginación contra un GHL de juguete: 300 llegan 300 y sin repetidos, el borde de 101, el techo de 1.000 sin colgarse, las 250 oportunidades, el hilo anidado y el plano |
+| `prueba-lo-que-ve-el-avatar.ts` | los normalizadores: quién espera respuesta, los siete estados de la cita, en qué etapa cae cada venta |
+
+Corren con el TypeScript que Node 22 entiende solo
+(`node --experimental-transform-types`), **a propósito: MCD no gana ninguna
+dependencia nueva por tener pruebas.** A mano: `npm run pruebas`.
+
+**Y lo que queda cuidando esto para siempre:**
+`scripts/probar-que-la-bateria-ve-el-defecto.py`, dentro del bloque 10 —el
+espejo del de TCD—. Los diez defectos, y **cada uno NOMBRA la lente que tiene
+que ponerse roja**. Probado contra su propio fallo dos veces: con las
+afirmaciones de la etapa ablandadas, el arnés salió rojo y nombró el defecto que
+había vuelto a ser invisible; y con el `process.exit` comentado en una prueba,
+la lente que cuida eso se puso roja (es el agujero que TCD encontró a las 07:25,
+cuando una de sus 133 imprimía `✗` y terminaba en 0).
+
+**El arnés cazó un agujero en mi propia prueba, antes de subirla.** El defecto
+de la etiqueta corta —`subarray(12, 27)`— **igual descifra**: AES-GCM acepta
+etiquetas truncadas, así que el token iba y venía y la vuelta completa daba
+verde. Por eso la prueba ahora recorre los 16 bytes de la etiqueta de a uno. Sin
+el arnés, esa prueba habría entrado con esa ceguera adentro.
+
+**Y una decisión de producto que quedó medida y NO se tocó, con su botón.**
+`toVenta` evalúa el nombre de la etapa con un `||`, así que **gana sobre el
+status de GHL**: una venta `lost` o `abandoned` parada en la etapa «Paciente» se
+muestra como **paciente**. El comentario del propio archivo dice lo contrario
+(«Señal DURA primero: el status de GHL»). O sea: una paciente que se fue sigue
+contándose como paciente hasta que alguien la mueva de etapa en GHL. Hoy es así
+y quedó clavado en la prueba para que el cambio sea tuyo:
+
+- **[A] que el status mande** — una venta `lost` o `abandoned` deja de contarse
+  como paciente aunque esté en esa etapa. Es lo que dice el comentario del
+  archivo. Es un renglón, y da vuelta un número del tablero del cliente.
+- **[B] dejarlo como está** — el nombre de la etapa manda, y el comentario del
+  archivo se corrige para que diga lo que el código hace.
+- **[C] mirarlo con el Snapshot de Javo congelado**, porque el mapa de etapas
+  («este mapa se ajusta UNA vez cuando el Snapshot esté congelado») todavía no
+  lo está, y puede que el nombre de las etapas de verdad cambie la respuesta.
+
+**Batería de MCD entera en verde antes de subir:** `tsc` limpio, `next build`
+limpio, las **87 lentes** (eran 75) con el bloque 10 adentro, las tres pruebas
+con sus 71 escenarios y el arnés con sus diez defectos. TCD sin tocar más que
+este mapa, con su batería entera en verde.
 
 ### El 16 de noviembre a las 07:25: las 143 en verde no querían decir que vieran
 
