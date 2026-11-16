@@ -22,6 +22,37 @@ const noventa = { tipo: 'noventa' as const, inicio };
 ok(estadoDeAcceso(noventa, '2026-11-10').abierto, 'con noventa días sigue abierto en noviembre');
 ok(!estadoDeAcceso(noventa, '2027-01-20').abierto, 'y se cierra al terminar los noventa');
 
+// ── EL BORDE, QUE ES DONDE SE PIERDE UN DÍA ────────────────────────────────
+//
+// Medido el 16 de noviembre de 2026: esta lente probaba el MEDIO de la ventana
+// (el día 15 de 30) y el bien pasado (el día 36, y enero del año que viene),
+// nunca el último día ni el primero de afuera. Con `if (hoy > cierra)` cambiado
+// por `if (hoy >= cierra)` —un carácter— la ventana cerraba un día antes y las
+// 143 pruebas seguían en verde: al cliente de La Base se le caía el día 90, que
+// es el de su foto de llegada y su cierre de cuentas.
+//
+// Las fechas no se escriben a mano: salen de `cierreDeLaVentana`, así que el
+// borde se mide igual el día que cambie el largo de la ventana.
+for (const [nombre, acceso, motivoEsperado] of [
+  ['treinta', treinta, 'venció su ventana'],
+  ['noventa', noventa, 'terminaron los noventa días'],
+] as const) {
+  const cierra = cierreDeLaVentana(acceso);
+  const ultimo = estadoDeAcceso(acceso, cierra);
+  ok(ultimo.abierto, `${nombre}: el último día de la ventana está ABIERTO`, cierra);
+  ok(ultimo.abierto && ultimo.diasRestantes === 1,
+    `${nombre}: y ese último día dice que queda uno`,
+    String(ultimo.abierto ? ultimo.diasRestantes : '—'));
+  const anteultimo = estadoDeAcceso(acceso, sumarDias(cierra, -1));
+  ok(anteultimo.abierto && anteultimo.diasRestantes === 2,
+    `${nombre}: el día anterior dice que quedan dos`,
+    String(anteultimo.abierto ? anteultimo.diasRestantes : '—'));
+  const afuera = estadoDeAcceso(acceso, sumarDias(cierra, 1));
+  ok(!afuera.abierto && afuera.motivo === motivoEsperado,
+    `${nombre}: el día siguiente al cierre está cerrado, y dice por qué`,
+    afuera.abierto ? 'abierto' : afuera.motivo);
+}
+
 console.log('\n── las cuotas ──');
 const cuotas = { tipo: 'cuotas' as const, inicio, cuotas: [
   { vence: '2026-10-05', pagada: true },

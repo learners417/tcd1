@@ -66,13 +66,22 @@ export function calcularRacha(_fechaInicio?: string | null): number {
  * La lógica PURA de la racha — compartida por el cliente (localStorage/DB) y
  * el Admin (fecha_completada de hoja_de_ruta). UNA definición en toda la app:
  * días hábiles reales, finde libre, gracia de 1 día hábil.
+ *
+ * El `hoy` entra por argumento, con el día de verdad por defecto, y es por lo
+ * que esta regla se puede medir. Medido el 16 de noviembre de 2026: con `new
+ * Date()` adentro, las tres reglas de acá —el día en curso no castiga, la
+ * gracia de un día hábil, el finde no rompe— no tenían ninguna lente que las
+ * ejecutara, y los tres defectos puestos a propósito dejaban las 143 en verde.
+ * Es el mismo argumento que `estadoDeAcceso` ya recibe por la misma razón.
+ * Ningún llamador lo pasa: los tres —el Diario del cliente, el Admin y la
+ * pista de 66 de Mi protocolo— siguen preguntando por hoy.
  */
-export function calcularRachaDesdeFechas(fechas: string[]): number {
+export function calcularRachaDesdeFechas(fechas: string[], hoy: Date = new Date()): number {
   if (fechas.length === 0) return 0;
   const set = new Set(fechas.map((f) => f.slice(0, 10)));
   let racha = 0;
   let graciaUsada = false;
-  const cursor = new Date();
+  const cursor = new Date(hoy);
 
   // El día en curso no castiga: si hoy aún no hay sesión, empezamos a mirar desde ayer.
   if (!set.has(isoDe(cursor))) cursor.setDate(cursor.getDate() - 1);

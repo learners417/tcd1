@@ -5630,6 +5630,26 @@ check('la piel es una sola, y sus cuatro lentes saben ponerse rojas (probado eje
       _ppiel.returncode == 0,
       (_ppiel.stdout + _ppiel.stderr).strip().split('\n')[-1][:170])
 
+# ── Y LA PREGUNTA DE ATRÁS: ¿LA BATERÍA VE EL DEFECTO? ─────────────────
+#
+# Todo lo de arriba mide el PRODUCTO. Esto mide la batería contra el
+# producto: se pone el defecto a propósito en un archivo de verdad, sobre
+# una copia, y se corre la lente que ese defecto NOMBRA. Si la lente sigue
+# verde, el renglón se pone rojo acá.
+#
+# Nació el 16 de noviembre de 2026, midiéndolo: de dieciséis defectos
+# puestos, la batería vio los nueve de NÚMERO —los literales están clavados
+# y comparados— y de los siete de MECANISMO no vio cuatro. Los cuatro: las
+# tres reglas de la racha (el día en curso no castiga, la gracia de un día
+# hábil, el finde no rompe) y el último día de la ventana de acceso, que con
+# `>` cambiado por `>=` se cerraba un día antes y se llevaba el día 90 del
+# que pagó La Base. Las 143 lentes daban verde con cualquiera de los cuatro.
+_pve = subprocess.run([sys.executable, 'scripts/probar-que-la-bateria-ve-el-defecto.py'],
+                      capture_output=True, text=True)
+check('la batería VE el defecto: cada defecto puesto pone roja a la lente que lo nombra',
+      _pve.returncode == 0,
+      (_pve.stdout + _pve.stderr).strip().split('\n')[-1][:170])
+
 print()
 if F == 0 and _pendientes:
     print(f'════ BATERÍA EN VERDE · {len(_pendientes)} cosa(s) por ESCRIBIR, arriba con ⧗ ════')

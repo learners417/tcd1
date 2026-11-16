@@ -346,6 +346,90 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 
 | **16 nov, 05:10** · `ee5a72a` | la cola vieja seguía con sus 17 filas cerradas y el plan de la piel tenía T1 a T6 cerrados, así que se tomó el **T7: los arreglos de LIBROS**, el último. **La premisa se cayó casi entera**: de los siete encargos del 12 de noviembre, seis ya estaban hechos —la escalera (1.000 y 6.000), los cinco sistemas con el nombre del impreso, el Limay, el alerce, las etiquetas de días, los cinco libros publicados con enlace y «el sexto mapa»—, y el cóndor que volvía a mitad de camino **no está en el repo**. Lo que no estaba era quien los cuide: **los cinco nombres del impreso están escritos tres veces y solo una copia tenía lente**. Y ya se había desfasado: el candado del Río dejaba «Tu app andando» con el sistema llamándose «Tu propia app», y ese texto viaja al prompt de los entrenadores (abajo, en «El 16 de noviembre a las 05:10») |
 
+| **16 nov, 07:25** | las dos colas cerradas —las 17 filas y los siete turnos de la piel—, así que esta despertada fue a la pregunta de atrás: **¿la batería VE el defecto?** Dieciséis defectos puestos a propósito, las 143 lentes con cada uno. Los nueve de número, vistos; de los siete de mecanismo, **cuatro no los vio nadie**: las tres reglas de la racha —la constancia del Diario, del Admin y de la pista de 66— y el último día de la ventana de acceso, que con `>` por `>=` se llevaba el día 90 del que pagó La Base. La racha no se podía medir (preguntaba el día adentro) y la ventana se medía por el medio, nunca por el borde (abajo, en «El 16 de noviembre a las 07:25») |
+
+### El 16 de noviembre a las 07:25: las 143 en verde no querían decir que vieran
+
+Las dos colas quedaron cerradas: las 17 filas de la cola vieja y los siete
+turnos del plan de la piel, el último a las 05:10. Sin nada que tomar, esta
+despertada fue a la pregunta de atrás, que nadie había hecho nunca **sobre el
+producto**: cuatro turnos auditaron `auditoria.py` contra sí misma y uno auditó
+las `prueba-*.ts` por su código de salida, pero **nadie había preguntado si la
+batería VE el defecto**. Que una lente esté en verde dice que hoy no se cayó.
+
+**Cómo se midió:** dieciséis defectos puestos a propósito en archivos de verdad,
+sobre una copia del repo, y las 143 lentes corridas con cada uno.
+
+| los defectos | la batería |
+|---|---|
+| **nueve de número** — el escalón de arriba de vuelta en 997 · la instalación en 5.000 · la meta de los 10 en 8 · la ventana de La Base en 80 días · un eslabón de la cadena roto · el cuarto sistema con el nombre corto · la tasa de asistencia en 0,50 · los 90 días con el color del lago · la subida de enero vencida | **vio los nueve** |
+| **siete de mecanismo** — no cambian ningún número, cambian lo que pasa | **no vio cuatro** |
+
+**Los cuatro que nadie veía, y de quién son:**
+
+| el defecto puesto | lo que el cliente veía | la batería |
+|---|---|---|
+| la racha: el día en curso castiga | su constancia más baja de lo que es, hasta que haga la sesión de hoy | 143 en verde |
+| la racha: se va la gracia de un día hábil | un día salteado le borra la racha entera | 143 en verde |
+| la racha: el finde rompe | **el lunes arranca en cero**, con la semana entera hecha | 143 en verde |
+| la ventana cierra un día antes (`>` por `>=`) | **se le cae el día 90**: su foto de llegada y su cierre de cuentas | 143 en verde |
+
+Los tres primeros son la misma cuenta, y la leen tres pantallas:
+`calcularRachaDesdeFechas` es la única definición de constancia de la app y la
+usan el Diario del cliente, el Admin cuando mira una cuenta y **la pista de 66
+de Mi protocolo** (`diasSostenidos`). El cuarto es el último día del que pagó
+La Base.
+
+**Por qué ninguna lente podía verlos, que es lo que vale para la próxima:**
+
+- **la racha no se podía medir.** Preguntaba el día con `new Date()` adentro,
+  así que ninguna prueba podía fijar un «hoy» y las tres reglas escritas arriba
+  del código desde julio nunca se ejecutaron. Tres de las 143 nombran la racha
+  y las tres miran **otra** cosa: las semanas con el mismo cuello en la cola del
+  Admin, que comparte la palabra y no la cuenta.
+- **la ventana sí se medía, pero por el medio.** `prueba-acceso.ts` ejecuta
+  `estadoDeAcceso` desde siempre, y probaba el día 15 de 30, el día 36 y enero
+  del año que viene: **nunca el último día ni el primero de afuera**. Un
+  carácter de diferencia y el borde se corría sin que nada se cayera.
+
+**Lo construido.** `calcularRachaDesdeFechas` recibe el `hoy` por argumento, con
+el día de verdad por defecto —el mismo argumento que `estadoDeAcceso` ya recibía
+por esta misma razón, y ningún llamador lo pasa—. Con eso, `prueba-la-racha.ts`:
+ocho escenarios con su cuenta a mano sobre un noviembre fijo, y **350 escenarios
+contra la misma regla escrita de otra forma** (una lista de días hábiles hacia
+atrás, sin cursor ni aritmética adentro del lazo), con el `hoy` paseando por los
+siete días de la semana. Y el borde en `prueba-acceso.ts`: el último día abierto
+diciendo «queda uno», el anterior «quedan dos» y el siguiente cerrado con su
+motivo, para los dos tipos de acceso, con las fechas saliendo de
+`cierreDeLaVentana` y no escritas a mano.
+
+**Y lo que queda cuidando esto para siempre:**
+`scripts/probar-que-la-bateria-ve-el-defecto.py`, en la batería. Diez defectos,
+y **cada uno NOMBRA la lente que tiene que ponerse roja**: si alguien ablanda esa
+lente, el renglón se pone rojo. Probado contra su propio fallo, ejecutando: con
+los casos de `prueba-la-racha.ts` dejados de comparar el número, el arnés salió
+en rojo y nombró los tres defectos de la racha que habían vuelto a ser invisibles.
+
+**Dos cosas más que se midieron de paso.**
+
+- **La trampa del `HEAD` suelto tenía otra abajo:** la `main` local de TCD no
+  estaba «quince commits atrás», estaba en **otra historia** —`git merge` la
+  rechazaba por «unrelated histories»—, y no era un force-push: **el clon es
+  superficial**, 50 commits de ventana, y los dos extremos caían en ventanas
+  distintas. Quedó con `--unshallow`: 663 commits y la historia entera. El que
+  venga y vea «unrelated histories» en este repo, que mire eso antes de asustarse.
+- **Vercel no se puede mirar desde acá, y no es el proxy: es la cuenta.** El
+  conector de esta sesión entra a `javieremilianokatz-6225's projects`, que
+  tiene tres proyectos —`refugio`, `propuestas-javo-katz`, `nexos-demo`— y
+  **ninguno es `sanar` ni el de MCD**. Así que promover el deploy y cargar
+  `VITE_LIBROS_URL` y `GHL_AVISOS_WEBHOOK` siguen siendo tuyos, y ahora se sabe
+  que una sesión dormida no puede ni verificarlos.
+
+Batería entera en verde antes de subir: `tsc` y `npm run build` limpios, **144 de
+144** `prueba-*.ts`, el arnés nuevo con sus diez defectos y `auditoria.py` con
+**906 miradas** y cero faltas de diseño en las 93 vistas del cliente y las 17
+del Admin. MCD sin tocar, con sus **75** en verde.
+
 ### El 16 de noviembre a las 05:10: el nombre del sistema, escrito tres veces y medido una
 
 Se tomó el **T7 del plan de la piel: los arreglos de LIBROS** —el último de los
@@ -3271,6 +3355,13 @@ De la 0 a la 6 se puede cobrar. De la 7 a la 10 se ve caro.
 ## Lo que es tuyo
 
 ### Antes de pasar el acceso (martes 17 de noviembre)
+
+> **Los tres primeros son tuyos sí o sí, medido el 16 de noviembre a las
+> 07:25:** el conector de Vercel de las sesiones dormidas entra a la cuenta
+> `javieremilianokatz-6225's projects`, que tiene `refugio`,
+> `propuestas-javo-katz` y `nexos-demo`. **`sanar` no está**, ni el proyecto de
+> MCD. No es el proxy: es la cuenta. Una sesión no puede promover el deploy ni
+> cargar las dos variables, y tampoco puede verificar si ya lo hiciste.
 
 - **Promover el deploy a producción.** Vercel compiló `26c5d03` y salió bien,
   pero los últimos cien deploys de este repo figuran como *Preview*: ninguno
