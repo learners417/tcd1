@@ -361,6 +361,146 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 | **16 nov, 23:40** · `062ff1f` (MCD) | las dos colas seguían cerradas y cero commits de Javo (`5d55fd4` en TCD, `75f617e` en MCD), `node_modules` en cero en los dos, el `HEAD` suelto en los dos y el clon de TCD otra vez en shallow. Las cuatro despertadas anteriores preguntaron si cada batería ve el defecto, si la costura estaba atada y si los datos del seed decían la verdad; esta preguntó por **el esquema**, que es el último cuerpo que nadie había mirado: **nadie había corrido nunca las cuatro migraciones de MCD**, y nadie comparaba el nombre de la columna que el código pide con el nombre de la columna que existe. De los 45 pares tabla.columna que el código nombra, **dos no existían**, y las dos se caían en silencio: la ficha de CUALQUIER paciente daba 404, y en «Mi marca» el sanador escribía su marca, apretaba Guardar y la base no cambiaba nada (abajo, en «El 16 de noviembre a las 23:40»)
 | **17 nov, 03:25** · `ea4cfd7` | las dos colas seguían cerradas y cero commits de Javo (`7f801e0` en TCD, `062ff1f` en MCD), `node_modules` en cero en los dos y el clon de TCD otra vez en shallow. La despertada de las 23:40 preguntó por **el esquema de MCD**; esta hizo la misma pregunta en TCD, y la respuesta estaba una capa más atrás: la base que la batería levanta **no es la de Javo**. De las diez tablas que `scripts/prueba-sql.sh` escribía a mano en su andamiaje, **ocho las crea el propio repo**, y tres estaban mal justo en las columnas que piden las pantallas. Al dejar de inventarlas salieron **dos defectos vivos que el andamiaje tapaba**: `devolver_credito` escribía un `source` que el CHECK real rechaza —así que el crédito cobrado por una imagen que falló **no volvía nunca**— y la Sala de Mando pedía **cinco columnas que no existen**, con lo que su panel «Decisiones» estaba vacío siempre (abajo, en «El 17 de noviembre a las 03:25») |
 | **17 nov, 07:25** · `c87ba69` + `5980732` (MCD) | las dos colas seguían cerradas y cero commits de Javo (`7f1bdd5` en TCD, `062ff1f` en MCD), `node_modules` en cero en los dos, el `HEAD` suelto en los dos y el clon de TCD otra vez en shallow. Las cinco anteriores preguntaron por el defecto dentro de cada repo, por la costura, por los datos del seed y por el esquema; esta preguntó por **el entorno**, que es la lista de lo que hay que cargar en Vercel y nunca se había medido contra el código. Y volvió a ser **la puerta**: la lente que vigila que ninguna clave viaje en el bundle buscaba `import.meta.env.VITE_X` escrito de corrido, y cinco archivos leen el entorno con una variable en el medio, así que **diez variables no se veían — entre ellas las nueve por donde entra la plata**. Detrás, el agujero: el código leía **doce variables que `.env.example` no nombraba**, nueve de ellas los enlaces de cobro, y ninguna rompe nada porque todas caen al WhatsApp. En MCD, a la tabla que se titula «TODAS» le faltaban tres (abajo, en «El 17 de noviembre a las 07:25») |
+| **17 nov, 11:30** · `612f4b5` (MCD) | las dos colas seguían cerradas y cero commits de Javo (`832f48c` en TCD, `5980732` en MCD), `node_modules` en cero en los dos, el `HEAD` suelto en los dos y el clon de TCD otra vez en shallow. La de las 23:40 levantó el esquema de MCD y la de las 03:25 el de TCD; esta preguntó por **la ausencia**: no si la columna que el código pide existe, sino **si la lente ve la TABLA que no está**. Y no la veía: el recorrido empezaba con `if tabla not in objetos: continue`, así que de las 14 tablas que el código de MCD nombra, **seis no estaban en el esquema y la lente daba verde**. Tres son de MCD y las tres fallaban en silencio en producción —el Guardar del Asistente, la nota del paciente y la campanita— (abajo, en «El 17 de noviembre a las 11:30») |
+
+### El 17 de noviembre a las 11:30: la ausencia era el defecto, y esta vez eran tablas enteras
+
+**La pregunta.** La despertada de las 23:40 levantó el esquema de MCD y la de
+las 03:25 el de TCD, y las dos preguntaron lo mismo: ¿la columna que el código
+pide existe? Quedaba la pregunta de atrás, que es la que este repo ya se hizo
+dos veces en otros cuerpos: **¿y la lente ve lo que NO está?**
+
+No lo veía. `scripts/prueba-el-esquema-real.py` dice medir «toda columna que el
+código nombra existe en el esquema», y su recorrido empezaba así:
+
+```python
+if tabla in vistas or tabla not in objetos: continue
+```
+
+Una tabla que no existe no se medía: **se salteaba**. Medido levantando la base:
+de las **14 tablas** que el código de MCD nombra, **seis no estaban en el
+esquema**, y la lente daba verde con las seis afuera. Es la tercera vez en este
+repo que la ausencia es el defecto —la primera fue el 14 a las 15:25 (el
+comentario que escondía al endpoint que cobra) y la segunda el 14 a las 19:30
+(las tres ausencias de mecanismo en un recolector)—.
+
+**Tres de las seis son de MCD, y las tres fallaban en silencio en producción.**
+No por mala suerte: las tres escrituras están escritas sin mirar el error.
+
+| la tabla que no existía | lo que pasa hoy en la app |
+|---|---|
+| `agent_config` | «Tu Asistente ✨»: el sanador escribe tono, reglas y firma, aprieta Guardar y **no se guarda nada**. Al volver, los campos vuelven a los de fábrica, y el asistente de IA redacta sin su tono |
+| `patient_notes` | la ficha del paciente: escribe una nota, la manda, y la nota **no queda**. El bloque de notas está siempre vacío |
+| `notifications` | la campanita del encabezado: **no suena nunca**. El webhook de GHL llama a `notificar()` por cada mensaje, cita y paciente nuevo, y los tres inserts se pierden |
+
+**Las otras tres no eran lo mismo, y la diferencia importa:**
+
+1. **`comprobantes` era un falso positivo del recorrido**: no es una tabla, es
+   la cubeta privada de storage, y la migración `20260707` sí la crea. El
+   recorrido no distinguía `supabase.from(...)` de `supabase.storage.from(...)`.
+   Ahora las separa, y la cubeta tiene su propia lente contra
+   `storage.buckets` —si no existe, el upload del comprobante falla y **sin
+   comprobante no hay cobro**—.
+2. **`profiles` y `clinica_artefactos` no se pueden crear en MCD**: viven en el
+   proyecto Supabase de TCD. Eso es el hallazgo de abajo.
+
+**Lo que se construyó.** Primero se mide la tabla y después la columna, y el
+saltearse —que sigue siendo necesario para no pedirle columnas a algo que no
+está— ya no es silencioso. Cuatro lentes nuevas y seis ejercicios:
+
+- toda tabla que el código nombra existe en el esquema;
+- toda cubeta que el código nombra existe en `storage.buckets`;
+- `AJENAS` —la única forma de perdonar una tabla ausente, y se paga con un
+  motivo escrito— **sin entradas inalcanzables**: una que nadie nombra quedó de
+  un borrado, y una que ya existe es una excusa que tapa. Es la misma lente de
+  la lista blanca del entorno, de las 07:25;
+- los dos Guardar de «Tu Asistente», que tienen que dejar **una** fila (por eso
+  `practitioner_id` es la clave primaria: con un `id` propio, el segundo Guardar
+  insertaría otra fila y el `maybeSingle()` de la pantalla reventaría);
+- la nota que queda escrita y la ficha que la lee;
+- **la campanita con dos sanadores**, que acá no es decorado: sus tres consultas
+  **no filtran por sanador** —el GET hace `select('*')` y el POST
+  `update({leida:true}).eq('leida', false)` a secas— y se apoyan enteras en la
+  política. Una tabla creada sin RLS dejaba al sanador viendo las
+  notificaciones de todos, y al apretar «marcar todas leídas» marcando las de
+  todos.
+
+**Probadas contra su propio fallo, ocho veces, las ocho rojas donde tenían que
+estarlo:** la migración de las tres tablas borrada, una consulta que nombra una
+tabla inventada, el upload con una cubeta inventada, la RLS de la campanita
+apagada, su política sin filtro de dueño, la clave primaria de `agent_config`
+movida, y las dos formas de una excepción inalcanzable.
+
+**Y el arnés falló primero por su propia culpa**, que es el apunte más útil de
+esta despertada: el temporal donde copia el repo nace en `0700` y las
+migraciones las lee **`psql`, que corre como `postgres`, no como root**. Con la
+base muerta **todas** las lentes se ponen rojas, y un arnés que solo busca «¿está
+roja la que nombré?» daba los ocho defectos por vistos. Quedó el canario: si la
+base no contestó, esa corrida no midió nada. Y de paso el puerto dejó de estar
+escrito a mano —con `5434` fijo, ocho corridas seguidas se pisaban—.
+
+Batería de MCD entera en verde antes de subir: `tsc` limpio, `next build`
+limpio, sus tres pruebas y `auditoria.py` con **97 lentes, cero faltas**. Y la
+de TCD, que no se tocó, verde también antes de subir este apunte: `tsc` y
+`npm run build` limpios y `auditoria.py` con **919 miradas, cero faltas** («el
+ZIP puede salir»).
+
+### Lo que esta despertada deja esperando tu clic: «La Clínica Amueblada» no puede amueblar nada
+
+Las otras dos tablas ausentes —`profiles` y `clinica_artefactos`— son una sola
+cosa, y es una **función entera que está escrita, subida, y no puede funcionar
+nunca**. El código la llama «La Clínica Amueblada»: lo que el profesional
+construyó en el Camino de TCD entra a su clínica de MiClínica con un clic —su
+identidad precarga «Mi marca», su método aparece armado en «Protocolos»—.
+
+Está escrita contra **una base compartida que no existe**. El encabezado de
+`src/lib/puenteMCD.ts` lo dice con todas las letras: «TCD escribe en la tabla
+compartida `clinica_artefactos`; MCD (**mismo proyecto Supabase**, misma
+identidad) la lee». Esa premisa ya se había caído el 16 de noviembre a las
+15:30 —las dos apps **no** comparten Supabase; lo único que las une es el
+puente HTTP— pero nadie había ido a ver **qué código se había construido
+encima de ella**.
+
+Y no falla por un motivo, falla por dos, cada uno suficiente:
+
+1. **La tabla no está.** MCD le pide `clinica_artefactos` y `profiles` a *su*
+   Supabase, donde ninguna de las dos existe ni puede existir: las escribe TCD
+   en el suyo.
+2. **La identidad tampoco cruzaría.** Las dos consultas filtran por
+   `user.id` —el id del usuario de *MCD*—, y el mismo profesional tiene un id
+   distinto en cada proyecto, porque son dos `auth.users` distintos. El puente,
+   que sí anda, por eso no usa el id: **usa el correo**.
+
+**Y las dos están escritas para fallar calladas**, que es por qué pudo durar:
+en «Mi marca» la consulta vive dentro de un `try { } catch { /* sin tabla o sin
+permiso: la página funciona igual */ }`, y en «Protocolos» el `if (!art)
+return` hace que el botón de traer el método **nunca aparezca**. Desde afuera
+se ve igual que un profesional que todavía no llenó nada.
+
+**No se tocó, y es decisión tuya.** Lo que hay que elegir no es un arreglo
+técnico: es si la función existe. Las dos tablas quedan declaradas en `AJENAS`
+con su motivo, así que la batería ya no las tapa ni se pone roja por ellas.
+Botón de tres:
+
+- **Recomendado · hacerla andar por el puente.** Es el único lugar por donde
+  las dos apps se entienden, y ya está probado de los dos lados. Son dos
+  piezas: una ruta nueva en TCD que entregue, por correo, la identidad y el
+  método del profesional, y las dos pantallas de MCD leyéndola por HTTP con la
+  clave que el puente ya usa. Se mide con el contrato del puente, que desde el
+  16 a las 15:30 es una sola fuente y no tres copias a mano.
+- **Sacarla.** Borrar las dos consultas y el botón. La app queda igual de
+  andando y deja de haber código que promete algo que no pasa.
+- **Dejarla como está.** Sabiendo que las dos pantallas tienen un trozo que no
+  corre nunca.
+
+**El otro candidato que queda medido:** TCD **no tiene** la lente que MCD acaba
+de arreglar. Su `scripts/prueba-sql.sh` levanta PostgreSQL y ejercita a mano,
+pero nadie compara las **46 tablas** que el código de TCD nombra contra el
+esquema que el repo crea, ni sus columnas. El trabajo no es el mismo que en
+MCD: el SQL de TCD no vive solo en `supabase/migrations/` —hay tablas creadas
+en `poner-al-dia-la-base.sql`, `sala-de-mando.sql` y `v2-migration.sql`, en la
+raíz—, así que lo primero que hay que decidir es **cuál de esos archivos es la
+base de verdad**. Eso también es tuyo.
 
 ### El 17 de noviembre a las 07:25: la lente de las claves no veía la puerta por donde entra la plata
 
