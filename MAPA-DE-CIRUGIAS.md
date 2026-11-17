@@ -242,6 +242,14 @@ turnos» —son diecisiete— y dice que MCD «hoy NO tiene batería de ningún 
 noviembre a las 11:40 tiene además tres `prueba-*.ts` que **ejecutan** código,
 así que lo de «su batería es toda Python» tampoco vale ya.
 
+Y la cuarta, del 17 a las 15:30, es sobre el método y no sobre el contenido:
+el encargo manda `git log --oneline -8` como primera medición, y **`git log` y
+`git status` no son fuentes confiables para el estado del remoto en un
+contenedor recién nacido** — leen un ref en disco que puede ser de ayer. Lo
+primero de un turno es `git ls-remote origin`, o un `fetch` que de verdad haya
+corrido; si el `fetch` sale rechazado, el turno **no sabe** dónde está el
+remoto y tiene que decirlo en vez de deducirlo.
+
 Y la tercera, medida el 16 a las 15:30: dice que las dos apps **«comparten
 Supabase»**, y no lo comparten. El comentario de la propia ruta de MCD lo dice
 —«TCD (proyecto Supabase distinto)»— y las tablas no se cruzan. Lo único que
@@ -362,6 +370,94 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 | **17 nov, 03:25** · `ea4cfd7` | las dos colas seguían cerradas y cero commits de Javo (`7f801e0` en TCD, `062ff1f` en MCD), `node_modules` en cero en los dos y el clon de TCD otra vez en shallow. La despertada de las 23:40 preguntó por **el esquema de MCD**; esta hizo la misma pregunta en TCD, y la respuesta estaba una capa más atrás: la base que la batería levanta **no es la de Javo**. De las diez tablas que `scripts/prueba-sql.sh` escribía a mano en su andamiaje, **ocho las crea el propio repo**, y tres estaban mal justo en las columnas que piden las pantallas. Al dejar de inventarlas salieron **dos defectos vivos que el andamiaje tapaba**: `devolver_credito` escribía un `source` que el CHECK real rechaza —así que el crédito cobrado por una imagen que falló **no volvía nunca**— y la Sala de Mando pedía **cinco columnas que no existen**, con lo que su panel «Decisiones» estaba vacío siempre (abajo, en «El 17 de noviembre a las 03:25») |
 | **17 nov, 07:25** · `c87ba69` + `5980732` (MCD) | las dos colas seguían cerradas y cero commits de Javo (`7f1bdd5` en TCD, `062ff1f` en MCD), `node_modules` en cero en los dos, el `HEAD` suelto en los dos y el clon de TCD otra vez en shallow. Las cinco anteriores preguntaron por el defecto dentro de cada repo, por la costura, por los datos del seed y por el esquema; esta preguntó por **el entorno**, que es la lista de lo que hay que cargar en Vercel y nunca se había medido contra el código. Y volvió a ser **la puerta**: la lente que vigila que ninguna clave viaje en el bundle buscaba `import.meta.env.VITE_X` escrito de corrido, y cinco archivos leen el entorno con una variable en el medio, así que **diez variables no se veían — entre ellas las nueve por donde entra la plata**. Detrás, el agujero: el código leía **doce variables que `.env.example` no nombraba**, nueve de ellas los enlaces de cobro, y ninguna rompe nada porque todas caen al WhatsApp. En MCD, a la tabla que se titula «TODAS» le faltaban tres (abajo, en «El 17 de noviembre a las 07:25») |
 | **17 nov, 11:30** · `612f4b5` (MCD) + `96f8137` | las dos colas seguían cerradas y cero commits de Javo (`832f48c` en TCD, `5980732` en MCD), `node_modules` en cero en los dos, el `HEAD` suelto en los dos y el clon de TCD otra vez en shallow. La de las 23:40 levantó el esquema de MCD y la de las 03:25 el de TCD; esta preguntó por **la ausencia**: no si la columna que el código pide existe, sino **si la lente ve la TABLA que no está**. Y no la veía: el recorrido empezaba con `if tabla not in objetos: continue`, así que de las 14 tablas que el código de MCD nombra, **seis no estaban en el esquema y la lente daba verde**. Tres son de MCD y las tres fallaban en silencio en producción —el Guardar del Asistente, la nota del paciente y la campanita— (abajo, en «El 17 de noviembre a las 11:30») |
+
+| **17 nov, 15:30** · `18a6672` + `d850db7` (MCD) | las dos colas seguían cerradas y cero commits de Javo, `node_modules` en cero en los dos y el `HEAD` suelto en los dos. Esta despertada **se equivocó primero y por eso encontró algo**: midió el estado de MCD con `git rev-parse origin/main`, lo vio tres commits atrás y dio por perdido el trabajo de las tres despertadas anteriores. Era falso — el remoto de verdad, por `git ls-remote`, estaba al día; lo viejo era **el ref en disco**, porque el `fetch` había salido rechazado. Y detrás estaba el agujero: de las **921 miradas de TCD y las 97 de MCD, ninguna medía que lo commiteado haya SALIDO del contenedor**, que es de usar y tirar. Lente nueva en los dos repos, que pregunta por la red y no le cree al disco, probada contra sus cinco defectos de estado de git — y el ejercicio del ref viejo le encontró un agujero al primer intento de la lente (abajo, en «El 17 de noviembre a las 15:30») |
+
+### El 17 de noviembre a las 15:30: el ref de origin era una foto vieja, y nadie medía si el trabajo había salido
+
+**La pregunta, y esta vez la trajo el propio turno equivocándose.** La cola no
+tenía nada que tomar, así que esta despertada hizo lo de siempre —medir desde
+frío— y lo primero que midió fue el estado de los dos repos. `git rev-parse
+origin/main` en MCD devolvió `75f617e`, del 16 a las 16:08, con el HEAD del
+contenedor **tres commits más adelante**. La lectura obvia: las despertadas del
+16 a las 23:50, del 17 a las 08:07 y del 17 a las 11:42 commitearon y **no
+subieron**, y el mapa tiene tres filas «cerrado» apuntando a commits que nadie
+tiene. Trabajo de tres turnos a punto de irse con el contenedor.
+
+**Era falso, y por eso esta entrada existe.** El remoto de verdad —`git
+ls-remote`, que pregunta por la red— estaba en `612f4b5`: las tres despertadas
+subieron. Lo que estaba viejo era **el ref en disco**. El `git fetch` de MCD
+había salido rechazado por el clasificador al principio del turno (venía pegado
+a un `reset --hard` en el mismo comando), así que `refs/remotes/origin/main`
+siguió siendo la foto del remoto de ayer. Y ésa es la parte que importa:
+
+> `git status`, `git rev-parse origin/main` y `git log origin/main..HEAD` leen
+> ese ref **sin avisar de qué fecha es**. Dicen «ahead 3» con el mismo tono con
+> el que dirían la verdad.
+
+La trampa ya estaba anotada de refilón —«la trampa del `HEAD` suelto», el 12 a
+las 15:50— pero como maña del contenedor, no como lo que es: **una fuente que
+envejece y que ninguna lente mira.** Y miente en las dos direcciones, con dos
+costos distintos:
+
+| el ref dice | la verdad | lo que cuesta |
+|---|---|---|
+| atrás (lo de hoy) | ya está subido | el turno se gasta «recuperando» lo que está sano, y es el turno entero |
+| adelante | el `push` falló | el trabajo **se pierde de verdad** cuando se recicla el contenedor, y el mapa queda con un hash que no existe |
+
+**Lo que se construyó, y es lo único que las dos baterías no se preguntaban
+nunca.** Las 921 miradas de TCD y las 97 de MCD miden el código. Ninguna medía
+que el código **haya salido**. Se buscó antes de escribir: en los dos repos, cero
+apariciones de `ls-remote`, de `origin/main` y de `git push` en `auditoria.py` y
+en todo `scripts/` (lo único era `volver-atras.sh`, que es otra cosa).
+
+`scripts/prueba-el-trabajo-subido.py`, igual en los dos repos, y **no le cree al
+disco**: pregunta por la red y mide tres cosas.
+
+1. **Todo commit alcanzable desde HEAD está en alguna rama del remoto.** Rojo
+   con el nombre del commit suelto y el remedio escrito (`git push`).
+2. **El ref local de origin coincide con el remoto de verdad.** Si es una foto
+   vieja, rojo: cualquier lente que lo lea mide el remoto de ayer.
+3. **Y si el remoto no contestó, la corrida no midió nada, y lo dice.** El
+   canario es el mismo de la base del bloque 10: una lente que se pone verde
+   porque no pudo preguntar es peor que no tenerla.
+
+Se corre **antes de commitear**, que es cuando HEAD tiene que estar en el
+remoto. Entre el commit y el `push` se pone roja a propósito: eso es lo que mide.
+
+**Probada contra su propio fallo, cinco veces.** Su defecto no es texto en un
+archivo, así que el arnés de la batería no le servía: lo que hay que ensuciar es
+el estado de git. El arnés nuevo arma un `--bare` y cuatro clones en una carpeta
+temporal —el repo de verdad no se toca— y le pone cada defecto: el commit sin
+subir, **el ref viejo**, el HEAD suelto (que es como nace este contenedor), y el
+remoto que no contesta. Los cinco en rojo, o sin medir, donde tenían que estarlo.
+
+**Y el ejercicio del ref viejo le encontró un agujero al primer intento de la
+lente**, que es el apunte más útil de la despertada: `git rev-list HEAD --not
+<sha>` **revienta con «bad object»** cuando ese commit del remoto no está en este
+disco — y eso pasa justo en el caso del ref viejo, el que la lente nació
+midiendo. Arreglado midiendo solo contra los commits del remoto que el disco
+tiene, y **no perdonando en silencio** el caso de no tener ninguno: sin un commit
+del remoto acá no hay con qué comparar, y eso es un rojo con su remedio
+(`git fetch origin`). Creerle al ref local ahí sería creerle a la foto vieja.
+
+**La verificación, en vivo y no en un temporal:** con el commit de MCD hecho y
+sin subir, la batería entera se puso **roja**, nombrando `d850db7` y el `git
+push`. Después del `push`, verde otra vez.
+
+Las dos baterías enteras en verde antes de subir: TCD con `tsc` y
+`npm run build` limpios, las **145** `prueba-*.ts` dentro del bloque y
+`auditoria.py` con **921 miradas, cero faltas** («el ZIP puede salir»); MCD con
+`tsc` limpio, `next build` limpio y sus **99** lentes —97 más las dos nuevas—.
+
+**Una premisa más del encargo de la tarea quedó corregida.** Dice que MCD «hoy
+NO tiene batería de ningún tipo: ése es su primer turno», y ya estaba anotado
+que no vale. Lo de hoy es otra cosa: el encargo manda `git log --oneline -8`
+como primera medición, y **`git log` y `git status` no son fuentes confiables
+para el estado del remoto en un contenedor recién nacido.** Lo primero de un
+turno es `git ls-remote origin`, o un `fetch` que de verdad haya corrido. Si el
+`fetch` sale rechazado, el turno **no sabe** dónde está el remoto, y tiene que
+decirlo en vez de deducirlo.
 
 ### El 17 de noviembre a las 11:30: la ausencia era el defecto, y esta vez eran tablas enteras
 
