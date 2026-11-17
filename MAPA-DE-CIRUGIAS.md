@@ -358,6 +358,114 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 | **16 nov, 11:40** · `b648008` (MCD) + `d977776` | las dos colas seguían cerradas y cero commits de Javo (`deb5536` en TCD, `d7b905a` en MCD), `node_modules` en cero en los dos. La despertada de las 07:25 preguntó si **la batería de TCD** ve el defecto; esta hizo la misma pregunta en **el otro repo**, donde nadie la había hecho nunca: las dos veces que se midió la batería de MCD (13 y 14 de nov) preguntaron si una lente se podía *engañar* con un comentario, no si **ve el defecto de verdad**. Diez defectos puestos, las 74 lentes con cada uno: **ocho no los vio nadie**, y uno de los ocho es textualmente lo que el bloque 6 dice que existe para evitar (abajo, en «El 16 de noviembre a las 11:40»)
 | **16 nov, 15:30** · `42cd83c` + `75f617e` (MCD) | las dos colas seguían cerradas y cero commits de Javo (`58f890c` en TCD, `b648008` en MCD), `node_modules` en cero en los dos y la trampa del `HEAD` suelto con la `main` local de TCD atrás **y el clon en shallow**, que hace que `git merge-base` diga «unrelated histories» y un `merge --ff-only` se niegue (se arregló con `fetch --unshallow` antes de medir). Las dos despertadas anteriores preguntaron si cada batería ve el defecto **en su propio repo**; esta preguntó por **la costura**, que es lo único que las dos comparten: el contrato del puente estaba en **tres copias escritas a mano** que nadie ataba, y renombrar un campo del lado de MCD dejaba **las dos baterías en verde** con el Cinturón Rojo sin llegar nunca (abajo, en «El 16 de noviembre a las 15:30»)
 | **16 nov, 19:30** · `56eb38c` | las dos colas seguían cerradas y cero commits de Javo (`2e444a4` en TCD, `75f617e` en MCD), `node_modules` en cero en los dos y el clon de TCD otra vez en shallow. Las tres despertadas anteriores preguntaron si cada batería ve el defecto en su repo y si la costura entre los dos estaba atada; esta preguntó por **los datos**, que es el otro cuerpo que nadie había mirado así: el seed de los 90 días. Y ahí estaba, desde el 24 de septiembre: **el día de cada pieza de video lo decidía una lista escrita a mano, desfasada del Camino en 35 de las 43**. Más el validador del paquete, que su propio encabezado llama «paso de CI», que nadie corría y que se caía con un KeyError antes de imprimir nada (abajo, en «El 16 de noviembre a las 19:30»)
+| **16 nov, 23:40** · `062ff1f` (MCD) | las dos colas seguían cerradas y cero commits de Javo (`5d55fd4` en TCD, `75f617e` en MCD), `node_modules` en cero en los dos, el `HEAD` suelto en los dos y el clon de TCD otra vez en shallow. Las cuatro despertadas anteriores preguntaron si cada batería ve el defecto, si la costura estaba atada y si los datos del seed decían la verdad; esta preguntó por **el esquema**, que es el último cuerpo que nadie había mirado: **nadie había corrido nunca las cuatro migraciones de MCD**, y nadie comparaba el nombre de la columna que el código pide con el nombre de la columna que existe. De los 45 pares tabla.columna que el código nombra, **dos no existían**, y las dos se caían en silencio: la ficha de CUALQUIER paciente daba 404, y en «Mi marca» el sanador escribía su marca, apretaba Guardar y la base no cambiaba nada (abajo, en «El 16 de noviembre a las 23:40»)
+
+### El 16 de noviembre a las 23:40: el esquema no tenía dos columnas que el código pedía
+
+**Cuatro premisas se cayeron antes de llegar al hallazgo, y las cuatro del lado
+bueno.** Se anotan porque cada una costó una medición y porque la regla —
+verificar antes de construir — es justo lo que las encontró:
+
+1. **La RLS de MCD.** Un primer `grep` dijo que seis de las nueve tablas no
+   tenían `enable row level security` —entre ellas `patients`—. Falso: las
+   nueve la tienen. El `grep` se tropezó con los **espacios de alineación**
+   (`alter table public.practitioners       enable row level security;`).
+   Medido de nuevo normalizando el espacio en blanco: 39 de 39 en TCD y 9 de 9
+   en MCD. Ninguna tabla queda sin RLS.
+2. **Las trece tablas «que ninguna migración crea» en TCD.** También falso:
+   las trece existen; el `grep` solo sabía leer `create table` y esas nacieron
+   de otra forma.
+3. **Las claves de entorno.** TCD lee cuatro que su `.env.example` no declara
+   (`FATHOM_WEBHOOK_SECRET`, `PRECIOS_IA`, `SALIDA_PDF`, `SUPABASE_ANON_KEY`) y
+   MCD dos que ningún README nombra (`AI_PROXY_URL`, `AI_MODEL`). Se leyó qué
+   hace cada una al faltar, y **las seis fallan bien**: el secreto de Fathom
+   sin poner contesta 401 a todo el mundo —cierra, no abre—, la clave anónima
+   cae en `VITE_SUPABASE_ANON_KEY` y tira si no hay ninguna, y las otras cuatro
+   tienen valor por defecto. Son cosmética, no agujero. (`VITE_LIBROS_URL`
+   está declarada y nadie la lee.)
+4. **MCD nunca se había renderizado.** Eso sí era cierto —TCD tiene su bloque
+   de Chromium real, MCD no tenía ninguno—, así que se levantó la app con
+   `next start` y se cargaron sus catorce rutas en Chromium de verdad. **Las
+   catorce pintan**, y las once de atrás del candado redirigen a `/login` sin
+   sesión: el arreglo estático del 14 de noviembre quedó confirmado
+   ejecutándolo. No había defecto ahí.
+
+**El hallazgo estaba una capa más abajo: en lo que las pantallas le piden a la
+base.** MCD tiene 74 lentes que leen el código y tres pruebas que ejecutan la
+cuenta, pero **nadie había corrido nunca sus cuatro migraciones**, y ninguna
+lente comparaba el nombre de la columna que el código pide con el nombre de la
+columna que existe.
+
+Y el esquema **no se puede leer con una expresión regular**: el primer intento
+de medirlo perdió `access_token` y `created_at` de `patients`, porque el
+comentario `--` del final de la línea se quedaba pegado al nombre de la columna
+siguiente. (Es exactamente la razón por la que existe `solo_sql` en las dos
+baterías, encontrada el 15 de noviembre por otro lado.) Así que el esquema no
+se lee: **se levanta**. Las migraciones corren contra un PostgreSQL de verdad y
+después se le pregunta a `information_schema` qué quedó.
+
+De los **45 pares tabla.columna** que el código de MCD nombra, **dos no
+existían**. Y no es un detalle de prolijidad: **PostgREST no ignora la columna
+que no conoce** —contesta 400 con `42703` y **la sentencia entera no se
+ejecuta**—. Las dos consecuencias se **ejercieron** contra la base, no se
+dedujeron:
+
+| lo que el código pide | lo que pasa, medido |
+|---|---|
+| `patients.phone`, en el `select` de la ficha del paciente | el select falla → `data` llega en `null` → la pantalla hace `if (!p) return notFound()`: **404 en la ficha de CUALQUIER paciente**. Y `src/lib/ghl/sync.ts` lee la misma columna para emparejar por teléfono, así que tampoco emparejaba |
+| `practitioners.inversion_mensual`, en el Tablero, el Admin y «Mi marca» | en «Mi marca» viaja dentro del **mismo `update`** que la marca, la especialidad, el color y el link del calendario. Corrido contra PostgreSQL: la sentencia se rechaza y la base queda con **los cinco valores viejos**. El sanador escribe su marca, aprieta Guardar, **no se guarda nada y la pantalla no muestra ningún error**. El mismo `update` sin la columna inventada guarda los tres campos bien |
+
+**Cerrado** con `20261117_las_dos_columnas_que_el_codigo_pedia.sql`, que las
+agrega con `add column if not exists`: si la base viva ya las tiene puestas a
+mano desde el panel de Supabase, el archivo no hace nada y queda como la
+constancia de que el esquema del repo también las tiene. Una instalación
+nueva —que es lo que significa vender esto— ya no nace rota. Las dos nacen
+nulas y sin valor por defecto, que es contra lo que el código está escrito
+(`p.phone ? … : ''`, `me?.inversion_mensual ?? ''`, `?? 0`).
+
+**La lente nueva** es `scripts/prueba-el-esquema-real.py`, cableada al bloque
+10 de MCD: levanta PostgreSQL, corre las migraciones —lo que de paso prueba
+que **corren**, que tampoco se medía—, le pregunta a la base qué columnas
+quedaron, y exige que toda columna que el código nombra esté ahí. Camina la
+cadena de `.from(…)` eslabón por eslabón en vez de mirar una ventana de
+caracteres, porque la ventana se comía el `.map(label => ({ label, done }))`
+de la línea siguiente y daba `protocols.label` como columna faltante cuando es
+una clave de un json; y saca el nombre de la tabla **embebida**
+(`patients(full_name)`), que tampoco es una columna. Después ejerce las dos
+sentencias que se caían, con una fila de prueba.
+
+**Probada contra su propio fallo, tres veces:** sacando `inversion_mensual` de
+la migración se ponen rojas tres lentes (la del esquema, la del `update` y la
+que mira si lo escrito quedó guardado); sacando `phone`, dos; y rompiendo una
+migración a propósito, la lente de esa migración.
+
+Batería entera en verde antes de subir, en los dos repos: en MCD `tsc`,
+`next build`, las tres `prueba-*.ts` y `auditoria.py` con la lente nueva
+adentro; TCD sin tocar y en verde, **con sus 145 pruebas y el ZIP habilitado**.
+
+### Lo que esta despertada deja esperando tu clic
+
+**Ninguna pantalla de MCD escribe nunca `patients.phone`.** El formulario de
+«Nuevo paciente» pide nombre y correo, nada más. La columna ahora existe, la
+ficha ya no da 404 y el emparejado con GHL cae en el correo —que es lo que el
+código ya hacía—, pero el teléfono queda siempre vacío hasta que alguien lo
+cargue. Agregarle el campo al formulario es **cambiar lo que la app le pide al
+sanador en una pantalla que él usa**, así que no se toca solo:
+
+- **Dejarlo así.** El teléfono entra solo cuando el contacto llega de GHL.
+- **Agregar «Teléfono» al formulario de Nuevo paciente** (un campo más, al
+  lado del correo; el emparejado con GHL empieza a encontrar por los últimos
+  ocho dígitos, que es lo que ya sabe hacer).
+
+**Y una segunda, más chica:** `src/app/(app)/marca/page.tsx` consulta la tabla
+`profiles` **de TCD** sobre el Supabase de MCD, con un comentario que dice
+«tabla compartida `profiles`». Eso ya no es cierto —se midió el 16 a las 15:30:
+**las dos apps no comparten Supabase**—, así que esa consulta no puede
+encontrar nada nunca. Está envuelta en `try/catch` y la pantalla funciona
+igual, así que no rompe; lo que hace es prometer una precarga que no ocurre.
+Arreglarlo de verdad es traer el nombre y la especialidad **por el puente**,
+que es el único lugar donde las dos apps se hablan — y eso es trabajo, no un
+clic. Queda anotado acá.
 
 ### El 16 de noviembre a las 19:30: el día de cada pieza lo decidía una lista de septiembre
 
