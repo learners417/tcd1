@@ -1629,9 +1629,15 @@ if _os28.path.exists('src/lib/salaDeMando.ts'):
           'siete días sin una agenda no es mala suerte: es que el anuncio no funciona')
     check('la reinversión tiene tope',
           'TOPE_REINVERSION' in cod(_sm))
+    # Ya no se busca `vigente: false`: esa columna NO EXISTE en la tabla, y
+    # mientras la lente la pedía la pantalla no podía ni listar ni guardar una
+    # decisión. La tabla tiene `estado`, una lista cerrada de tres. Lo que se
+    # mide es lo mismo de antes: que derogar CAMBIE el estado y no borre la
+    # fila. Medido el 17 de noviembre.
+    _smsc = rdc('src/lib/salaDeMandoStorage.ts')
     check('una decisión no se borra, se deja de aplicar',
-          'derogarDecision' in rdc('src/lib/salaDeMandoStorage.ts')
-          and 'vigente: false' in rd('src/lib/salaDeMandoStorage.ts'),
+          'derogarDecision' in _smsc
+          and 'estado: DEROGADA' in _smsc and '.delete()' not in _smsc,
           'la historia de por qué se decidió algo importa')
     check('la lógica de la Sala se puede probar sin la base',
           'supabase' not in _sm,
@@ -4619,6 +4625,21 @@ _rpcn = subprocess.run([sys.executable, 'scripts/prueba-rpc-nombres.py'],
 check('cada parámetro que la app manda por RPC existe en la función que llama',
       _rpcn.returncode == 0,
       _rpcn.stdout.strip().split('\n')[0][:160])
+
+# Y cada COLUMNA que la app nombra existe en la base que la batería levanta.
+#
+# `prueba-rpc-nombres.py` cuida los nombres de los RPC; esto cuida los nombres
+# de las columnas, que es por donde se colaron dos defectos el 17 de noviembre:
+# la Sala de Mando pedía cinco columnas que no existen —el panel «Decisiones»
+# salía vacío siempre— y el andamiaje de `prueba-sql.sh` declaraba a mano ocho
+# tablas que el propio repo crea, tres de ellas con las columnas mal. Si no hay
+# PostgreSQL en esta máquina la prueba lo dice y sale en 0, igual que las otras.
+_esq = subprocess.run([sys.executable, 'scripts/prueba-el-esquema-de-la-bateria.py'],
+                      capture_output=True, text=True)
+_esq_rojas = [l.strip() for l in _esq.stdout.split('\n') if l.strip().startswith('✗')]
+check('cada columna que la app nombra existe en la base que la batería levanta',
+      _esq.returncode == 0 and not _esq_rojas,
+      '; '.join(_esq_rojas[:3]) or (_esq.stdout + _esq.stderr).strip().split('\n')[-1][:160])
 
 # ── 6.72 · LO QUE SE LE OFRECE AL CLIENTE ES LO QUE SE VENDE HOY ───────
 #

@@ -321,8 +321,13 @@ begin
      set topup_balance = coalesce(topup_balance, 0) + 1
    where user_id = p_user_id;
 
+  -- `refund` y NO `devolucion`: `credit_transactions.source` es una lista
+  -- cerrada (CHECK de siete valores en 20260513_credits_system.sql, la misma
+  -- lista que declara src/lib/credits.ts). Con `devolucion` el insert rompía
+  -- el CHECK y el rechazo se llevaba también el update de arriba, así que el
+  -- crédito cobrado no volvía nunca. Medido el 17 de noviembre.
   insert into credit_transactions (user_id, delta, source, reason)
-  values (p_user_id, 1, 'devolucion', p_motivo);
+  values (p_user_id, 1, 'refund', p_motivo);
 end $$;
 
 

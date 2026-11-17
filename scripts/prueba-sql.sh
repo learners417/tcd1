@@ -68,6 +68,7 @@ alter default privileges in schema public
   grant all on sequences to authenticated, anon, service_role;
 create schema if not exists auth;
 create or replace function auth.uid() returns uuid language sql stable as $$ select null::uuid $$;
+create or replace function auth.role() returns text language sql stable as $$ select 'authenticated'::text $$;
 create table profiles (
   id uuid primary key, nombre text, email text, especialidad text,
   rol text default 'cliente', plan text, plan_comercial text,
@@ -91,17 +92,6 @@ create table mensajes (
 
 create type admin_tarea_prioridad as enum ('baja','media','alta','urgente');
 
-create table admin_tareas (
-  id uuid primary key default gen_random_uuid(), titulo text, descripcion text,
-  asignado_a uuid, creado_por uuid, cliente_id uuid, prioridad text,
-  fecha_vencimiento date, status text,
-  completada_at timestamptz, archivada_at timestamptz,
-  created_at timestamptz default now(), updated_at timestamptz default now());
-create table user_credits (
-  user_id uuid primary key, monthly_quota_remaining int, topup_balance int);
-create table credit_transactions (
-  id uuid primary key default gen_random_uuid(), user_id uuid, delta int,
-  source text, reason text, created_at timestamptz default now());
 -- Lo que Supabase trae de fábrica y un PostgreSQL pelado no: sin esto, una
 -- migración correcta falla acá y el error no dice nada sobre la migración.
 create schema if not exists storage;
@@ -133,9 +123,6 @@ create table hoja_de_ruta (
   hecho_afuera boolean default false, marcado_por text, marcado_el timestamptz,
   created_at timestamptz default now(),
   unique (usuario_id, pilar_numero, meta_codigo));
-create table programa_videos (
-  id uuid primary key default gen_random_uuid(), titulo text, url text,
-  grupo text, pilar_id text, orden int);
 create table sala_metricas_semana (
   id uuid primary key default gen_random_uuid(), cliente_id uuid not null,
   campana_id uuid, semana_iso text not null, anuncio text,
@@ -150,6 +137,42 @@ SQL
 marcar() {
   if [ "$1" -eq 0 ]; then echo "✓ $2"; else echo "✗ $2"; fallas=$((fallas + 1)); fi
 }
+
+# ── Lo que el repo CREA, lo crea el repo ───────────────────────────────────
+#
+# De las diez tablas que este andamiaje escribía a mano, OCHO las crea el
+# propio repositorio. Tres estaban mal justo en las columnas que las pantallas
+# piden, y se midió ejecutando el SQL de la app contra esta misma base:
+#
+#   · `cliente_preactivacion_check` tenía `paso` donde la tabla real tiene
+#     `step_id`, y le faltaba `completado_por`. El select del Camino
+#     —`select cliente_id, step_id`— no corre contra esa tabla, y el insert de
+#     `guardar_extra_celda` tampoco.
+#   · `programa_videos` tenía un `url` que no existe en ninguna parte y le
+#     faltaban `youtube_url`, `descripcion`, `duracion` y `created_at`: las
+#     cuatro que piden la Biblioteca, el Roadmap y el Tablero de grabación.
+#   · `credit_transactions` no tenía `paypal_order_id` ni `pack_id`, que son
+#     la llave de idempotencia de la compra por PayPal.
+#
+# Es la cuarta vez que pasa lo mismo en este archivo —`hoja_de_ruta` ya había
+# caído por esto y quedó arreglada a mano—, así que el arreglo no es volver a
+# escribirlas bien: es NO escribirlas. Se corren sus creadores de verdad.
+# `profiles` y `mensajes` siguen a mano porque ningún .sql del repo las crea
+# (nacieron en el panel de Supabase), y eso lo vigila
+# `scripts/prueba-el-esquema-de-la-bateria.py`.
+for creador in \
+  supabase/migrations/20260418_admin_tareas.sql \
+  supabase/migrations/20260507_cliente_preactivacion_check.sql \
+  supabase/migrations/20260513_credits_system.sql \
+  videos-migration.sql \
+  pilar-id-migration.sql ; do
+  psqlq -f "$creador" > "$DATA/creador.txt" 2>&1
+  if grep -qE "^ERROR|ERROR:" "$DATA/creador.txt"; then
+    echo "✗ el creador $creador no corre sobre el andamiaje"
+    grep -E "^ERROR|ERROR:" "$DATA/creador.txt" | head -2
+    fallas=$((fallas + 1))
+  fi
+done
 
 # ── Lo que las migraciones viejas ya dejaron en la base de Javo ─────────────
 #
@@ -208,22 +231,23 @@ su postgres -c "psql -h $SOCK -p $PORT -U postgres -q -f $DATA/rls.sql" > /dev/n
 # Y las tablas y funciones que Supabase o una migración vieja ya crearon, que
 # las nuevas usan sin crearlas.
 psqlq << 'SQL' > /dev/null 2>&1
-create table if not exists notificaciones (
-  id uuid primary key default gen_random_uuid(),
-  usuario_id uuid not null references profiles(id) on delete cascade,
-  tipo text not null, titulo text not null, descripcion text,
-  leida boolean default false, accion_url text,
-  created_at timestamptz default now());
--- Como está en la base de Javo ANTES de la migración 20261011: `completado_at`
--- obligatorio y con default, que es justo lo que esa migración afloja para
--- poder distinguir «tildado» de «tiene una nota y sigue pendiente».
-create table if not exists cliente_preactivacion_check (
-  id uuid primary key default gen_random_uuid(), cliente_id uuid, paso text,
-  completado_at timestamptz not null default now(),
-  unique (cliente_id, paso));
 create or replace function storage.foldername(name text)
   returns text[] language sql immutable as $$ select string_to_array(name, '/') $$;
 SQL
+
+# `notificaciones` tampoco se copia a mano. La crea la migración 20260518, que
+# es anterior al corte y por eso no corre acá; así que se EXTRAE su sentencia
+# de ese archivo en vez de transcribirla. Una copia que hoy coincide mañana se
+# desfasa, y es exactamente lo que le pasó a cuatro tablas de este andamiaje.
+python3 - << 'EXTRAE' > "$DATA/notif.sql"
+import re
+t = open('supabase/migrations/20260518_admin_roles_notifications.sql',
+         encoding='utf-8').read()
+m = re.search(r'create\s+table\s+if\s+not\s+exists\s+notificaciones\s*\([\s\S]*?\n\);',
+              t, re.I)
+print(m.group(0) if m else '')
+EXTRAE
+psqlq -f "$DATA/notif.sql" > /dev/null 2>&1
 
 echo "══ el SQL contra PostgreSQL real ══"
 
@@ -237,10 +261,17 @@ marcar $? "corre DOS VECES sin errores (es idempotente)"
 echo ""
 echo "══ las funciones, ejecutadas ══"
 psqlq << 'SQL' > "$DATA/f.txt" 2>&1
+insert into auth.users (id, email)
+  values ('11111111-1111-1111-1111-111111111111','prueba@ejemplo.com')
+  on conflict do nothing;
 insert into profiles (id, nombre, rol, plan_comercial)
   values ('11111111-1111-1111-1111-111111111111','Prueba','cliente','completo')
   on conflict do nothing;
-insert into user_credits values ('11111111-1111-1111-1111-111111111111', 30, 0)
+-- Por nombre de columna y no por posición: `user_credits` tiene NUEVE columnas
+-- —la crea 20260513_credits_system.sql— y el insert posicional de tres estaba
+-- escrito contra la tabla inventada de tres que este andamiaje declaraba.
+insert into user_credits (user_id, monthly_quota_remaining, topup_balance)
+  values ('11111111-1111-1111-1111-111111111111', 30, 0)
   on conflict do nothing;
 insert into gasto_ia (user_id, usd, modelo, tarea, ms, ok) values
   ('11111111-1111-1111-1111-111111111111', 0.05, 'claude-sonnet-4-6','guion', 3200, true),

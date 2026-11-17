@@ -359,6 +359,148 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 | **16 nov, 15:30** · `42cd83c` + `75f617e` (MCD) | las dos colas seguían cerradas y cero commits de Javo (`58f890c` en TCD, `b648008` en MCD), `node_modules` en cero en los dos y la trampa del `HEAD` suelto con la `main` local de TCD atrás **y el clon en shallow**, que hace que `git merge-base` diga «unrelated histories» y un `merge --ff-only` se niegue (se arregló con `fetch --unshallow` antes de medir). Las dos despertadas anteriores preguntaron si cada batería ve el defecto **en su propio repo**; esta preguntó por **la costura**, que es lo único que las dos comparten: el contrato del puente estaba en **tres copias escritas a mano** que nadie ataba, y renombrar un campo del lado de MCD dejaba **las dos baterías en verde** con el Cinturón Rojo sin llegar nunca (abajo, en «El 16 de noviembre a las 15:30»)
 | **16 nov, 19:30** · `56eb38c` | las dos colas seguían cerradas y cero commits de Javo (`2e444a4` en TCD, `75f617e` en MCD), `node_modules` en cero en los dos y el clon de TCD otra vez en shallow. Las tres despertadas anteriores preguntaron si cada batería ve el defecto en su repo y si la costura entre los dos estaba atada; esta preguntó por **los datos**, que es el otro cuerpo que nadie había mirado así: el seed de los 90 días. Y ahí estaba, desde el 24 de septiembre: **el día de cada pieza de video lo decidía una lista escrita a mano, desfasada del Camino en 35 de las 43**. Más el validador del paquete, que su propio encabezado llama «paso de CI», que nadie corría y que se caía con un KeyError antes de imprimir nada (abajo, en «El 16 de noviembre a las 19:30»)
 | **16 nov, 23:40** · `062ff1f` (MCD) | las dos colas seguían cerradas y cero commits de Javo (`5d55fd4` en TCD, `75f617e` en MCD), `node_modules` en cero en los dos, el `HEAD` suelto en los dos y el clon de TCD otra vez en shallow. Las cuatro despertadas anteriores preguntaron si cada batería ve el defecto, si la costura estaba atada y si los datos del seed decían la verdad; esta preguntó por **el esquema**, que es el último cuerpo que nadie había mirado: **nadie había corrido nunca las cuatro migraciones de MCD**, y nadie comparaba el nombre de la columna que el código pide con el nombre de la columna que existe. De los 45 pares tabla.columna que el código nombra, **dos no existían**, y las dos se caían en silencio: la ficha de CUALQUIER paciente daba 404, y en «Mi marca» el sanador escribía su marca, apretaba Guardar y la base no cambiaba nada (abajo, en «El 16 de noviembre a las 23:40»)
+| **17 nov, 03:25** · `2efa7c0` | las dos colas seguían cerradas y cero commits de Javo (`7f801e0` en TCD, `062ff1f` en MCD), `node_modules` en cero en los dos y el clon de TCD otra vez en shallow. La despertada de las 23:40 preguntó por **el esquema de MCD**; esta hizo la misma pregunta en TCD, y la respuesta estaba una capa más atrás: la base que la batería levanta **no es la de Javo**. De las diez tablas que `scripts/prueba-sql.sh` escribía a mano en su andamiaje, **ocho las crea el propio repo**, y tres estaban mal justo en las columnas que piden las pantallas. Al dejar de inventarlas salieron **dos defectos vivos que el andamiaje tapaba**: `devolver_credito` escribía un `source` que el CHECK real rechaza —así que el crédito cobrado por una imagen que falló **no volvía nunca**— y la Sala de Mando pedía **cinco columnas que no existen**, con lo que su panel «Decisiones» estaba vacío siempre (abajo, en «El 17 de noviembre a las 03:25») |
+
+### El 17 de noviembre a las 03:25: la base que la batería levanta no era la de Javo
+
+**La pregunta.** La despertada de las 23:40 levantó el esquema de MCD y encontró
+dos columnas que el código pedía y no existían. Esta hizo la misma pregunta en
+TCD. La respuesta no estaba en el esquema: estaba en **quién lo describe**.
+
+`scripts/prueba-sql.sh` es la prueba más fuerte del repo —levanta PostgreSQL de
+verdad, valida tipos, defaults y políticas—, pero la base que levanta es un
+**andamiaje**, y su propio comentario dice para qué: «el andamiaje tiene que
+parecerse a la base real». Medido: de las **diez tablas que escribía a mano**,
+**ocho las crea el propio repositorio**. Solo dos —`profiles` y `mensajes`—
+tienen que estar a mano, porque ningún `.sql` del repo las crea.
+
+Y tres de las ocho estaban mal justo donde importa. No se dedujo: se levantó la
+base y se corrieron contra ella las sentencias de la app.
+
+| la tabla a mano | lo que decía | lo que dice la de verdad |
+|---|---|---|
+| `cliente_preactivacion_check` | `paso`, sin `completado_por` | `step_id` y `completado_por` (la crea `20260507`) — el `select cliente_id, step_id` del Camino **no corre** contra la de a mano |
+| `programa_videos` | un `url` que no existe en ninguna parte | `youtube_url`, `descripcion`, `duracion`, `created_at` (las crea `videos-migration.sql`) — el select de la Biblioteca **no corre** |
+| `credit_transactions` | sin `paypal_order_id`, sin `pack_id` y **sin el CHECK de `source`** | la crea `20260513`, con la lista cerrada de siete valores |
+
+`hoja_de_ruta` ya había caído por esto mismo y quedó arreglada a mano, con su
+comentario explicando el fallo. Era la cuarta vez. Así que el arreglo no es
+volver a escribirlas bien: es **no escribirlas**. Ahora el andamiaje corre los
+creadores de verdad, y `notificaciones` —que nace en una migración anterior al
+corte, y por eso no corre— se **extrae** de su archivo en vez de transcribirse.
+
+**Y al dejar de inventarlas aparecieron dos defectos vivos que el andamiaje
+tapaba.** Los dos del lado de la app, los dos en silencio.
+
+**Uno · el crédito cobrado que no volvía.** El guardián cobra el crédito ANTES
+de llamar al modelo —es la única forma de que dos pedidos a la vez no gasten el
+mismo saldo—, y si después la cadena falla, `devolver_credito` lo repone. Esa
+función escribía `source = 'devolucion'`, y `credit_transactions.source` es una
+**lista cerrada de siete valores** que no la incluye: la declara el CHECK de
+`20260513` y la repite `CreditTransactionSource` en TypeScript. El insert rompía
+el CHECK, y como el insert y el `update user_credits` van en la **misma
+función**, el rechazo se llevaba también la devolución del saldo. **El cliente
+pagaba por aire.** No se veía por dos motivos: el andamiaje declaraba la tabla
+sin el CHECK, así que la función pasaba la prueba de «las 17 funciones se
+ejecutan»; y del lado de la app `devolverCreditoServer` solo hace
+`console.warn`. La red de seguridad tenía el mismo agujero por dos lados:
+escribía el **mismo** valor inválido, y miraba el `catch` cuando Supabase
+**devuelve** el error en vez de lanzarlo — así que el log decía «devolución
+anotada» sobre un insert que la base había rechazado. Cerrado con
+`20261117_la_devolucion_no_era_una_fuente.sql` (y la misma corrección en
+`sala-de-mando.sql`, que es de donde nace la función): `refund`, que es la
+palabra que el sistema de créditos ya usa en el otro camino de devolución. No se
+afloja el CHECK.
+
+**Dos · la Sala de Mando no podía guardar ni listar una decisión.**
+`sala_decisiones` la crea `sala-de-mando.sql` con `texto`, `motivo`, `fecha`,
+`decidida_por`, `area`, `estado` y `created_at`. El código pedía **otras cinco**:
+`titulo`, `criterio`, `contexto`, `decidida_en` y `vigente`. Ninguna existe, y
+ninguna migración las creó nunca. PostgREST no ignora la columna que no conoce
+—contesta 400 con `42703` y la sentencia entera no se ejecuta—, así que:
+
+- `listarDecisiones` fallaba y devolvía `[]` por su propio
+  `if (error || !data) return []`: **el panel «Decisiones» estaba vacío
+  siempre**, sin decir nada;
+- `guardarDecision` tiraba el error del motor en la cara, y es lo que corre
+  **por cada decisión** al cargar una sesión desde `CargarSesion`;
+- `derogarDecision` tampoco podía.
+
+Cerrado del lado del código, con los alias de PostgREST
+(`titulo:texto, criterio:motivo, decidida_en:created_at`) para que la pantalla
+no se toque y las filas que ya están cargadas sigan valiendo; `vigente` se
+calcula del `estado`, que es la lista cerrada de tres que la tabla tiene.
+`contexto` era la única sin equivalente y se agrega por migración
+(`20261117_la_sala_guardaba_decisiones_en_columnas_que_no_existen.sql`).
+
+**La lente nueva** es `scripts/prueba-el-esquema-de-la-bateria.py`, cableada al
+bloque 6 junto a `prueba-rpc-nombres.py`. Reusa el andamiaje de
+`prueba-sql.sh` cortándolo en su marcador —igual que `prueba-puesta-al-dia.sh`,
+así no puede desfasarse de él—, levanta la base, le pregunta a
+`information_schema` qué quedó, y exige cuatro cosas: que el andamiaje **no
+escriba a mano ninguna tabla que el repo crea**; que **toda columna que el
+código nombra exista**; que **no aparezca una tabla nueva** que ningún `.sql`
+del repo cree (hoy son cuatro conocidas y anotadas —`profiles`, `mensajes`,
+`session_logs`, `diario_entradas`—, más dos que solo nombra `test-db.mjs`); y
+que **las tres sentencias de la Sala corran** contra la base con una fila de
+prueba.
+
+**Probada contra su propio fallo, cinco veces** — y la cuarta encontró que la
+lente estaba ciega: al sacar la lista de columnas a una constante —que es lo
+prolijo— el argumento del `select` deja de ser un texto y **no se medía nada**.
+La lente resuelve ahora las constantes de texto del archivo, y con eso pasó de
+208 a **214 pares** medidos. Las cinco: pedir `titulo` otra vez (roja), volver a
+inventar `programa_videos` en el andamiaje (dos rojas), sacar la columna
+`contexto` de la migración (dos rojas), devolver `devolucion` a
+`sala-de-mando.sql` (roja en `prueba-sql.sh`), y nombrar una tabla que el repo
+no crea (roja).
+
+**Tres premisas se cayeron antes de llegar al hallazgo**, y se anotan porque
+cada una costó una medición:
+
+1. **«Trece tablas que ninguna migración crea en TCD».** Son **cuatro** las que
+   importan —`profiles`, `mensajes`, `session_logs`, `diario_entradas`—, más dos
+   que solo nombra un script suelto. Y lo que la nota del 16 daba por resuelto
+   («las trece existen») es cierto en la base de Javo y **falso en el repo**:
+   `profiles` —con cerca de cien columnas— no tiene `create table` en ningún
+   `.sql`. Su única descripción completa vivía dentro del andamiaje de una
+   prueba.
+2. **`jornadas.funciones` parecía faltar.** No faltaba: era la lente nueva
+   corriendo las migraciones **antes** de `sala-de-mando.sql`, que es donde nace
+   `jornadas`. `prueba-sql.sh` las corre al revés. Corregido el orden.
+3. **Las cuatro pruebas de política de `prueba-puesta-al-dia.sh` estaban en
+   verde por el motivo equivocado.** Al dejar de inventar `user_credits`,
+   apareció el disparador que `20260513` pone sobre `profiles`: crea la fila de
+   créditos, y `user_credits.user_id` apunta a `auth.users`. Sin el usuario, el
+   disparador revienta y **ninguno de los tres perfiles de prueba entra**. Las
+   dos pruebas de lectura se pusieron rojas; las dos negativas —«un cliente no
+   lee la ficha de otro»— seguían verdes **sobre una tabla vacía**. Arreglado el
+   andamiaje de esa prueba, y con una guarda que exige que los tres perfiles
+   estén antes de medir ninguna política.
+
+Batería entera en verde antes de subir: `tsc` y `npm run build` limpios, las
+**145** `prueba-*.ts`, los dos `.sh` de política y `auditoria.py` con la lente
+nueva adentro —**916 miradas, cero faltas**, «el ZIP puede salir»—. MCD sin
+tocar.
+
+### Lo que esta despertada deja esperando tu clic
+
+**El repo no sabe crear `profiles`.** Es la tabla del centro de la app y su
+esquema no está en ningún `.sql`: lo único que hay son los `add column` de
+sesenta migraciones, más una descripción a mano dentro de una prueba. Mientras
+siga así, de este repositorio **no puede salir una instalación nueva**, y si el
+proyecto de Supabase se perdiera, el esquema de `profiles` habría que
+reconstruirlo a mano. No se arregla solo porque adivinar los tipos de la tabla
+viva sería inventar: **lo tienes que exportar tú**, desde el panel de Supabase
+(SQL Editor), y queda guardado en el repo como la constancia del esquema. Las
+otras tres —`mensajes`, `session_logs`, `diario_entradas`— van en el mismo
+volcado. Dos opciones:
+
+- **Dejarlo así.** La lente nueva vigila que el agujero no crezca: si aparece
+  una quinta tabla que el repo no crea, la batería se pone roja.
+- **Exportar el esquema de las cuatro** y pegarlo acá. Con eso, una instalación
+  nueva nace completa y la batería puede dejar de describir `profiles` a mano.
+
 
 ### El 16 de noviembre a las 23:40: el esquema no tenía dos columnas que el código pedía
 

@@ -118,11 +118,35 @@ create or replace function auth.uid() returns uuid language sql stable as
   $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
 grant usage on schema auth to authenticated;
 grant execute on function auth.uid() to authenticated;
+-- Primero `auth.users`, y no por prolijidad: la migración 20260513 pone un
+-- disparador AFTER INSERT sobre `profiles` que crea la fila de créditos, y
+-- `user_credits.user_id` apunta a `auth.users(id)`. Sin el usuario, el
+-- disparador revienta y NINGUNO de los tres perfiles entra; las dos pruebas
+-- de lectura daban rojo y las dos negativas daban verde sobre una tabla
+-- vacía, que es verde por el motivo equivocado. Salió al dejar de inventar
+-- `user_credits` en el andamiaje, el 17 de noviembre.
+insert into auth.users (id, email) values
+  ('aaaaaaaa-0000-0000-0000-000000000001','javo@ejemplo.com'),
+  ('aaaaaaaa-0000-0000-0000-000000000002','cliente@ejemplo.com'),
+  ('aaaaaaaa-0000-0000-0000-000000000003','otro@ejemplo.com')
+  on conflict do nothing;
 insert into profiles (id, nombre, rol) values
   ('aaaaaaaa-0000-0000-0000-000000000001','Javo','admin'),
   ('aaaaaaaa-0000-0000-0000-000000000002','Cliente','cliente'),
   ('aaaaaaaa-0000-0000-0000-000000000003','Otro','cliente')
   on conflict do nothing;
+-- Y que los tres perfiles ESTÉN: sin esto, una tabla vacía deja las cuatro
+-- pruebas de política en el resultado que el autor esperaba, por la razón
+-- equivocada.
+do $guard$
+begin
+  if (select count(*) from profiles
+       where id in ('aaaaaaaa-0000-0000-0000-000000000001',
+                    'aaaaaaaa-0000-0000-0000-000000000002',
+                    'aaaaaaaa-0000-0000-0000-000000000003')) <> 3 then
+    raise exception 'los tres perfiles de prueba no entraron: las pruebas de politica medirian una tabla vacia';
+  end if;
+end $guard$;
 SQL
 
 echo ""

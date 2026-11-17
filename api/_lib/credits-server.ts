@@ -187,11 +187,25 @@ export async function devolverCreditoServer(
 
   // Red de seguridad: aunque la RPC no exista todavía, queda el movimiento
   // anotado para que nadie pierda un crédito en silencio.
+  //
+  // `refund` y NO `devolucion`: `credit_transactions.source` es una lista
+  // cerrada —el CHECK de 20260513_credits_system.sql, la misma lista que
+  // declara `CreditTransactionSource`— y `devolucion` no está en ninguna de las
+  // dos. Esta red escribía un valor que la base rechaza, así que no anotaba
+  // nada. Medido el 17 de noviembre.
+  //
+  // Y el error se MIRA: Supabase lo DEVUELVE, no lo lanza, así que el
+  // `catch` no veía nada y el log decía «devolución anotada» sobre un insert
+  // que la base había rechazado.
   try {
-    await admin.from('credit_transactions').insert({
-      user_id: userId, delta: 1, source: 'devolucion', reason: motivo,
+    const { error: errAnota } = await admin.from('credit_transactions').insert({
+      user_id: userId, delta: 1, source: 'refund', reason: motivo,
     });
-    console.warn('[creditos] devolución anotada como movimiento, revisar a mano:', { userId, motivo });
+    if (errAnota) {
+      console.error('[creditos] NO SE PUDO DEVOLVER NI ANOTAR:', { userId, motivo }, errAnota.message);
+    } else {
+      console.warn('[creditos] devolución anotada como movimiento, revisar a mano:', { userId, motivo });
+    }
   } catch (err) {
     console.error('[creditos] NO SE PUDO DEVOLVER NI ANOTAR:', { userId, motivo }, err);
   }

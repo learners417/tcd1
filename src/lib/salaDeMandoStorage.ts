@@ -29,33 +29,59 @@ export async function moverDeEtapa(clienteId: string, etapa: number): Promise<vo
  * vez que se vuelve a discutir, alguien tiene que estar presente para
  * decidirlo otra vez — que es exactamente lo que la Sala existe para evitar.
  */
+/**
+ * LOS NOMBRES DE LA TABLA NO SON LOS DEL TIPO, Y ESO SE TRADUCE ACÁ.
+ *
+ * `sala_decisiones` la crea `sala-de-mando.sql` con `texto`, `motivo`,
+ * `estado` y `created_at`. El código pedía `titulo`, `criterio`, `vigente` y
+ * `decidida_en`: cinco columnas que no existen en ninguna parte. PostgREST no
+ * ignora la columna que no conoce —contesta 400 con 42703 y la sentencia
+ * entera no corre—, así que el panel «Decisiones» salía vacío por su propio
+ * `return []` y guardar una decisión tiraba el error del motor en la cara.
+ * Medido el 17 de noviembre.
+ *
+ * Se traduce acá con los alias de PostgREST y no se renombra la tabla: las
+ * filas que ya están cargadas en la base de Javo hablan el idioma de la
+ * tabla, y la pantalla habla el del tipo `Decision`. `contexto` es la única
+ * que no tenía equivalente y se agrega por migración.
+ */
+const COLUMNAS_DECISION =
+  'id, titulo:texto, criterio:motivo, contexto, decidida_en:created_at, cliente_id, estado';
+
+/** `estado` es una lista cerrada de tres; la pantalla solo quiere un booleano. */
+const VIGENTE = 'vigente';
+const DEROGADA = 'revertida';
+
 export async function listarDecisiones(soloVigentes = true): Promise<Decision[]> {
   let q = db().from('sala_decisiones')
-    .select('id, titulo, criterio, contexto, decidida_en, vigente, cliente_id')
-    .order('decidida_en', { ascending: false });
-  if (soloVigentes) q = q.eq('vigente', true);
+    .select(COLUMNAS_DECISION)
+    .order('created_at', { ascending: false });
+  if (soloVigentes) q = q.eq('estado', VIGENTE);
   const { data, error } = await q;
   if (error || !data) return [];
-  return data as unknown as Decision[];
+  return (data as unknown as Array<Omit<Decision, 'vigente'> & { estado: string | null }>)
+    .map(({ estado, ...resto }) => ({ ...resto, vigente: estado === VIGENTE }));
 }
 
 export async function guardarDecision(d: {
   titulo: string; criterio?: string; contexto?: string; clienteId?: string | null;
 }): Promise<void> {
   const { error } = await db().from('sala_decisiones').insert({
-    titulo: d.titulo,
-    criterio: d.criterio ?? null,
+    texto: d.titulo,
+    motivo: d.criterio ?? null,
     contexto: d.contexto ?? null,
     cliente_id: d.clienteId ?? null,
-    decidida_en: new Date().toISOString(),
-    vigente: true,
+    estado: VIGENTE,
+    // `created_at` y `fecha` los pone la base por defecto: la hora de la
+    // decisión es cuando se guarda, no cuando el navegador cree que es.
   });
   if (error) throw new Error(error.message);
 }
 
 /** Una decisión no se borra: se deja de aplicar. La historia importa. */
 export async function derogarDecision(id: string): Promise<void> {
-  const { error } = await db().from('sala_decisiones').update({ vigente: false }).eq('id', id);
+  const { error } = await db().from('sala_decisiones')
+    .update({ estado: DEROGADA }).eq('id', id);
   if (error) throw new Error(error.message);
 }
 
