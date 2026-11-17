@@ -360,6 +360,139 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 | **16 nov, 19:30** · `56eb38c` | las dos colas seguían cerradas y cero commits de Javo (`2e444a4` en TCD, `75f617e` en MCD), `node_modules` en cero en los dos y el clon de TCD otra vez en shallow. Las tres despertadas anteriores preguntaron si cada batería ve el defecto en su repo y si la costura entre los dos estaba atada; esta preguntó por **los datos**, que es el otro cuerpo que nadie había mirado así: el seed de los 90 días. Y ahí estaba, desde el 24 de septiembre: **el día de cada pieza de video lo decidía una lista escrita a mano, desfasada del Camino en 35 de las 43**. Más el validador del paquete, que su propio encabezado llama «paso de CI», que nadie corría y que se caía con un KeyError antes de imprimir nada (abajo, en «El 16 de noviembre a las 19:30»)
 | **16 nov, 23:40** · `062ff1f` (MCD) | las dos colas seguían cerradas y cero commits de Javo (`5d55fd4` en TCD, `75f617e` en MCD), `node_modules` en cero en los dos, el `HEAD` suelto en los dos y el clon de TCD otra vez en shallow. Las cuatro despertadas anteriores preguntaron si cada batería ve el defecto, si la costura estaba atada y si los datos del seed decían la verdad; esta preguntó por **el esquema**, que es el último cuerpo que nadie había mirado: **nadie había corrido nunca las cuatro migraciones de MCD**, y nadie comparaba el nombre de la columna que el código pide con el nombre de la columna que existe. De los 45 pares tabla.columna que el código nombra, **dos no existían**, y las dos se caían en silencio: la ficha de CUALQUIER paciente daba 404, y en «Mi marca» el sanador escribía su marca, apretaba Guardar y la base no cambiaba nada (abajo, en «El 16 de noviembre a las 23:40»)
 | **17 nov, 03:25** · `ea4cfd7` | las dos colas seguían cerradas y cero commits de Javo (`7f801e0` en TCD, `062ff1f` en MCD), `node_modules` en cero en los dos y el clon de TCD otra vez en shallow. La despertada de las 23:40 preguntó por **el esquema de MCD**; esta hizo la misma pregunta en TCD, y la respuesta estaba una capa más atrás: la base que la batería levanta **no es la de Javo**. De las diez tablas que `scripts/prueba-sql.sh` escribía a mano en su andamiaje, **ocho las crea el propio repo**, y tres estaban mal justo en las columnas que piden las pantallas. Al dejar de inventarlas salieron **dos defectos vivos que el andamiaje tapaba**: `devolver_credito` escribía un `source` que el CHECK real rechaza —así que el crédito cobrado por una imagen que falló **no volvía nunca**— y la Sala de Mando pedía **cinco columnas que no existen**, con lo que su panel «Decisiones» estaba vacío siempre (abajo, en «El 17 de noviembre a las 03:25») |
+| **17 nov, 07:25** · `pendiente` | las dos colas seguían cerradas y cero commits de Javo (`7f1bdd5` en TCD, `062ff1f` en MCD), `node_modules` en cero en los dos, el `HEAD` suelto en los dos y el clon de TCD otra vez en shallow. Las cinco anteriores preguntaron por el defecto dentro de cada repo, por la costura, por los datos del seed y por el esquema; esta preguntó por **el entorno**, que es la lista de lo que hay que cargar en Vercel y nunca se había medido contra el código. Y volvió a ser **la puerta**: la lente que vigila que ninguna clave viaje en el bundle buscaba `import.meta.env.VITE_X` escrito de corrido, y cinco archivos leen el entorno con una variable en el medio, así que **diez variables no se veían — entre ellas las nueve por donde entra la plata**. Detrás, el agujero: el código leía **doce variables que `.env.example` no nombraba**, nueve de ellas los enlaces de cobro, y ninguna rompe nada porque todas caen al WhatsApp. En MCD, a la tabla que se titula «TODAS» le faltaban tres (abajo, en «El 17 de noviembre a las 07:25») |
+
+### El 17 de noviembre a las 07:25: la lente de las claves no veía la puerta por donde entra la plata
+
+**La pregunta.** Las cinco despertadas anteriores preguntaron por el defecto
+dentro de cada repo, por la costura entre los dos, por los datos del seed y por
+el esquema. Quedaba un cuerpo sin mirar: **el entorno**. No el código, no la
+base: la lista de lo que hay que cargar en Vercel para que la app ande entera.
+Nadie la había medido nunca contra el código.
+
+**Y la respuesta volvió a ser la puerta, no la marca** —igual que el 15 a las
+06:30, y por eso se escribe así—.
+
+`auditoria.py` tiene desde hace semanas una lente que dice vigilar que ninguna
+clave secreta viaje dentro del paquete publicado: todo lo que lleva el prefijo
+`VITE_` se empaqueta en el bundle y lo puede leer cualquiera que abra la app.
+Esa lente buscaba `import.meta.env.VITE_X` **escrito así, de corrido**. Y cinco
+archivos del repo no leen el entorno así: lo leen con una variable en el medio
+—`const env = (import.meta as {…}).env ?? {}` y después `env.VITE_CHECKOUT_BASE`—,
+que es el patrón que permite importar esos archivos fuera del navegador sin que
+revienten, y está puesto a propósito.
+
+Medido: **diez variables `VITE_` que la lente no veía**, y entre ellas **las
+nueve por donde entra la plata**.
+
+| el archivo | las que no se veían |
+|---|---|
+| `src/lib/planes.ts` | `VITE_CHECKOUT_AMARILLO`, `_VERDE`, `_NEGRO` — el candado de los pilares |
+| `src/lib/laOfertaQueSigue.ts` | `VITE_CHECKOUT_BASE`, `_ASCENSO`, `_INSTALACION` — el candado del día 5 |
+| `src/lib/renovacion.ts` | `VITE_RENOVACION_APP`, `_GRUPAL`, `_PRIVADO` — los tres pases al mes |
+| `src/lib/libros.ts` | `VITE_LIBROS_URL` — el estante de los cinco libros |
+
+**La prueba de que la lente se creía viéndolas está en su propia lista blanca.**
+`_PUBLICAS` nombraba `VITE_CHECKOUT_AMARILLO`, `VERDE` y `NEGRO`: tres entradas
+con las que el patrón viejo no se podía cruzar nunca. Una lista blanca con
+entradas inalcanzables es la huella de una puerta ciega, así que ahora hay una
+lente que mide justo eso.
+
+**Y detrás de la puerta apareció el agujero de verdad: el inventario.**
+`.env.example` no es documentación —es la lista de lo que se carga en Vercel—, y
+nunca se había medido contra el código. El código leía **doce variables que ese
+archivo no nombraba**:
+
+- **las nueve de arriba**, los nueve enlaces de cobro;
+- **`FATHOM_WEBHOOK_SECRET`**, sin la cual la ruta de la transcripción rechaza
+  con 401 **todo** lo que llegue (falla cerrada, no abierta): el webhook queda
+  configurado del lado de Fathom y ninguna transcripción entra nunca;
+- **`PRECIOS_IA`**, que es la que el Panel del Motor de IA le nombra a Javo en
+  pantalla —«se corrigen cargando la variable `PRECIOS_IA`»— y que la lista no
+  tenía;
+- **`SUPABASE_ANON_KEY`** del lado del servidor.
+
+Ninguna de las doce rompe nada, y por eso el agujero podía durar: los nueve
+enlaces **degradan al WhatsApp** con la variable vacía, así que el botón nunca
+queda sin salida y la app no se queja. Lo que pasa es más barato de no notar:
+**no cobra sola.** Cada venta sigue pasando por una conversación, y desde
+afuera eso se ve igual que si estuviera bien.
+
+**Lo que se construyó.** La lente vieja se reemplazó por un resolvedor que lee
+el entorno **por todas las puertas** —la directa, la de corchetes
+(`env['VITE_X']`) y la de la variable en el medio—, y sobre el archivo **sin
+comentarios**: `VITE_GEMINI_API_KEY` sigue nombrada en tres comentarios que
+cuentan de cuando la clave vivía en el navegador, y leerlos en crudo pondría la
+batería roja por una clave que ya no existe. Encima de ese resolvedor, cuatro
+lentes: la de los secretos en el bundle (ahora por todas las puertas), el
+inventario **de ida** (toda variable que el código lee está en `.env.example`),
+el inventario **de vuelta** (toda variable de `.env.example` la lee alguien: una
+que nadie lee es creer que encendiste algo), y la de la lista blanca sin
+entradas inalcanzables.
+
+**Probada contra su propio fallo, siete veces**, y las siete rojas donde tenían
+que estarlo: una clave puesta por la puerta indirecta, la misma por la directa
+(para que no se perdiera lo que ya se medía), la misma por corchetes, una
+variable sacada de `.env.example`, una declarada que nadie lee, una entrada
+inalcanzable en la lista blanca, y una declaración comentada con `#`, que no es
+una declaración. Más la octava, que tiene que quedar **verde**: la clave
+nombrada solo en un comentario del código no cuenta como leída.
+
+**Y lo mismo en MCD, que no tiene `.env.example`.** Su lista es la tabla de
+`README-DEPLOY.md`, y el título de esa tabla dice **«TODAS»**. No lo era: el
+código leía tres que no estaban —`NEXT_PUBLIC_APP_URL`, `AI_PROXY_URL` y
+`AI_MODEL`—, y las dos últimas no estaban en **ningún** README. La del proxy es
+la que importa: con la variable vacía el asistente **no se apaga**, le pega al
+proxy escrito por defecto en `src/lib/ai/proxy.ts`
+(`https://apighl.vercel.app/...`), así que nadie se enteraría de que la
+dirección que creía haber cargado no está cargada. MCD tiene ahora las mismas
+dos lentes de inventario, más una tercera que cuida la costura:
+`TCD_INTEGRATION_KEY` es el mismo valor de los dos lados, así que **las dos
+listas tienen que nombrarla** —si una no la tiene, el puente queda con un solo
+lado cargado y contesta 401 para siempre—. Probada contra su propio fallo cuatro
+veces, las cuatro rojas.
+
+**Dos premisas se cayeron por el camino**, y las dos eran de la propia
+medición:
+
+1. **«`VITE_LIBROS_URL` está declarada y nadie la lee».** Eso dio el primer
+   barrido, hecho con el patrón de la lente vieja — y era el barrido el que
+   estaba ciego, no el código: `libros.ts` la lee por la puerta indirecta. El
+   primer intento de medir el inventario tenía **exactamente el mismo defecto**
+   que la lente que iba a arreglar.
+2. **Las tres `prueba-*.ts` de MCD se corren con `npx tsx`.** No: con
+   `node --experimental-transform-types`, que es como las corre su batería. Con
+   `npx tsx` una de las tres se pone roja por diez errores de
+   «top-level await … cjs» sin que nada esté roto. Queda anotado arriba, en el
+   manual de operación.
+3. **Leer un archivo nuevo con `rd()` y listo.** No: el bloque 16 —la auditoría
+   de la auditoría— puso la batería roja en la corrida completa con
+   `['.example']`, porque `.env.example` era **un lenguaje cuyo comentario la
+   batería no sabía escribir**. Declarado en `_MARCAS` con su `#`, y el
+   inventario pasó a leerla con `rdc()`: una variable escrita dentro de un
+   comentario **no está declarada**, que es justo lo que había que medir. La
+   lente que lo marcó no existía hasta el 15 de noviembre a las 03:25.
+
+Batería entera en verde antes de subir, en los dos repos. TCD: `tsc` y
+`npm run build` limpios, las **145** `prueba-*.ts`, los dos `.sh` de política y
+`auditoria.py` con las cuatro lentes nuevas adentro. MCD: `tsc` limpio,
+`next build` limpio y sus tres pruebas, con `auditoria.py` en verde y las tres
+lentes nuevas.
+
+### Lo que esta despertada deja esperando tu clic
+
+**Los nueve enlaces de cobro están en la lista y vacíos.** Ahora `.env.example`
+los nombra con lo que abre cada uno, pero el enlace es tuyo: son order forms de
+GHL y no se inventan. Mientras estén vacíos, los nueve botones caen al WhatsApp
+—nada roto, nada que se cobre solo—. Dos opciones:
+
+- **Dejarlo así.** Cada venta pasa por una conversación, que es como está hoy.
+- **Pegar los nueve en Vercel** (Settings → Environment Variables) y redeploy.
+  Los nombres están en `.env.example`, agrupados por candado.
+
+Y lo mismo, más corto, con **`FATHOM_WEBHOOK_SECRET`**: es un valor que
+inventas tú, se pega en Vercel y el mismo en Fathom. Hasta que esté, el webhook
+de la transcripción contesta 401 a todo.
 
 ### El 17 de noviembre a las 03:25: la base que la batería levanta no era la de Javo
 
@@ -2575,6 +2708,13 @@ aparece roja en `tsc` o en `next build`, lo primero es mirar si hay
 dependencias, y la segunda si `.next` quedó de una instalación vieja: una
 primera corrida tras instalar marcó una falla que se fue sola al repetirla, con
 los tipos de Next ya generados.
+
+**Y las tres `prueba-*.ts` de MCD tampoco se corren con `npx tsx`.** Su
+batería las corre con `node --experimental-transform-types`, y es lo único que
+funciona: con `npx tsx` pelado, `prueba-las-listas-completas.ts` se pone roja
+con diez errores de «top-level await is currently not supported with the cjs
+output format» sin que nada esté roto. Medido el 17 de noviembre a las 07:25,
+que es cuando se cayó en la trampa.
 
 **Las pruebas son 134 archivos, y la que sobra no se corre igual que
 las otras.** Son **133** `prueba-*.ts` —la 132 es

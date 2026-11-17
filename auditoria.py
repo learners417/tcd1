@@ -91,6 +91,12 @@ _MARCAS = {
     '.mjs': ('//',), '.cjs': ('//',), '.css': (), '.json': (),
     '.sql': ('--',), '.py': ('#',), '.sh': ('#',), '.bash': ('#',),
     '.md': (), '.html': (), '.txt': (), '.yml': ('#',), '.yaml': ('#',),
+    # `.env.example` es la lista de lo que se carga en Vercel, y la lente del
+    # inventario (6.27b) la lee. Comenta con `#`, como los `.sh`: una variable
+    # escrita dentro de un comentario NO está declarada. Declarado el 17 de
+    # noviembre, que es cuando la lente nueva la leyó por primera vez y el
+    # bloque 16 la marcó por no saber escribir su comentario.
+    '.example': ('#',),
 }
 _BLOQUE = {'.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.css', '.sql'}
 # El comentario de bloque tampoco se escribe igual: en Markdown y en HTML es
@@ -1574,21 +1580,108 @@ check('un solo motor de cada cosa',
 # leer y gastar cualquiera que abra la app. No rompe nada — es una cuenta
 # abierta al público. VITE_SUPABASE_ANON_KEY es la excepción: está diseñada
 # para ser pública y sin ella no hay app.
+#
+# ═══ NO ERA EL PREFIJO, ERA LA PUERTA (17 de noviembre, 07:25) ═══
+#
+# Hasta hoy esta lente buscaba `import.meta.env.VITE_X` escrito así, de
+# corrido. Y cinco archivos del repo NO leen el entorno así: lo leen con una
+# variable en el medio —`const env = (import.meta as {…}).env ?? {}` y después
+# `env.VITE_CHECKOUT_BASE`—, que es el patrón que deja importar el archivo
+# fuera del navegador sin que reviente. Resultado medido: **diez** variables
+# VITE_ que la lente no veía, y entre ellas las NUEVE por donde entra la
+# plata (los tres checkouts del candado, los tres de la oferta, los tres
+# pases de renovación). La prueba de que se creía viéndolas está en su propia
+# lista blanca: `_PUBLICAS` nombra VITE_CHECKOUT_AMARILLO, VERDE y NEGRO, tres
+# entradas con las que el patrón viejo no se podía cruzar nunca.
+#
+# Así que ahora el entorno se resuelve por TODAS las puertas —directa, con
+# corchetes, y con la variable en el medio— y sobre el archivo SIN comentarios,
+# porque `VITE_GEMINI_API_KEY` sigue nombrada en tres comentarios que cuentan
+# de cuando la clave vivía en el navegador, y leerlos en crudo la haría roja
+# por una clave que ya no existe.
 import re as _re27, glob as _g27
 _PUBLICAS = ('VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY', 'VITE_PAYPAL_CLIENT_ID',
              'VITE_PAYPAL_ENV', 'VITE_SENTRY_DSN', 'VITE_SENTRY_ENVIRONMENT',
              'VITE_APP_VERSION', 'VITE_CREDITS_ENABLED', 'VITE_CHECKOUT_AMARILLO',
-             'VITE_CHECKOUT_VERDE', 'VITE_CHECKOUT_NEGRO')
+             'VITE_CHECKOUT_VERDE', 'VITE_CHECKOUT_NEGRO', 'VITE_CHECKOUT_BASE',
+             'VITE_CHECKOUT_ASCENSO', 'VITE_CHECKOUT_INSTALACION',
+             'VITE_RENOVACION_APP', 'VITE_RENOVACION_GRUPAL',
+             'VITE_RENOVACION_PRIVADO', 'VITE_LIBROS_URL')
+# Las que no se cargan: las pone Vite (MODE, DEV, PROD, SSR, BASE_URL), Node
+# (NODE_ENV) o Vercel en cada despliegue (VERCEL_*). No van en ningún archivo.
+_DEL_ANDAMIO27 = ('DEV', 'PROD', 'MODE', 'SSR', 'BASE_URL', 'NODE_ENV')
+_DIRECTA27 = _re27.compile(
+    r'(?:import\.meta|process)\s*\.\s*env\s*'
+    r'(?:\.\s*([A-Z][A-Z0-9_]*)|\[\s*[\'"]([A-Z][A-Z0-9_]*)[\'"]\s*\])')
+_ATAJO27 = _re27.compile(
+    r'(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*([^;\n]*?\.env\b[^;\n]*)')
+
+
+def _entorno_de(_texto):
+    """Toda variable de entorno que este código lee, por cualquier puerta.
+
+    La directa (`process.env.X`), la de corchetes (`env['X']`) y la que pasa
+    por una variable en el medio, que es la que esta lente no veía. El texto
+    llega ya sin comentarios: una variable nombrada en un comentario no es una
+    variable leída.
+    """
+    _v = {_m.group(1) or _m.group(2) for _m in _DIRECTA27.finditer(_texto)}
+    for _m in _ATAJO27.finditer(_texto):
+        # `const X = process.env.FOO` no es un atajo: es una lectura directa,
+        # ya contada arriba. Atajo es el que se queda con el objeto entero.
+        if not _re27.search(r'\.env\b(?!\s*\.\s*[A-Z])', _m.group(2)): continue
+        _v |= {_m2.group(1) or _m2.group(2) for _m2 in _re27.finditer(
+            _re27.escape(_m.group(1)) +
+            r'\s*(?:\.\s*([A-Z][A-Z0-9_]*)|\[\s*[\'"]([A-Z][A-Z0-9_]*)[\'"]\s*\])',
+            _texto)}
+    return _v
+
+
+_leidas27 = {}
+for _f27 in sorted(_g27.glob('src/**/*.ts*', recursive=True)
+                   + _g27.glob('api/**/*.ts', recursive=True)):
+    for _v27 in _entorno_de(rdc(_f27)):
+        _leidas27.setdefault(_v27, set()).add(_f27)
 _expuestas = set()
-for _f27 in _g27.glob('src/**/*.ts*', recursive=True):
-    _s27 = rd(_f27)
-    for _m27 in _re27.finditer(r'import\.meta\.env\.(VITE_[A-Z0-9_]+)', _s27):
-        _v = _m27.group(1)
-        if _v in _PUBLICAS: continue
-        if _re27.search(r'(API_)?KEY|SECRET|TOKEN', _v):
-            _expuestas.add(f'{_v} ({_f27.split("/")[-1]})')
+for _v27, _donde27 in _leidas27.items():
+    if not _v27.startswith('VITE_') or _v27 in _PUBLICAS: continue
+    if _re27.search(r'(API_)?KEY|SECRET|TOKEN', _v27):
+        _expuestas.add(f'{_v27} ({sorted(_donde27)[0].split("/")[-1]})')
 check('ninguna clave de IA o secreto vive en el navegador',
       not _expuestas, '; '.join(sorted(_expuestas)),)
+
+# ── 6.27b · El inventario del entorno: lo que el código pide, escrito ──
+#
+# `.env.example` no es documentación: es la lista de lo que hay que cargar en
+# Vercel para que la app ande entera. Medido hoy: el código leía DOCE
+# variables que ese archivo no nombraba, y nueve de las doce eran los enlaces
+# de cobro. Ninguna rompe nada —todas caen al WhatsApp con la variable
+# vacía—, y por eso el agujero podía durar: la app no se queja, simplemente
+# nunca cobra desde el botón. Las dos lentes son de ida y de vuelta.
+_falta_declarar27 = sorted(
+    _v27 for _v27 in _leidas27
+    if _v27 not in _DEL_ANDAMIO27 and not _v27.startswith('VERCEL_')
+    and not _re27.search(r'^' + _re27.escape(_v27) + r'\s*=',
+                          rdc('.env.example'), _re27.M))
+check('toda variable que el código lee está en .env.example',
+      not _falta_declarar27,
+      ', '.join(_falta_declarar27) + ' — la que no está en la lista no se '
+      'carga en Vercel, y lo que vive de ella no anda')
+_declaradas27 = set(_re27.findall(r'^([A-Z][A-Z0-9_]*)\s*=',
+                                  rdc('.env.example'), _re27.M))
+_nadie_lee27 = sorted(_declaradas27 - set(_leidas27))
+check('y toda variable de .env.example la lee alguien',
+      not _nadie_lee27,
+      ', '.join(_nadie_lee27) + ' — cargar una variable que nadie lee es '
+      'creer que encendiste algo')
+# Y la trampa que dejó pasar lo anterior: una lista blanca con entradas que la
+# lente no se podía cruzar nunca. Si `_PUBLICAS` nombra una variable que el
+# código no lee, o la variable se fue o la puerta está ciega otra vez.
+_sin_cruzar27 = sorted(set(_PUBLICAS) - set(_leidas27))
+check('la lista blanca no nombra variables que el código no lee',
+      not _sin_cruzar27,
+      ', '.join(_sin_cruzar27) + ' — una entrada que no se puede cruzar es '
+      'la señal de que la puerta está ciega')
 
 # Y las llamadas directas a proveedores de IA tampoco: van por api/.
 _directas = []
