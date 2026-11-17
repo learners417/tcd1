@@ -5939,6 +5939,49 @@ check('la batería VE el defecto: cada defecto puesto pone roja a la lente que l
       _pve.returncode == 0,
       (_pve.stdout + _pve.stderr).strip().split('\n')[-1][:170])
 
+# ── Y LA ÚNICA PREGUNTA QUE NINGUNA DE LAS DOS BATERÍAS SE HACÍA ───────
+#
+# Las lentes de arriba miden el código. Ninguna medía que el código HAYA
+# SALIDO: el contenedor de estas despertadas es de usar y tirar, y lo que
+# queda commiteado y sin subir se pierde con él, dejando en el mapa una fila
+# «cerrado · hash» que apunta a un commit que nadie tiene.
+#
+# MEDIDO EL 17 DE NOVIEMBRE DE 2026, en carne propia: esta despertada leyó
+# `origin/main` de MCD, lo vio tres commits atrás y dio por perdido el
+# trabajo de tres despertadas. Era falso. El `git fetch` había quedado
+# rechazado, así que `refs/remotes/origin/main` era una FOTO VIEJA del
+# remoto, guardada en disco, que `git status` y `git rev-parse` leen sin
+# avisar de qué fecha es. El remoto de verdad —`git ls-remote`, por la red—
+# estaba al día. El ref local miente en las dos direcciones, y las dos
+# cuestan: atrás gasta un turno «recuperando» lo que ya está subido, y
+# adelante —un `push` que falló con el ref ya movido— pierde el trabajo de
+# verdad. Por eso la lente pregunta por la red y no le cree al disco.
+_psub = subprocess.run([sys.executable, 'scripts/prueba-el-trabajo-subido.py'],
+                       capture_output=True, text=True)
+_ssub = (_psub.stdout or '') + (_psub.stderr or '')
+if 'SIN MEDIR' in _ssub:
+    print('  ⚠ SIN MEDIR: el remoto no contestó, así que no se sabe si lo '
+          'commiteado salió del repo')
+else:
+    check('lo commiteado salió del repo, y el ref de origin no es una foto vieja',
+          _psub.returncode == 0,
+          '; '.join(l.strip() for l in _ssub.splitlines() if '✗' in l)[:400])
+
+# Y el arnés de esa lente: su defecto no es texto en un archivo sino el
+# ESTADO DE GIT, así que se arma un `--bare` y cuatro clones en una carpeta
+# temporal y se le pone cada defecto —el commit sin subir, el ref viejo, el
+# HEAD suelto, el remoto que no contesta—. El ejercicio 3 le encontró un
+# agujero al primer intento de la lente: `rev-list HEAD --not <sha>` revienta
+# con «bad object» cuando ese commit del remoto no está en este disco, que es
+# exactamente el caso del ref viejo.
+_asub = subprocess.run([sys.executable,
+                        'scripts/probar-que-la-lente-del-trabajo-subido-ve-el-defecto.py'],
+                       capture_output=True, text=True)
+check('la lente del trabajo subido ve sus cinco defectos del estado de git',
+      _asub.returncode == 0,
+      '; '.join(l.strip() for l in (_asub.stdout + _asub.stderr).splitlines()
+                if '✗' in l)[:400])
+
 print()
 if F == 0 and _pendientes:
     print(f'════ BATERÍA EN VERDE · {len(_pendientes)} cosa(s) por ESCRIBIR, arriba con ⧗ ════')
