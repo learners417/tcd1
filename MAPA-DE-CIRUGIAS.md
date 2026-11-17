@@ -371,7 +371,122 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 | **17 nov, 07:25** · `c87ba69` + `5980732` (MCD) | las dos colas seguían cerradas y cero commits de Javo (`7f1bdd5` en TCD, `062ff1f` en MCD), `node_modules` en cero en los dos, el `HEAD` suelto en los dos y el clon de TCD otra vez en shallow. Las cinco anteriores preguntaron por el defecto dentro de cada repo, por la costura, por los datos del seed y por el esquema; esta preguntó por **el entorno**, que es la lista de lo que hay que cargar en Vercel y nunca se había medido contra el código. Y volvió a ser **la puerta**: la lente que vigila que ninguna clave viaje en el bundle buscaba `import.meta.env.VITE_X` escrito de corrido, y cinco archivos leen el entorno con una variable en el medio, así que **diez variables no se veían — entre ellas las nueve por donde entra la plata**. Detrás, el agujero: el código leía **doce variables que `.env.example` no nombraba**, nueve de ellas los enlaces de cobro, y ninguna rompe nada porque todas caen al WhatsApp. En MCD, a la tabla que se titula «TODAS» le faltaban tres (abajo, en «El 17 de noviembre a las 07:25») |
 | **17 nov, 11:30** · `612f4b5` (MCD) + `96f8137` | las dos colas seguían cerradas y cero commits de Javo (`832f48c` en TCD, `5980732` en MCD), `node_modules` en cero en los dos, el `HEAD` suelto en los dos y el clon de TCD otra vez en shallow. La de las 23:40 levantó el esquema de MCD y la de las 03:25 el de TCD; esta preguntó por **la ausencia**: no si la columna que el código pide existe, sino **si la lente ve la TABLA que no está**. Y no la veía: el recorrido empezaba con `if tabla not in objetos: continue`, así que de las 14 tablas que el código de MCD nombra, **seis no estaban en el esquema y la lente daba verde**. Tres son de MCD y las tres fallaban en silencio en producción —el Guardar del Asistente, la nota del paciente y la campanita— (abajo, en «El 17 de noviembre a las 11:30») |
 
+| **17 nov, 19:30** · `PENDIENTE` + `3fefd97` (MCD) | las dos colas seguían cerradas y cero commits de Javo, `node_modules` en cero en los dos, el `HEAD` suelto en los dos y el clon de TCD en shallow. Las seis anteriores preguntaron por el defecto dentro de cada repo, por la costura, por el seed, por el esquema, por la tabla ausente, por el entorno y por si el trabajo salió; esta preguntó por **la RLS**, que es el único cuerpo que decide quién ve los datos de quién y el único que ninguna de las dos baterías nombraba. De las **921 miradas de TCD, ninguna**, salvo el aislamiento de `profiles`; de las 99 de MCD, solo las tres de la campanita: **las otras once tablas tenían su política escrita y nunca ejecutada**. Las tres premisas del lado malo se cayeron —las 60 de TCD y las 12 de MCD están encendidas y acotadas— y quedaron dos tablas como deuda anotada: `diario_entradas` y `session_logs`, que el navegador escribe y ningún `.sql` del repo enciende (abajo, en «El 17 de noviembre a las 19:30») |
 | **17 nov, 15:30** · `18a6672` + `d850db7` (MCD) | las dos colas seguían cerradas y cero commits de Javo, `node_modules` en cero en los dos y el `HEAD` suelto en los dos. Esta despertada **se equivocó primero y por eso encontró algo**: midió el estado de MCD con `git rev-parse origin/main`, lo vio tres commits atrás y dio por perdido el trabajo de las tres despertadas anteriores. Era falso — el remoto de verdad, por `git ls-remote`, estaba al día; lo viejo era **el ref en disco**, porque el `fetch` había salido rechazado. Y detrás estaba el agujero: de las **921 miradas de TCD y las 97 de MCD, ninguna medía que lo commiteado haya SALIDO del contenedor**, que es de usar y tirar. Lente nueva en los dos repos, que pregunta por la red y no le cree al disco, probada contra sus cinco defectos de estado de git — y el ejercicio del ref viejo le encontró un agujero al primer intento de la lente (abajo, en «El 17 de noviembre a las 15:30») |
+
+### El 17 de noviembre a las 19:30: la política que nadie enciende, y las once que nunca se ejercitaron
+
+**La pregunta.** Las seis despertadas anteriores fueron preguntando por cada
+cuerpo que nadie había mirado: si cada batería ve el defecto en su propio repo,
+si la costura del puente estaba atada, si los datos del seed decían la verdad,
+si el esquema tenía la columna que el código pide, si la lente ve la TABLA que
+no está, si la lista del entorno coincidía con el código, y si lo commiteado
+había salido del contenedor. Quedaba uno, y es el único que decide quién ve los
+datos de quién: **la RLS**.
+
+Medido antes de escribir nada: de las **921 miradas de TCD, ninguna nombraba la
+RLS**, con una excepción —`profiles`, cuyo aislamiento `prueba-puesta-al-dia.sh`
+sí ejercita de verdad, con dos sesiones distintas—. Las otras **41 tablas que el
+navegador toca** tenían su política escrita y **nunca ejecutada**. En MCD, lo
+mismo: de sus 99 lentes, las únicas que ejercitaban una política eran las tres
+de la campanita; **las otras once tablas, ninguna** —y detrás de ellas están los
+pacientes—.
+
+**Y la RLS tiene una trampa que no tiene ninguna otra parte del SQL:**
+
+> UNA POLÍTICA SOBRE UNA TABLA CON LA RLS APAGADA NO HACE NADA. PostgreSQL la
+> acepta, la guarda, `pg_policies` la muestra, y no filtra ni una fila. No hay
+> error y no hay aviso. Al leer el `.sql` la tabla parece cuidada: tiene su
+> `create policy` con su `using` bien escrito.
+
+Es la misma forma de todo lo que se cerró del 13 al 17: la lente verde porque no
+pudo preguntar.
+
+**La premisa se cayó tres veces, y las tres del lado bueno.**
+
+1 · «Hay tablas sin RLS». No las hay. Levantado el esquema contra un PostgreSQL
+de verdad, **las 60 tablas de TCD que el repo crea tienen la RLS encendida**,
+las 210 políticas viven todas sobre tablas encendidas, y las seis `using (true)`
+son las seis `for select` que tienen que ser —catálogos compartidos: plantillas,
+biblioteca, pausas globales, mercado aprendido—. En MCD, **las doce**, y once con
+su política bien acotada, probado ejecutando y no leyendo.
+
+2 · **El primer intento de medirlo buscó en minúsculas**, y de los 72
+`enable row level security` del repo **35 están en MAYÚSCULAS**. Así que dio por
+ABIERTAS a `hoja_de_ruta`, `mensajes` y `notificaciones` —tres tablas cerradas—.
+Mandar a arreglar lo que está sano es la peor forma de equivocarse, y es la que
+el arnés de abajo prueba que ya no puede pasar.
+
+3 · Y en MCD, contar filas en vez de dueños distintos daba «2 de 2» con la
+política funcionando perfecto, porque varias de esas tablas ya tenían filas del
+primer sanador sembradas más arriba en la misma prueba.
+
+**Lo que NO se cayó, y queda anotado como deuda: dos tablas.**
+`diario_entradas` y `session_logs`. El navegador las lee y las escribe, y
+**ningún `.sql` del repo las crea ni las enciende**: nacieron a mano en el panel
+de Supabase. `profiles` y `mensajes` también nacieron ahí, con la diferencia de
+que a esas dos sí las enciende un archivo del repo. Que hoy estén cerradas en
+producción es lo más probable —`get_user_diary` es `security definer` justo para
+que el equipo pueda leer el diario de un cliente, y una función así no haría
+falta con la tabla abierta—, pero «lo más probable» no es una medición. Lo que
+sí se puede afirmar: **su protección vive solo en el panel, donde ningún archivo
+la lee y ninguna lente la mide**, y el día que alguien rearme el proyecto desde
+el repo —que es para lo que existe `poner-al-dia-la-base.sql`— las otras cuarenta
+llegan cerradas y estas dos llegan desnudas. Y el diario es lo más íntimo que
+guarda la app. Quedan declaradas, con el motivo, en `SOLO_EN_EL_PANEL`, y
+**atadas**: el día que un `.sql` las encienda, la línea sobra y la lente lo dice.
+
+**Lo que se construyó.** En TCD, `scripts/prueba-la-rls-esta-encendida.py`: ocho
+miradas sobre el `.sql` del repo leído con `solo_codigo(…, archivo)` —el
+limpiador de la batería, cortado y compilado en vez de copiado— que piden que
+ninguna política viva sobre una tabla apagada, que toda tabla que el navegador
+toca la encienda un `.sql`, que las dos listas de excepciones no se podran, y
+que el **array escrito a mano del `do $$` de `sala-de-mando.sql`** nombre a cada
+tabla que ese mismo archivo crea: la tabla doce nacería abierta y en silencio.
+
+En MCD, dentro de `prueba-el-esquema-real.py`, que ya levanta el esquema con las
+seis migraciones corridas: le pregunta al **catálogo** —no al texto— y después se
+sienta en la silla de un sanador. Dos sanadores, una fila de cada uno, y la
+sesión del primero: ve la suya y **no** la del otro, **no puede** escribir una
+fila a nombre del otro (el `with check`, que una lente de lectura no encuentra
+nunca), y **no puede** tocar la fila ajena. **Once de las doce tablas**
+ejercitadas así; `patient_protocols` a mano, porque es la única sin columna de
+dueño —su política llega por un `exists` sobre `patients`— y `ghl_connections`
+declarada aparte, porque sus seis usos pasan por el cliente de service role.
+
+**Probadas contra su propio fallo: seis defectos en cada repo, veinte en total.**
+En TCD, la RLS apagada con la política escrita, lo mismo en MAYÚSCULAS, una
+pantalla nueva que lee una tabla que nadie enciende, el `alter table` comentado
+con `--`, una tabla fuera del array de la sala, una excepción que sobra, y el
+canario: sin `.sql` que leer, la lente **no** puede dar verde. En MCD, seis más
+sumados a los ocho que ya tenía su arnés —`patients` sin RLS, su política con
+`using (true)`, el `with check` de `sessions` abierto, `patient_notes` con RLS y
+sin ninguna política (que no es una fuga sino lo contrario: la tabla cerrada en
+silencio y la ficha vacía sin un solo error), el `exists` de
+`patient_protocols` abierto, y la lista de perdón con una tabla que sí tiene
+política—: **14 de 14 vistos**.
+
+**Y el apunte más útil: los arneses le encontraron dos agujeros a las lentes
+nuevas al primer intento.**
+
+  · En TCD, apagar `pausas_globales` en su migración **no la apagaba** —
+    `poner-al-dia-la-base.sql` la vuelve a encender—, así que el defecto quedaba
+    sin poner y la lente salía «aprobada» por un ejercicio que nunca ocurrió.
+    Ahora el arnés comprueba que el defecto **apagó algo** antes de creerle a la
+    medición.
+  · En MCD, **`max(uuid)` no existe en PostgreSQL**. Ocho afirmaciones estaban
+    leyendo la palabra `SET` —lo que imprime psql cuando la consulta revienta y
+    lo único que queda son los dos `set` de la impersonación— y comparándola
+    contra el valor esperado. Daban rojo por el motivo equivocado; con la
+    comparación al revés habrían dado verde para siempre.
+
+Las dos baterías enteras en verde antes de subir: TCD con `tsc` y `npm run build`
+limpios, las **145** `prueba-*.ts` dentro del bloque 10 y `auditoria.py` con
+**923 miradas, cero faltas** («el ZIP puede salir»); MCD con `tsc` limpio,
+`next build` limpio y sus lentes en verde —la única roja fue la que esta misma
+cola construyó ayer: el ref de `origin` era otra vez una foto vieja, `d850db7` en
+el remoto y `75f617e` en disco, y se arregló con el `git fetch origin` que la
+propia lente escribe como remedio—.
 
 ### El 17 de noviembre a las 15:30: el ref de origin era una foto vieja, y nadie medía si el trabajo había salido
 

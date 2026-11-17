@@ -5939,6 +5939,61 @@ check('la batería VE el defecto: cada defecto puesto pone roja a la lente que l
       _pve.returncode == 0,
       (_pve.stdout + _pve.stderr).strip().split('\n')[-1][:170])
 
+# ── LA RLS: LA POLÍTICA QUE NADIE ENCIENDE ─────────────────────────────
+#
+# Medido el 17 de noviembre de 2026. De las 921 miradas, NINGUNA preguntaba
+# por la RLS. La única excepción es `profiles`, cuyo aislamiento
+# `prueba-puesta-al-dia.sh` ejecuta de verdad —cuatro afirmaciones, con dos
+# sesiones distintas—. Las otras 41 tablas que el navegador toca tienen su
+# política escrita y nunca ejecutada, y las 67 que el repo enciende no las
+# miraba nadie.
+#
+# Y la RLS tiene una trampa que no tiene ninguna otra parte del SQL: UNA
+# POLÍTICA SOBRE UNA TABLA CON LA RLS APAGADA NO HACE NADA. PostgreSQL la
+# acepta, la guarda, `pg_policies` la muestra, y no filtra ni una fila. Al
+# leer el `.sql` la tabla parece cuidada: tiene su `create policy` con su
+# `using` bien escrito. Lo único que la enciende es un `alter table … enable
+# row level security` en otra sentencia, muchas veces en otro archivo.
+#
+# LO QUE SE MIDIÓ ANTES DE ESCRIBIR LA LENTE, y lo que se cayó:
+#
+#   · La premisa «hay tablas sin RLS» se cayó: las 67 que el repo crea están
+#     encendidas, las 210 políticas viven todas sobre tablas encendidas, y
+#     las seis `using (true)` son las seis `for select` que tienen que ser
+#     —catálogos compartidos: plantillas, biblioteca, pausas, mercado—.
+#     Levantado el esquema contra un PostgreSQL de verdad para comprobarlo.
+#   · Lo que NO se cayó son dos tablas: `diario_entradas` y `session_logs`.
+#     El navegador las lee y las escribe, y NINGÚN `.sql` del repo las crea
+#     ni las enciende: nacieron en el panel. Quedan declaradas, con su
+#     motivo, en `SOLO_EN_EL_PANEL` — que es una deuda anotada, no un verde.
+#   · Y el primer intento de medir esto buscó en minúsculas: de los 72
+#     `enable row level security` del repo, 35 están en MAYÚSCULAS, así que
+#     dio por ABIERTAS a tres tablas cerradas. Mandar a arreglar lo que está
+#     sano es la peor forma de equivocarse, y es la que esta lente evita con
+#     el `re.I` que su arnés prueba.
+_prls = subprocess.run([sys.executable, 'scripts/prueba-la-rls-esta-encendida.py'],
+                       capture_output=True, text=True)
+check('ninguna política vive sobre una tabla con la RLS apagada, y toda tabla '
+      'que el navegador toca la enciende un .sql',
+      _prls.returncode == 0,
+      '; '.join(l.strip() for l in (_prls.stdout + _prls.stderr).splitlines()
+                if '✗' in l)[:500])
+
+# Y su arnés. El arnés le encontró un agujero al primer intento, igual que el
+# de la lente del trabajo subido: apagar `pausas_globales` en su migración no
+# la apagaba —`poner-al-dia-la-base.sql` la vuelve a encender—, así que el
+# defecto quedaba sin poner y la lente salía «aprobada» por un ejercicio que
+# nunca ocurrió. Ahora el arnés comprueba que el defecto apagó algo antes de
+# creerle a la medición.
+_arls = subprocess.run([sys.executable,
+                        'scripts/probar-que-la-lente-de-la-rls-ve-el-defecto.py'],
+                       capture_output=True, text=True)
+check('la lente de la RLS ve sus seis defectos y no da verde sin .sql que leer',
+      _arls.returncode == 0,
+      '; '.join(l.strip() for l in (_arls.stdout + _arls.stderr).splitlines()
+                if '✗' in l)[:400])
+
+
 # ── Y LA ÚNICA PREGUNTA QUE NINGUNA DE LAS DOS BATERÍAS SE HACÍA ───────
 #
 # Las lentes de arriba miden el código. Ninguna medía que el código HAYA
