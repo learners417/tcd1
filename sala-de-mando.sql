@@ -15,6 +15,60 @@
 -- ═══════════════════════════════════════════════════════════════════════════
 
 
+-- ── 0 · QUIÉN LLAMA ────────────────────────────────────────────────────────
+--
+-- Medido el 17 de noviembre de 2026, contra un PostgreSQL de verdad: de las
+-- 51 funciones SECURITY DEFINER de `public`, **49 las puede ejecutar
+-- `authenticated` y 42 `anon`** —el permiso de fábrica de PostgreSQL es
+-- EXECUTE para PUBLIC—, y 25 de ellas no preguntaban quién llamaba. Una
+-- función SECURITY DEFINER corre con los permisos de su dueño: **pasa por
+-- encima de la RLS**. Así que la RLS puede estar perfecta —y lo está, se
+-- midió el 17 a las 19:30— y no servir de nada: sentado en la silla de un
+-- cliente cualquiera, `carga_de_semana` devolvía la semana de OTRO cliente
+-- que la RLS le negaba una línea antes, y `devolver_credito` le sumaba
+-- crédito comprado a quien quisiera, SIN SESIÓN NINGUNA.
+--
+-- Estas dos son la única puerta. `solo_el_equipo` para las plpgsql (grita),
+-- `el_que_llama_es_del_equipo` para las `language sql` (filtra). Una sola
+-- copia de la regla, y el service_role —que es la API de la casa, sin
+-- sesión de navegador— pasa.
+alter table profiles add column if not exists admin_rol text;
+
+create or replace function public.el_que_llama_es_del_equipo()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  -- `auth.role()` y NO `current_user`: adentro de una función SECURITY
+  -- DEFINER `current_user` es el DUEÑO de la función, no el que llama, así
+  -- que la comparación nunca daba verdadero y el service_role —la API de la
+  -- casa, que no tiene sesión de navegador— quedaba afuera. Lo cazó el arnés
+  -- de esta lente al primer intento: el equipo y el cliente medían bien y
+  -- `carga_de_semana` devolvía cero filas al service_role.
+  select coalesce(auth.role(), '') = 'service_role'
+      or exists (
+           select 1 from public.profiles
+            where id = auth.uid()
+              and (rol = 'admin' or admin_rol in ('owner', 'manager', 'staff'))
+         );
+$$;
+
+create or replace function public.solo_el_equipo(p_que text)
+returns void
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+begin
+  if not public.el_que_llama_es_del_equipo() then
+    raise exception 'Solo el equipo: %', p_que;
+  end if;
+end $$;
+
+
 -- ── 1 · Las tareas ganan procedencia ───────────────────────────────────────
 -- Para poder filtrar "lo que generó la app" de "lo que cargó una persona".
 alter table admin_tareas
@@ -392,7 +446,8 @@ language sql security definer as $$
     round(coalesce(sum(g.usd) filter (where not g.precio_verificado), 0), 4),
     max(g.creado_en)
   from gasto_ia g
-  where g.creado_en > now() - (p_dias || ' days')::interval
+  where public.el_que_llama_es_del_equipo()
+    and g.creado_en > now() - (p_dias || ' days')::interval
   group by g.user_id
   order by 2 desc;
 $$;
@@ -439,7 +494,8 @@ language sql security definer as $$
     round((percentile_cont(0.5) within group (order by g.ms))::numeric, 0),
     round((percentile_cont(0.95) within group (order by g.ms))::numeric, 0)
   from gasto_ia g
-  where g.creado_en > now() - (p_dias || ' days')::interval
+  where public.el_que_llama_es_del_equipo()
+    and g.creado_en > now() - (p_dias || ' days')::interval
   group by 1, 2
   order by 6 desc nulls last;
 $$;
@@ -454,7 +510,8 @@ returns table (
 language sql security definer as $$
   select g.creado_en, g.user_id, g.modelo, g.tarea, g.feature, g.error
   from gasto_ia g
-  where not g.ok
+  where public.el_que_llama_es_del_equipo()
+    and not g.ok
   order by g.creado_en desc
   limit p_limite;
 $$;
@@ -473,7 +530,8 @@ language sql security definer as $$
     count(*) filter (where not ok),
     count(distinct user_id)
   from gasto_ia
-  where creado_en > now() - (p_dias || ' days')::interval;
+  where public.el_que_llama_es_del_equipo()
+    and creado_en > now() - (p_dias || ' days')::interval;
 $$;
 
 
@@ -643,6 +701,7 @@ create or replace function abrir_jornada(
 language plpgsql security definer as $$
 declare v_id uuid;
 begin
+  perform public.solo_el_equipo('la jornada del equipo');
   insert into jornadas (persona_id, dia, planeados)
   values (p_persona, current_date, coalesce(p_planeados, '{}'))
   on conflict (persona_id, dia)
@@ -738,6 +797,7 @@ create or replace function guardar_campo(
 ) returns void
 language plpgsql security definer as $$
 begin
+  perform public.solo_el_equipo('los números de la semana de un cliente');
   insert into carga_semanal (cliente_id, semana_iso, campo, valor, por_quien, nombre_quien)
   values (p_cliente, p_semana, p_campo, p_valor, p_quien, p_nombre)
   on conflict (cliente_id, semana_iso, campo)
@@ -771,7 +831,8 @@ returns table (campo text, valor numeric, por_quien text, nombre_quien text, car
 language sql security definer as $$
   select c.campo, c.valor, c.por_quien, c.nombre_quien, c.cargado_en
   from carga_semanal c
-  where c.cliente_id = p_cliente and c.semana_iso = p_semana;
+  where public.el_que_llama_es_del_equipo()
+    and c.cliente_id = p_cliente and c.semana_iso = p_semana;
 $$;
 
 -- Los mercados donde corre la pauta de cada cliente. NO es donde vive:
@@ -849,6 +910,10 @@ create or replace function guardar_respuestas(
 ) returns void
 language plpgsql security definer as $$
 begin
+  if p_cliente is distinct from auth.uid()
+     and not public.el_que_llama_es_del_equipo() then
+    raise exception 'Cada uno guarda lo suyo';
+  end if;
   insert into sesion_respuestas (cliente_id, meta_codigo, estado)
   values (p_cliente, p_meta, coalesce(p_estado, '{}'::jsonb))
   on conflict (cliente_id, meta_codigo)
@@ -861,7 +926,8 @@ returns table (meta_codigo text, estado jsonb, actualizado_en timestamptz)
 language sql security definer as $$
   select r.meta_codigo, r.estado, r.actualizado_en
   from sesion_respuestas r
-  where r.cliente_id = p_cliente;
+  where (p_cliente = auth.uid() or public.el_que_llama_es_del_equipo())
+    and r.cliente_id = p_cliente;
 $$;
 
 
@@ -922,6 +988,7 @@ create or replace function crear_tarea_del_sistema(
 language plpgsql security definer as $$
 declare v_id uuid;
 begin
+  perform public.solo_el_equipo('crear una tarea del sistema');
   insert into admin_tareas (
     titulo, descripcion, asignado_a, creado_por, cliente_id,
     origen, ref, destino, texto_listo, peso, prioridad, fecha_vencimiento, status
@@ -957,7 +1024,8 @@ language sql security definer as $$
          t.origen, t.ref, t.destino, t.texto_listo,
          t.peso, t.prioridad::text, t.fecha_vencimiento, t.status::text
   from admin_tareas t
-  where t.asignado_a = p_persona
+  where (p_persona = auth.uid() or public.el_que_llama_es_del_equipo())
+    and t.asignado_a = p_persona
     and t.status <> 'completada'
     and t.archivada_at is null
   -- Lo vencido primero: una tarea vencida YA FALLÓ UNA VEZ.
@@ -971,6 +1039,7 @@ create or replace function cerrar_tarea(p_tarea uuid, p_quien uuid)
 returns void
 language plpgsql security definer as $$
 begin
+  perform public.solo_el_equipo('cerrar una tarea del equipo');
   update admin_tareas
   set status = 'completada', completada_at = now(), updated_at = now()
   where id = p_tarea;
@@ -1045,3 +1114,28 @@ language sql security definer as $$
     and coalesce(p.campana_pausada, false) = false
   group by p.id;
 $$;
+
+
+-- ── QUIÉN LAS PUEDE EJECUTAR ───────────────────────────────────────────────
+--
+-- Las de abajo las llama SOLO la API de la casa con el service_role, nunca el
+-- navegador (medido el 17 de noviembre: `api/_lib/credits-server.ts`,
+-- `api/_lib/uso-server.ts`, `api/_lib/gasto-server.ts`, `api/ghl-agenda.ts`).
+-- El permiso de fábrica de PostgreSQL es EXECUTE para PUBLIC, así que sin
+-- esto cualquiera con la llave publicable las llamaba: `devolver_credito` le
+-- sumaba un crédito comprado a quien quisiera, en un bucle, SIN SESIÓN.
+-- Es el mismo cierre que `grant_credits` y `monthly_reset_all` ya tenían.
+revoke all on function public.devolver_credito(uuid, text) from public;
+grant execute on function public.devolver_credito(uuid, text) to service_role;
+
+revoke all on function public.registrar_uso_ia(uuid, text, int, int) from public;
+grant execute on function public.registrar_uso_ia(uuid, text, int, int) to service_role;
+
+revoke all on function public.gasto_ia_acumulado(uuid) from public;
+grant execute on function public.gasto_ia_acumulado(uuid) to service_role;
+
+revoke all on function public.sumar_campo(uuid, text, text, numeric, text) from public;
+grant execute on function public.sumar_campo(uuid, text, text, numeric, text) to service_role;
+
+revoke all on function public.clientes_para_avisar(text) from public;
+grant execute on function public.clientes_para_avisar(text) to service_role;

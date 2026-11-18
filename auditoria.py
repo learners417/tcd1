@@ -4240,6 +4240,16 @@ if _os10.path.exists('scripts/prueba-pantallas.tsx'):
 for _sh, _loQuePrueba in [
     ('scripts/prueba-donde-cae-lo-que-se-rompe.sh', 'donde cae lo que se le rompe a un cliente'),
     ('scripts/prueba-puesta-al-dia.sh', 'la puesta al día de la base'),
+    # LA PUERTA QUE RODEA LA RLS ENTERA, medida el 17 de noviembre a las 23:25.
+    # Una función SECURITY DEFINER corre con los permisos de SU DUEÑO, así que
+    # no le aplica la RLS; y el permiso de fábrica de PostgreSQL es EXECUTE
+    # para PUBLIC, que PostgREST publica como /rest/v1/rpc/<nombre>. De las 51
+    # SECURITY DEFINER de `public`, 49 las podía ejecutar `authenticated` y 42
+    # `anon`, y 25 no preguntaban quién llamaba: `carga_de_semana` entregaba la
+    # semana de otro cliente que la RLS acababa de negar, y `devolver_credito`
+    # sumaba crédito comprado SIN NINGUNA SESIÓN.
+    ('scripts/prueba-las-funciones-preguntan-quien-llama.sh',
+     'quién puede ejecutar lo que pasa por encima de la RLS'),
 ]:
     if not _os10.path.exists(_sh):
         continue
@@ -5991,6 +6001,22 @@ _arls = subprocess.run([sys.executable,
 check('la lente de la RLS ve sus seis defectos y no da verde sin .sql que leer',
       _arls.returncode == 0,
       '; '.join(l.strip() for l in (_arls.stdout + _arls.stderr).splitlines()
+                if '✗' in l)[:400])
+
+# Y el arnés de la lente de quién llama. También le encontró un agujero al
+# primer intento, y del lado que importa: la guarda medía `current_user`, que
+# ADENTRO de una función SECURITY DEFINER es el dueño de la función y no el que
+# llama, así que el service_role —la API de la casa, sin sesión de navegador—
+# quedaba afuera y `carga_de_semana` le devolvía cero filas. Un arreglo de
+# seguridad que rompe la app es un arreglo que se revierte: por eso la lente
+# mide las tres sillas (cliente, equipo y service_role) y el arnés tiene dos
+# defectos de PORTAZO, no solo de fuga.
+_aqll = subprocess.run(['bash',
+                        'scripts/probar-que-la-lente-de-quien-llama-ve-el-defecto.sh'],
+                       capture_output=True, text=True)
+check('la lente de quién llama ve sus diez defectos, fugas y portazos',
+      _aqll.returncode == 0,
+      '; '.join(l.strip() for l in (_aqll.stdout + _aqll.stderr).splitlines()
                 if '✗' in l)[:400])
 
 

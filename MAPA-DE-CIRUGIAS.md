@@ -371,8 +371,125 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 | **17 nov, 07:25** · `c87ba69` + `5980732` (MCD) | las dos colas seguían cerradas y cero commits de Javo (`7f1bdd5` en TCD, `062ff1f` en MCD), `node_modules` en cero en los dos, el `HEAD` suelto en los dos y el clon de TCD otra vez en shallow. Las cinco anteriores preguntaron por el defecto dentro de cada repo, por la costura, por los datos del seed y por el esquema; esta preguntó por **el entorno**, que es la lista de lo que hay que cargar en Vercel y nunca se había medido contra el código. Y volvió a ser **la puerta**: la lente que vigila que ninguna clave viaje en el bundle buscaba `import.meta.env.VITE_X` escrito de corrido, y cinco archivos leen el entorno con una variable en el medio, así que **diez variables no se veían — entre ellas las nueve por donde entra la plata**. Detrás, el agujero: el código leía **doce variables que `.env.example` no nombraba**, nueve de ellas los enlaces de cobro, y ninguna rompe nada porque todas caen al WhatsApp. En MCD, a la tabla que se titula «TODAS» le faltaban tres (abajo, en «El 17 de noviembre a las 07:25») |
 | **17 nov, 11:30** · `612f4b5` (MCD) + `96f8137` | las dos colas seguían cerradas y cero commits de Javo (`832f48c` en TCD, `5980732` en MCD), `node_modules` en cero en los dos, el `HEAD` suelto en los dos y el clon de TCD otra vez en shallow. La de las 23:40 levantó el esquema de MCD y la de las 03:25 el de TCD; esta preguntó por **la ausencia**: no si la columna que el código pide existe, sino **si la lente ve la TABLA que no está**. Y no la veía: el recorrido empezaba con `if tabla not in objetos: continue`, así que de las 14 tablas que el código de MCD nombra, **seis no estaban en el esquema y la lente daba verde**. Tres son de MCD y las tres fallaban en silencio en producción —el Guardar del Asistente, la nota del paciente y la campanita— (abajo, en «El 17 de noviembre a las 11:30») |
 
+| **17 nov, 23:25** · `TCDHASH` + `58664d8` (MCD) | las dos colas seguían cerradas y cero commits de Javo, `node_modules` en cero en los dos y el `HEAD` suelto en TCD. La de las 19:30 midió **la RLS** y la dio por bien —y lo está—; esta preguntó lo único que esa medición deja abierto: **quién puede EJECUTAR las funciones**. Y ahí estaba la puerta que la rodea entera: una `SECURITY DEFINER` corre con los permisos de SU DUEÑO, así que **no le aplica la RLS**, y el permiso de fábrica de PostgreSQL es `EXECUTE` para `PUBLIC`. De las **51 de `public`, 49 las podía ejecutar `authenticated` y 42 `anon`, y 25 no preguntaban quién llamaba**: sentado en la silla de un cliente, `carga_de_semana` entregaba la semana de otro cliente que la RLS acababa de negarle, y `devolver_credito` le sumaba crédito comprado a quien quisiera **sin ninguna sesión** —seis llamadas, saldo de 0 a 6—. Cerradas con UNA puerta y no 25 parches; en MCD la premisa es la buena y quedó medida (abajo, en «El 17 de noviembre a las 23:25») |
 | **17 nov, 19:30** · `7d4040e` + `3fefd97` (MCD) | las dos colas seguían cerradas y cero commits de Javo, `node_modules` en cero en los dos, el `HEAD` suelto en los dos y el clon de TCD en shallow. Las seis anteriores preguntaron por el defecto dentro de cada repo, por la costura, por el seed, por el esquema, por la tabla ausente, por el entorno y por si el trabajo salió; esta preguntó por **la RLS**, que es el único cuerpo que decide quién ve los datos de quién y el único que ninguna de las dos baterías nombraba. De las **921 miradas de TCD, ninguna**, salvo el aislamiento de `profiles`; de las 99 de MCD, solo las tres de la campanita: **las otras once tablas tenían su política escrita y nunca ejecutada**. Las tres premisas del lado malo se cayeron —las 60 de TCD y las 12 de MCD están encendidas y acotadas— y quedaron dos tablas como deuda anotada: `diario_entradas` y `session_logs`, que el navegador escribe y ningún `.sql` del repo enciende (abajo, en «El 17 de noviembre a las 19:30») |
 | **17 nov, 15:30** · `18a6672` + `d850db7` (MCD) | las dos colas seguían cerradas y cero commits de Javo, `node_modules` en cero en los dos y el `HEAD` suelto en los dos. Esta despertada **se equivocó primero y por eso encontró algo**: midió el estado de MCD con `git rev-parse origin/main`, lo vio tres commits atrás y dio por perdido el trabajo de las tres despertadas anteriores. Era falso — el remoto de verdad, por `git ls-remote`, estaba al día; lo viejo era **el ref en disco**, porque el `fetch` había salido rechazado. Y detrás estaba el agujero: de las **921 miradas de TCD y las 97 de MCD, ninguna medía que lo commiteado haya SALIDO del contenedor**, que es de usar y tirar. Lente nueva en los dos repos, que pregunta por la red y no le cree al disco, probada contra sus cinco defectos de estado de git — y el ejercicio del ref viejo le encontró un agujero al primer intento de la lente (abajo, en «El 17 de noviembre a las 15:30») |
+
+### El 17 de noviembre a las 23:25: la RLS estaba bien, y 25 funciones la rodeaban
+
+**La pregunta, y la trajo la despertada anterior.** A las 19:30 quedó medido
+—ejecutando, no leyendo— que la RLS de este repo está bien: las 60 tablas que
+el repo crea con la RLS encendida, las 210 políticas viviendo todas sobre
+tablas encendidas, y un cliente que no ve ni escribe la fila de otro. Cuatro
+horas después, la pregunta que esa medición deja abierta y que nadie se había
+hecho: **¿quién puede ejecutar las funciones?** Porque hay una puerta que
+rodea la RLS entera:
+
+> UNA FUNCIÓN `SECURITY DEFINER` CORRE CON LOS PERMISOS DE SU DUEÑO, ASÍ QUE
+> **NO LE APLICA LA RLS**. Y EL PERMISO DE FÁBRICA DE PostgreSQL ES `EXECUTE`
+> PARA `PUBLIC`: nadie tiene que concederlo, viene puesto. PostgREST publica
+> toda función de `public` como `/rest/v1/rpc/<nombre>`, así que con la llave
+> publicable —la que viaja dentro del bundle, a propósito— cualquiera la
+> llama.
+
+**La premisa se cayó por el lado malo, y es la primera vez en nueve
+despertadas.** De las **51 funciones `SECURITY DEFINER` de `public`** medidas
+sobre un PostgreSQL de verdad con el esquema del repo: **49 las podía ejecutar
+`authenticated` y 42 `anon`**, y **25 no preguntaban quién llamaba**. No era
+una lista escrita mal: era el permiso que nadie escribió nunca.
+
+**Probado sentándose en la silla, no leyendo el `.sql`:**
+
+  · **La plata.** Un cliente cualquiera llamó `devolver_credito('<otro>',
+    'robo')` cinco veces y el saldo comprado de ese otro pasó de 0 a 5. Una
+    sexta llamada **sin ninguna sesión** —rol `anon`— lo dejó en 6, con sus
+    seis asientos de `refund` en `credit_transactions`. El saldo comprado es
+    lo que se paga con PayPal: era una fábrica de crédito gratis con la llave
+    que ya está publicada.
+  · **Los datos de otro cliente.** `carga_semanal` le negó la fila al cliente
+    —0 filas, la RLS cumplió— y `carga_de_semana('<otro>')` se la entregó
+    entera, el número y quién lo cargó. También al rol `anon`.
+  · **Escribir sobre lo de otro.** `guardar_campo` dejó a un cliente pisar con
+    un 1 el 999 que el equipo había cargado en la semana de otro.
+  · **El diario.** `get_user_diary`, `get_user_tasks`, `get_user_metrics`,
+    `get_user_ventas` y `get_user_hoja_de_ruta` existen para que el equipo lea
+    la ficha de un cliente: las llama `src/pages/Admin.tsx` con
+    `target_user_id`. Las cinco son SECURITY DEFINER y ninguna preguntaba, así
+    que **lo único que protegía el diario de un cliente —lo más íntimo que
+    guarda la app— era que la pantalla del Admin no se abra.** La protección
+    vivía en la interfaz, no en la base.
+
+**Lo que se construyó, y es UNA puerta y no 25 parches.** Dos funciones nuevas
+en `sala-de-mando.sql`, que son la única copia de la regla:
+`el_que_llama_es_del_equipo()` para las `language sql` —filtra— y
+`solo_el_equipo(texto)` para las plpgsql —grita—. Con ellas: once funciones de
+la Sala de Mando acotadas, las cinco de la ficha del cliente recreadas con su
+guarda en
+`supabase/migrations/20261118_las_funciones_no_preguntaban_quien_llama.sql`, la
+fila de créditos acotada a la propia, y **seis cerradas a PUBLIC con el mismo
+cierre que `grant_credits` y `monthly_reset_all` ya tenían** —las que solo
+llama la API de la casa con el service_role: `devolver_credito`,
+`registrar_uso_ia`, `gasto_ia_acumulado`, `sumar_campo`,
+`clientes_para_avisar` y `consume_credit`, cuyo envoltorio del navegador no
+tiene ni un llamador y cuyo propio comentario ya decía que el cliente no debe
+llamarlo—.
+
+**La lente:** `scripts/prueba-las-funciones-preguntan-quien-llama.sh`, con sus
+dos mitades, que no se pueden separar. **El catálogo**, que le pregunta al
+permiso real —no al texto— si queda alguna SECURITY DEFINER alcanzable que no
+pregunte, con un PERDÓN de cinco líneas donde cada una tiene su motivo escrito
+y la lente falla si una sobra. Y **la silla**, porque la primera mitad se
+satisface escribiendo `auth.uid()` en cualquier parte del cuerpo: se sienta en
+la de un cliente, en la de nadie (`anon`), en la del equipo y en la del
+service_role, y mide por el SALDO y por el VALOR QUE QUEDÓ, no por el error.
+
+**Dos cosas que esta lente hace y las anteriores no: mide el portazo.** Un
+arreglo de seguridad que rompe la app es un arreglo que se revierte, así que
+tres afirmaciones piden lo contrario —el equipo sí lee la semana, el equipo sí
+la escribe, el cliente sí lee lo suyo, el service_role sí devuelve el
+crédito—. Y **el arnés le encontró su agujero al primer intento, del lado del
+portazo:** la guarda preguntaba `current_user = 'service_role'`, y **adentro
+de una función SECURITY DEFINER `current_user` es el DUEÑO de la función, no
+el que llama**, así que nunca daba verdadero y `carga_de_semana` le devolvía
+cero filas a la API de la casa. Quedó en `auth.role()`, que es lo que
+PostgREST pone. La lente también se encontró dos funciones que me había
+salteado: `panel_ia_por_modelo`, y `podar_fallas_viejas` —que estaba revocada
+de PUBLIC desde el 5 de noviembre, bien, y **concedida a `authenticated`**, que
+es el rol de cualquier cliente con sesión: borra el único registro de lo que se
+le rompe a un cliente—.
+
+**Probada contra sus propios defectos: diez, puestos a propósito, diez vistos**
+(`scripts/probar-que-la-lente-de-quien-llama-ve-el-defecto.sh`). Seis de fuga
+—la plata abierta otra vez, la semana de otro sin su predicado, la escritura
+sin su guarda, la fila de créditos, el crédito de otro, la poda— y dos de
+**portazo** —la guarda vuelta a `current_user`, y `respuestas_de` cerrada
+también para su dueño—, más el PERDÓN inflado con un nombre que no existe y una
+SECURITY DEFINER nueva agregada al final sin guarda. Y la trampa del arnés de
+la RLS, heredada: cada defecto comprueba primero que **landeó**, porque un
+`sed` que no encuentra su texto deja la lente verde y el arnés cantando
+«aprobada» por un ejercicio que nunca ocurrió.
+
+**Las dos baterías enteras en verde antes de subir:** TCD con `tsc` y
+`npm run build` limpios, las **145** `prueba-*.ts` dentro del bloque 10 y
+`auditoria.py` con **925 miradas, cero faltas** («el ZIP puede salir»); MCD con
+`tsc` limpio, `next build` limpio, sus tres `prueba-*.ts` y sus 98 —la única
+roja fue, otra vez, la que esta cola construyó el 17 a las 15:30: el ref de
+`origin` era una foto vieja, `3fefd97` en el remoto y `75f617e` en disco, y se
+arregló con el `git fetch origin` que la propia lente escribe como remedio—.
+
+**En MCD no hay nada que cerrar, y está medido:** sus únicas dos funciones
+`SECURITY DEFINER` son **de disparador**, y a esas no las llama PostgREST sino
+la tabla. La puerta no existe de ese lado.
+
+**Y queda una deuda anotada, que es la misma de la despertada anterior y creció:**
+cuatro de las cinco tablas de la ficha —`diario_entradas`, `tareas_usuario`,
+`metricas` y `ventas_registradas`— **no las crea ningún `.sql` del repo**,
+igual que `session_logs`. Nacieron en el panel de Supabase. Por eso las cinco
+funciones se recrean con un `do $$` que pregunta `to_regclass` antes: un
+`create function … returns setof <tabla>` sobre una tabla que no está no se
+crea, revienta. Que el 17 a las 19:30 quedaran declaradas dos y hoy sean cinco
+es el mismo agujero por otro lado: **el día que alguien rearme el proyecto
+desde el repo, esas cinco tablas no llegan.**
 
 ### El 17 de noviembre a las 19:30: la política que nadie enciende, y las once que nunca se ejercitaron
 
