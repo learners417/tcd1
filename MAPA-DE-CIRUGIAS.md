@@ -371,12 +371,122 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 | **17 nov, 07:25** · `c87ba69` + `5980732` (MCD) | las dos colas seguían cerradas y cero commits de Javo (`7f1bdd5` en TCD, `062ff1f` en MCD), `node_modules` en cero en los dos, el `HEAD` suelto en los dos y el clon de TCD otra vez en shallow. Las cinco anteriores preguntaron por el defecto dentro de cada repo, por la costura, por los datos del seed y por el esquema; esta preguntó por **el entorno**, que es la lista de lo que hay que cargar en Vercel y nunca se había medido contra el código. Y volvió a ser **la puerta**: la lente que vigila que ninguna clave viaje en el bundle buscaba `import.meta.env.VITE_X` escrito de corrido, y cinco archivos leen el entorno con una variable en el medio, así que **diez variables no se veían — entre ellas las nueve por donde entra la plata**. Detrás, el agujero: el código leía **doce variables que `.env.example` no nombraba**, nueve de ellas los enlaces de cobro, y ninguna rompe nada porque todas caen al WhatsApp. En MCD, a la tabla que se titula «TODAS» le faltaban tres (abajo, en «El 17 de noviembre a las 07:25») |
 | **17 nov, 11:30** · `612f4b5` (MCD) + `96f8137` | las dos colas seguían cerradas y cero commits de Javo (`832f48c` en TCD, `5980732` en MCD), `node_modules` en cero en los dos, el `HEAD` suelto en los dos y el clon de TCD otra vez en shallow. La de las 23:40 levantó el esquema de MCD y la de las 03:25 el de TCD; esta preguntó por **la ausencia**: no si la columna que el código pide existe, sino **si la lente ve la TABLA que no está**. Y no la veía: el recorrido empezaba con `if tabla not in objetos: continue`, así que de las 14 tablas que el código de MCD nombra, **seis no estaban en el esquema y la lente daba verde**. Tres son de MCD y las tres fallaban en silencio en producción —el Guardar del Asistente, la nota del paciente y la campanita— (abajo, en «El 17 de noviembre a las 11:30») |
 
+| **18 nov, 15:30** · `b9b3447` | la cola seguía sin turnos nuevos —las 17 filas cerradas, cero commits de Javo (`cb7cc45` en TCD y `b7ba810` en MCD, los dos al día contra `git ls-remote`)—, `node_modules` en cero y el `HEAD` suelto otra vez, con la `main` local **ocho** commits atrás y el ref de `origin` una foto vieja que la lente del trabajo subido cazó en la batería. Las anteriores preguntaron por la tabla, la columna, el campo que se lee, la RLS, quién ejecuta, el informe y los archivos: todas por NOMBRES. Esta preguntó por **el VALOR**, que es lo único que ninguna mira. De las 25 columnas con lista cerrada, los once literales del código están todos bien —una lente de literales cerraba el turno en verde—, y el defecto entraba por el TIPO: `creativos.tipo` acepta dos valores desde el 10 de abril y `TipoCreativo` admite tres. La pestaña «Portada YouTube» **cobraba el crédito, generaba la imagen y moría al guardar** con un 23514, medido ejecutando; siete meses así. Cerrado con el CHECK recreado, la lente nueva de tres puertas —literal, objeto tipado y clave abreviada— y su arnés de ocho defectos y dos canarios. De paso: leer las listas con una expresión regular daba cinco de los siete valores de `credit_transactions.source` por un paréntesis dentro de un comentario, y habría mandado a arreglar el `refund` que el turno del 17 dejó bien. En MCD la clase no existe: cero `CHECK IN`, sus valores viven en un comentario (abajo, en «El 18 de noviembre a las 15:30») |
 | **18 nov, 11:30** · `4943e1a` + `b7ba810` (MCD) | las dos colas seguían cerradas y cero commits de Javo (`8494650` en TCD, `d3b7c40` en MCD, los dos al día contra `git ls-remote`), `node_modules` en cero en los dos y **el `HEAD` suelto en los dos**, con la `main` local de MCD un commit atrás y la de TCD cuatro: el `push origin main` salió rechazado por «non-fast-forward» con el padre del commit siendo justo el remoto, que es la cara que tiene esa trampa; se sube con `push origin HEAD:main`. Las anteriores preguntaron por el esquema, por la tabla ausente, por la RLS, por quién ejecuta las funciones, por el informe y por los archivos; esta preguntó por **lo que trae la estrella**: el `select('*')`, que no nombra ninguna columna y por eso la lente del esquema lo saltea —y las VISTAS, que saltea también, escrito en su propia cabecera—. El código sí nombra esas columnas: las nombra al leer el resultado por propiedad. El Tablero de MCD leía **ocho** campos de `mis_numeros` y la vista tenía **siete**: `roi_mes` no estaba en ningún `.sql`, y era la condición del cartel «Tu inversión en MiClínica se pagó N×», que **no se dibujó nunca desde el 8 de julio**. Cerrado con la cuenta que el Tablero ya hacía a mano, más la lente nueva (36 miradas) y su arnés de ocho defectos y dos canarios. En TCD no hay vistas y sus 35 sitios de `select('*')` se revisaron a mano: sin campo fantasma (abajo, en «El 18 de noviembre a las 11:30») |
 | **18 nov, 07:45** · `d86096e` + `d3b7c40` (MCD) | las dos colas seguían cerradas y cero commits de Javo (`ff735ac` en TCD, `58664d8` en MCD, los dos al día contra `git ls-remote`), `node_modules` en cero en los dos. Las anteriores preguntaron por el esquema, por la tabla ausente, por la RLS de las tablas, por quién ejecuta las funciones y por el informe del archivo que Javo pega; esta preguntó por **los archivos**, que es el último cuerpo sin ejercitar: `storage.objects`. De las 930 miradas de TCD **ninguna lo nombraba** —la única que dice «bucket» pregunta que no se abra un segundo bucket, no quién lee el primero—. Y storage tiene una trampa propia: **una política sin `to <rol>` vale para TODOS los roles**, `anon` incluido, que es la llave publicable que viaja en el bundle. Dos estaban así y su condición no preguntaba de quién era la carpeta: **sin ninguna sesión se listaban los archivos que cada cliente le manda a Javo en el chat de soporte**, y el bucket es público, así que con el nombre en la mano el archivo se descarga. Más la escritura de creativos, abierta a cualquier carpeta. En MCD la premisa es la buena —su cubeta es privada y su política sí pregunta— y quedó ejercitada igual (abajo, en «El 18 de noviembre a las 07:45») |
 | **18 nov, 04:15** · `2d22371` | las dos colas seguían cerradas y cero commits de Javo (`f9855f6` en TCD, `58664d8` en MCD, los dos al día contra `git ls-remote`), `node_modules` en cero en los dos. Las anteriores preguntaron por el esquema, por la tabla ausente, por la RLS y por quién ejecuta; esta preguntó por **el archivo que Javo pega en Supabase**, `poner-al-dia-la-base.sql`, que termina con su propio informe «QUÉ QUEDÓ». **Nadie lo leía:** su prueba miraba que no hubiera un `ERROR` y después comprobaba su PROPIA lista de 25 nombres, así que el informe imprimía **35 líneas de `FALTA` en una corrida verde**. Y sus dos listas estaban cortas: **44 tablas contra las 60 que crea el repo** —`sesiones` y `anuncios_fichas` entre las que faltaban, y **las crea ese mismo archivo**— y siete de sus propias funciones afuera. De paso, el otro lado del mismo hueco: de las 68 tablas que el repo CUIDA, **siete no las CREA ningún `.sql`**, y tres no estaban anotadas en ninguna parte (abajo, en «El 18 de noviembre a las 04:15») |
 | **17 nov, 23:25** · `3074dce` + `58664d8` (MCD) | las dos colas seguían cerradas y cero commits de Javo, `node_modules` en cero en los dos y el `HEAD` suelto en TCD. La de las 19:30 midió **la RLS** y la dio por bien —y lo está—; esta preguntó lo único que esa medición deja abierto: **quién puede EJECUTAR las funciones**. Y ahí estaba la puerta que la rodea entera: una `SECURITY DEFINER` corre con los permisos de SU DUEÑO, así que **no le aplica la RLS**, y el permiso de fábrica de PostgreSQL es `EXECUTE` para `PUBLIC`. De las **51 de `public`, 49 las podía ejecutar `authenticated` y 42 `anon`, y 25 no preguntaban quién llamaba**: sentado en la silla de un cliente, `carga_de_semana` entregaba la semana de otro cliente que la RLS acababa de negarle, y `devolver_credito` le sumaba crédito comprado a quien quisiera **sin ninguna sesión** —seis llamadas, saldo de 0 a 6—. Cerradas con UNA puerta y no 25 parches; en MCD la premisa es la buena y quedó medida (abajo, en «El 17 de noviembre a las 23:25») |
 | **17 nov, 19:30** · `7d4040e` + `3fefd97` (MCD) | las dos colas seguían cerradas y cero commits de Javo, `node_modules` en cero en los dos, el `HEAD` suelto en los dos y el clon de TCD en shallow. Las seis anteriores preguntaron por el defecto dentro de cada repo, por la costura, por el seed, por el esquema, por la tabla ausente, por el entorno y por si el trabajo salió; esta preguntó por **la RLS**, que es el único cuerpo que decide quién ve los datos de quién y el único que ninguna de las dos baterías nombraba. De las **921 miradas de TCD, ninguna**, salvo el aislamiento de `profiles`; de las 99 de MCD, solo las tres de la campanita: **las otras once tablas tenían su política escrita y nunca ejecutada**. Las tres premisas del lado malo se cayeron —las 60 de TCD y las 12 de MCD están encendidas y acotadas— y quedaron dos tablas como deuda anotada: `diario_entradas` y `session_logs`, que el navegador escribe y ningún `.sql` del repo enciende (abajo, en «El 17 de noviembre a las 19:30») |
 | **17 nov, 15:30** · `18a6672` + `d850db7` (MCD) | las dos colas seguían cerradas y cero commits de Javo, `node_modules` en cero en los dos y el `HEAD` suelto en los dos. Esta despertada **se equivocó primero y por eso encontró algo**: midió el estado de MCD con `git rev-parse origin/main`, lo vio tres commits atrás y dio por perdido el trabajo de las tres despertadas anteriores. Era falso — el remoto de verdad, por `git ls-remote`, estaba al día; lo viejo era **el ref en disco**, porque el `fetch` había salido rechazado. Y detrás estaba el agujero: de las **921 miradas de TCD y las 97 de MCD, ninguna medía que lo commiteado haya SALIDO del contenedor**, que es de usar y tirar. Lente nueva en los dos repos, que pregunta por la red y no le cree al disco, probada contra sus cinco defectos de estado de git — y el ejercicio del ref viejo le encontró un agujero al primer intento de la lente (abajo, en «El 17 de noviembre a las 15:30») |
+
+### El 18 de noviembre a las 15:30: el nombre estaba bien y el valor no entraba
+
+**La pregunta.** Las dos lentes que vigilan el esquema miran NOMBRES: la del
+17 pregunta si la TABLA existe, la del 16 si la COLUMNA existe, la de las
+11:30 si el CAMPO que se lee existe, y `prueba-rpc-nombres.py` si el PARÁMETRO
+existe. Ninguna mira el VALOR. Y una columna con `CHECK (col IN (...))` es una
+lista cerrada: el nombre está bien, la columna existe, la fila llega, y la base
+la rechaza con un 23514 igual.
+
+No es hipotético: **ya costó plata una vez**. El 17 de noviembre se arregló
+`devolver_credito`, que anotaba `devolucion` en `credit_transactions.source`
+—una lista de siete valores donde esa palabra no está—, así que la red de
+seguridad del crédito no anotaba nada y el log decía «devolución anotada».
+Quedó arreglado ese caso. La CLASE no.
+
+**Lo medido, ejecutando.** De las 25 columnas con lista cerrada que tiene la
+base de TCD, el código escribe literales en once sitios y **ninguno está
+fuera de su lista**. Una lente de literales habría dado verde y cerrado el
+turno. El defecto no es un literal:
+
+    creativos.tipo  →  la base acepta  imagen_single · carrusel
+    TipoCreativo    →  el código admite imagen_single · carrusel · yt_thumbnail
+
+`creativos.tipo` nació el 10 de abril con dos valores y **nunca se amplió**.
+Pero la app tiene una tercera pestaña —«Portada YouTube», 1280x720— y todo su
+camino está escrito: `TipoCreativo` la declara, `FORMATOS` le da su tamaño,
+`campanasPrompts.ts` le arma su prompt 16:9, `TIPO_LABELS` su etiqueta. En el
+insert no hay ninguna comilla con ese valor: viaja en `config.tipo`, y lo que
+lo admite es el TIPO.
+
+Ejecutado contra un PostgreSQL 16 con las siete migraciones y el andamiaje de
+`prueba-sql.sh`:
+
+    ERROR: new row for relation "creativos" violates check constraint
+           "creativos_tipo_check"
+
+Y el crédito **se cobra ANTES** de llamar al modelo. O sea: el cliente elegía
+la pestaña, pagaba, la imagen se generaba, y `saveCreativo` lanzaba con ese
+mensaje. No es una pantalla que degrada en silencio como la del Tablero de
+MCD esta mañana: es la función entera que no guarda nada, con el crédito ya
+gastado. Siete meses así.
+
+**Y una premisa de método que se cayó al escribir la lente.** El primer
+intento leía las listas del `.sql` con una expresión regular, y daba
+**cinco** valores para `credit_transactions.source` cuando tiene **siete**:
+el comentario de un valor —`-- ajuste manual del admin (regalo,
+compensacion)`— tiene un paréntesis, y `[^)]*` corta la lista ahí. Con esa
+lista corta, `refund` aparecía como fuga **siendo legítimo**: la lente habría
+mandado a arreglar la línea que el turno del 17 acababa de dejar bien. Es la
+misma lección del `--` del 15 de noviembre, un paréntesis más adelante. Las
+listas se PREGUNTAN a `pg_constraint`.
+
+**Lo que se cerró.**
+`supabase/migrations/20261118_la_portada_de_youtube_no_entraba.sql`: el CHECK
+recreado con los tres valores. No se afloja el candado ni se saca —los otros
+dos quedan igual—: se agrega el valor que la app ya usa. Ni una palabra de
+pantalla se tocó, y sin la migración aplicada la pestaña sigue como hoy.
+
+**La lente nueva y sus tres puertas.**
+`scripts/prueba-el-valor-que-la-base-rechaza.py`: levanta la base, le pregunta
+sus 25 listas al catálogo, y mide por donde el valor puede entrar.
+
+  · **el literal**, dentro del objeto que se escribe —y también en el FILTRO,
+    porque un `.eq('estado', 'pendientes')` no da error: devuelve cero filas
+    siempre, y la pantalla sale vacía sin que nadie se entere.
+  · **el objeto tipado**, que es por donde entró el de hoy: el tipo de la
+    fila, siguiendo `Omit`, `Partial` y `Pick`, y el alias del alias
+    (`tipo: TipoCreativo` → `'a' | 'b' | 'c'`).
+  · **la clave abreviada** —`.update({ contenido, tipo })`—, que no es ni
+    literal ni objeto entero. Esa puerta la enseñó el propio repo:
+    `sacarDeLaCola` escribe así, y el valor sale de
+    `const [tipo, setTipo] = useState<TipoDeMensaje>`, los dos botones del
+    chat de soporte.
+
+Y corre TODAS las migraciones, no las de 20261009 en adelante como el resto de
+la batería: las listas de `creativos` y `campanas` nacen el 10 de abril, así
+que **esas dos tablas no existen en la base que la batería levanta** — que es,
+exactamente, por qué este defecto vivió siete meses sin que nadie pudiera
+verlo. Lo que no puede resolver lo DICE: 16 escrituras cuyo tipo es un
+`Record<string, unknown>` y tres nombres de tabla que no son ni literal ni
+constante.
+
+**El arnés: ocho defectos y dos canarios.**
+`probar-que-la-lente-del-valor-ve-el-defecto.py` pone el de hoy de nuevo, un
+literal fuera de lista en la fila de la compra por PayPal, el mismo sobre una
+tabla nombrada por `const TABLA` —así es como escribe `api/fathom-webhook.ts`,
+las transcripciones que entran solas, y anclando sólo en la comilla no se
+miraba nunca—, un `.eq` imposible, un `.in` con el valor de más escondido
+entre dos buenos, una unión con nombre, una unión escrita dentro de la
+interfaz, y un botón más en el chat de soporte. Los dos canarios tienen que
+dejarla VERDE, y los dos son contra un falso positivo:
+
+  · un tipo **del todo local** con un campo `estado` inventado. Este repo
+    tiene `estado: 'hecha' | 'hoy' | 'porVenir'` en una fila de pantalla y
+    `estado` cerrado en cuatro tablas distintas: una lente que empareje por
+    nombre de campo manda a arreglar lo que no está roto.
+  · el valor de más en una columna que el `Omit<>` del insert saca y que el
+    update no toca. Si la columna no se escribe, no hay defecto.
+
+**En MCD la clase no existe, y se midió.** Ninguna de sus siete migraciones
+tiene un solo `CHECK (col IN (...))`: los valores permitidos de `status`,
+`source` y `tipo` viven en un comentario `--` al lado de la columna
+—`-- onboarding | activo | pausado`—, así que la base acepta cualquier cosa.
+Portar la lente ahí hoy sería medir cero listas. Lo que sí se comprobó a mano
+es que lo que el código escribe coincide con esos comentarios: `onboarding`,
+`mensaje`, `cita` y `paciente`, los cuatro bien. Queda anotado como la otra
+forma del mismo hueco —una lista cerrada que no cierra nada—, y es decisión
+tuya si se cierra con CHECKs o se deja así.
 
 ### El 18 de noviembre a las 11:30: el séptimo número no existía
 
@@ -873,12 +983,12 @@ Javo**. La diferencia está medida: cinco tablas que el navegador usa
 y sobre esas cinco ningún turno puede afirmar nada hoy. Con el conector en pie,
 se miden de verdad.
 
-### Lo que esta despertada deja esperando tu clic: los dos archivos, pegados en Supabase
+### Lo que las despertadas dejan esperando tu clic: los archivos, pegados en Supabase
 
 El arreglo está en el repo y probado, pero **el SQL no se aplica solo**: hasta
 que lo pegues, los agujeros siguen abiertos en tu base de producción, y el de
 `devolver_credito` se puede usar con la llave que ya está publicada en el
-bundle. Son dos archivos, los dos idempotentes —se pueden correr más de una vez
+bundle. Son cuatro archivos, los cuatro idempotentes —se pueden correr más de una vez
 sin romper nada—, en este orden, en Supabase → SQL Editor → Run:
 
 1. `sala-de-mando.sql` (entero, como siempre: trae las dos funciones nuevas
@@ -890,6 +1000,12 @@ sin romper nada—, en este orden, en Supabase → SQL Editor → Run:
    (las diez políticas de los archivos: el chat de soporte y los creativos
    dejan de listarse sin sesión, y la escritura de creativos vuelve a su
    carpeta — medido el 18 de noviembre a las 07:45)
+4. `supabase/migrations/20261118_la_portada_de_youtube_no_entraba.sql`
+   (una línea: `creativos.tipo` acepta además `yt_thumbnail`, que es lo que
+   escribe la pestaña «Portada YouTube». Hasta que se pegue, esa pestaña
+   **cobra el crédito, genera la imagen y no guarda nada** — medido el 18 de
+   noviembre a las 15:30. No depende de las dos funciones del primero, así que
+   se puede pegar suelto y en cualquier orden.)
 
 **El orden importa:** el segundo y el tercero usan las dos funciones que crea
 el primero.
