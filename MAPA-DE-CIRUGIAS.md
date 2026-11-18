@@ -491,6 +491,64 @@ crea, revienta. Que el 17 a las 19:30 quedaran declaradas dos y hoy sean cinco
 es el mismo agujero por otro lado: **el día que alguien rearme el proyecto
 desde el repo, esas cinco tablas no llegan.**
 
+### La decisión del 18 de noviembre: el conector de Supabase, con escritura
+
+**Lo preguntado y lo decidido.** Javo preguntó cómo se conecta Supabase si esa
+cuenta está en otro Gmail, y si se puede mudar el proyecto de cuenta. Medido
+antes de contestar:
+
+  · **El Gmail nunca fue el obstáculo.** El conector de Supabase entra por
+    **OAuth contra Supabase**, no por Google y no por token: se abre el login
+    de Supabase y se elige la organización. La cuenta de Claude y la de
+    Supabase no tienen que coincidir.
+  · **El conector ya estaba instalado en la organización de Claude, con la
+    conexión sin cerrar** (`connect_incomplete`). El paso es terminarlo, no
+    instalarlo.
+  · **Y desde una sesión dormida no se llega a Supabase de ninguna otra
+    manera:** medido el 18, el proxy de este contenedor no sale ni a
+    `supabase.com` ni a `api.supabase.com`. Así que una clave de servicio o
+    una cadena de conexión pegadas acá no servirían de nada. El conector es
+    otro camino —no pasa por el contenedor— y por eso ése sí funciona.
+  · **Mudar el proyecto se puede y no hacía falta.** Supabase lo transfiere
+    entre organizaciones si eres dueño del origen y al menos miembro del
+    destino, sin integración de GitHub activa y sin log drains; si el destino
+    está en Free hay 1 a 2 minutos de caída y rige el límite de dos proyectos.
+    Lo que resuelve el problema de las dos cuentas sin transferir ni cortar
+    servicio es **invitar la cuenta habitual como miembro de la organización**.
+
+**La decisión, que es suya y queda anotada tal cual: el conector LEE Y
+ESCRIBE.** Se le dijo el costo antes de elegir, y es el que sigue:
+
+> Supabase recomienda, para rutinas desatendidas, acotar el conector a un
+> proyecto (`project_ref`) y dejarlo en **modo lectura**, y advierte de la
+> inyección de prompt diciendo con sus palabras que su defensa «no es
+> infalible». **Y esta tarea programada corre en aprobación automática**
+> —`permission_mode` es `auto`, medido el 12 de noviembre—, así que en un
+> turno desatendido el visto de una escritura no lo da Javo: lo da la
+> máquina. Con escritura habilitada, «con tu visto» y «libre» son lo mismo
+> cada cuatro horas.
+
+**Por eso la recomendación que acompaña a la decisión, y que es de él:
+apagar la aprobación automática de la tarea** («Cola de turnos TCD y MCD»),
+desde su teléfono. **La sesión no puede hacerlo**: está medido cinco veces
+—12 de noviembre a las 07:25, 11:40 y 23:25, y 13 a las 03:23— que cualquier
+escritura sobre la tarea la rechaza el clasificador del modo automático, con
+la categoría «Cowork Scheduled Task Write». No se reintenta.
+
+**Lo que un turno futuro tiene que saber, para no volver a discutirlo:** si
+encuentra el conector de Supabase conectado y con escritura, es porque Javo lo
+decidió el 18 de noviembre sabiendo esto. Lo que **no** cambia: los precios,
+las promesas, las garantías y el texto de venta siguen sin tocarse solos, y
+una migración que no sea reversible se propone con botón, conector o no.
+
+**Y lo que el conector sí mejora, que es la razón de haberlo pedido:** hoy los
+turnos miden **un Postgres levantado con el SQL del repo, que no es la base de
+Javo**. La diferencia está medida: cinco tablas que el navegador usa
+—`diario_entradas`, `session_logs`, `tareas_usuario`, `metricas` y
+`ventas_registradas`— no las crea ningún `.sql` del repo, nacieron en el panel,
+y sobre esas cinco ningún turno puede afirmar nada hoy. Con el conector en pie,
+se miden de verdad.
+
 ### Lo que esta despertada deja esperando tu clic: los dos archivos, pegados en Supabase
 
 El arreglo está en el repo y probado, pero **el SQL no se aplica solo**: hasta
