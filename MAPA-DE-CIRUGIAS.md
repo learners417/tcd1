@@ -371,10 +371,111 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 | **17 nov, 07:25** · `c87ba69` + `5980732` (MCD) | las dos colas seguían cerradas y cero commits de Javo (`7f1bdd5` en TCD, `062ff1f` en MCD), `node_modules` en cero en los dos, el `HEAD` suelto en los dos y el clon de TCD otra vez en shallow. Las cinco anteriores preguntaron por el defecto dentro de cada repo, por la costura, por los datos del seed y por el esquema; esta preguntó por **el entorno**, que es la lista de lo que hay que cargar en Vercel y nunca se había medido contra el código. Y volvió a ser **la puerta**: la lente que vigila que ninguna clave viaje en el bundle buscaba `import.meta.env.VITE_X` escrito de corrido, y cinco archivos leen el entorno con una variable en el medio, así que **diez variables no se veían — entre ellas las nueve por donde entra la plata**. Detrás, el agujero: el código leía **doce variables que `.env.example` no nombraba**, nueve de ellas los enlaces de cobro, y ninguna rompe nada porque todas caen al WhatsApp. En MCD, a la tabla que se titula «TODAS» le faltaban tres (abajo, en «El 17 de noviembre a las 07:25») |
 | **17 nov, 11:30** · `612f4b5` (MCD) + `96f8137` | las dos colas seguían cerradas y cero commits de Javo (`832f48c` en TCD, `5980732` en MCD), `node_modules` en cero en los dos, el `HEAD` suelto en los dos y el clon de TCD otra vez en shallow. La de las 23:40 levantó el esquema de MCD y la de las 03:25 el de TCD; esta preguntó por **la ausencia**: no si la columna que el código pide existe, sino **si la lente ve la TABLA que no está**. Y no la veía: el recorrido empezaba con `if tabla not in objetos: continue`, así que de las 14 tablas que el código de MCD nombra, **seis no estaban en el esquema y la lente daba verde**. Tres son de MCD y las tres fallaban en silencio en producción —el Guardar del Asistente, la nota del paciente y la campanita— (abajo, en «El 17 de noviembre a las 11:30») |
 
+| **18 nov, 07:45** · `HASH_TCD` + `d3b7c40` (MCD) | las dos colas seguían cerradas y cero commits de Javo (`ff735ac` en TCD, `58664d8` en MCD, los dos al día contra `git ls-remote`), `node_modules` en cero en los dos. Las anteriores preguntaron por el esquema, por la tabla ausente, por la RLS de las tablas, por quién ejecuta las funciones y por el informe del archivo que Javo pega; esta preguntó por **los archivos**, que es el último cuerpo sin ejercitar: `storage.objects`. De las 930 miradas de TCD **ninguna lo nombraba** —la única que dice «bucket» pregunta que no se abra un segundo bucket, no quién lee el primero—. Y storage tiene una trampa propia: **una política sin `to <rol>` vale para TODOS los roles**, `anon` incluido, que es la llave publicable que viaja en el bundle. Dos estaban así y su condición no preguntaba de quién era la carpeta: **sin ninguna sesión se listaban los archivos que cada cliente le manda a Javo en el chat de soporte**, y el bucket es público, así que con el nombre en la mano el archivo se descarga. Más la escritura de creativos, abierta a cualquier carpeta. En MCD la premisa es la buena —su cubeta es privada y su política sí pregunta— y quedó ejercitada igual (abajo, en «El 18 de noviembre a las 07:45») |
 | **18 nov, 04:15** · `2d22371` | las dos colas seguían cerradas y cero commits de Javo (`f9855f6` en TCD, `58664d8` en MCD, los dos al día contra `git ls-remote`), `node_modules` en cero en los dos. Las anteriores preguntaron por el esquema, por la tabla ausente, por la RLS y por quién ejecuta; esta preguntó por **el archivo que Javo pega en Supabase**, `poner-al-dia-la-base.sql`, que termina con su propio informe «QUÉ QUEDÓ». **Nadie lo leía:** su prueba miraba que no hubiera un `ERROR` y después comprobaba su PROPIA lista de 25 nombres, así que el informe imprimía **35 líneas de `FALTA` en una corrida verde**. Y sus dos listas estaban cortas: **44 tablas contra las 60 que crea el repo** —`sesiones` y `anuncios_fichas` entre las que faltaban, y **las crea ese mismo archivo**— y siete de sus propias funciones afuera. De paso, el otro lado del mismo hueco: de las 68 tablas que el repo CUIDA, **siete no las CREA ningún `.sql`**, y tres no estaban anotadas en ninguna parte (abajo, en «El 18 de noviembre a las 04:15») |
 | **17 nov, 23:25** · `3074dce` + `58664d8` (MCD) | las dos colas seguían cerradas y cero commits de Javo, `node_modules` en cero en los dos y el `HEAD` suelto en TCD. La de las 19:30 midió **la RLS** y la dio por bien —y lo está—; esta preguntó lo único que esa medición deja abierto: **quién puede EJECUTAR las funciones**. Y ahí estaba la puerta que la rodea entera: una `SECURITY DEFINER` corre con los permisos de SU DUEÑO, así que **no le aplica la RLS**, y el permiso de fábrica de PostgreSQL es `EXECUTE` para `PUBLIC`. De las **51 de `public`, 49 las podía ejecutar `authenticated` y 42 `anon`, y 25 no preguntaban quién llamaba**: sentado en la silla de un cliente, `carga_de_semana` entregaba la semana de otro cliente que la RLS acababa de negarle, y `devolver_credito` le sumaba crédito comprado a quien quisiera **sin ninguna sesión** —seis llamadas, saldo de 0 a 6—. Cerradas con UNA puerta y no 25 parches; en MCD la premisa es la buena y quedó medida (abajo, en «El 17 de noviembre a las 23:25») |
 | **17 nov, 19:30** · `7d4040e` + `3fefd97` (MCD) | las dos colas seguían cerradas y cero commits de Javo, `node_modules` en cero en los dos, el `HEAD` suelto en los dos y el clon de TCD en shallow. Las seis anteriores preguntaron por el defecto dentro de cada repo, por la costura, por el seed, por el esquema, por la tabla ausente, por el entorno y por si el trabajo salió; esta preguntó por **la RLS**, que es el único cuerpo que decide quién ve los datos de quién y el único que ninguna de las dos baterías nombraba. De las **921 miradas de TCD, ninguna**, salvo el aislamiento de `profiles`; de las 99 de MCD, solo las tres de la campanita: **las otras once tablas tenían su política escrita y nunca ejecutada**. Las tres premisas del lado malo se cayeron —las 60 de TCD y las 12 de MCD están encendidas y acotadas— y quedaron dos tablas como deuda anotada: `diario_entradas` y `session_logs`, que el navegador escribe y ningún `.sql` del repo enciende (abajo, en «El 17 de noviembre a las 19:30») |
 | **17 nov, 15:30** · `18a6672` + `d850db7` (MCD) | las dos colas seguían cerradas y cero commits de Javo, `node_modules` en cero en los dos y el `HEAD` suelto en los dos. Esta despertada **se equivocó primero y por eso encontró algo**: midió el estado de MCD con `git rev-parse origin/main`, lo vio tres commits atrás y dio por perdido el trabajo de las tres despertadas anteriores. Era falso — el remoto de verdad, por `git ls-remote`, estaba al día; lo viejo era **el ref en disco**, porque el `fetch` había salido rechazado. Y detrás estaba el agujero: de las **921 miradas de TCD y las 97 de MCD, ninguna medía que lo commiteado haya SALIDO del contenedor**, que es de usar y tirar. Lente nueva en los dos repos, que pregunta por la red y no le cree al disco, probada contra sus cinco defectos de estado de git — y el ejercicio del ref viejo le encontró un agujero al primer intento de la lente (abajo, en «El 17 de noviembre a las 15:30») |
+
+### El 18 de noviembre a las 07:45: los archivos eran de cualquiera
+
+**La pregunta.** El 17 a las 19:30 se midió la RLS de las tablas (las 60
+encendidas y acotadas) y a las 23:25 la puerta que la rodea (quién puede
+EJECUTAR las funciones, donde estaban las 25 abiertas). Queda un cuerpo que
+ninguna de las dos toca y que **ninguna de las 930 miradas de esta batería
+nombraba: `storage.objects`, donde viven los archivos.** La única mirada que
+dice «bucket» pregunta que la app no abra un SEGUNDO bucket, no quién lee el
+primero.
+
+**La trampa, y es propia de storage.** Dos, en realidad:
+
+  1 · **Una política sin `to <rol>` vale para TODOS los roles.** PostgreSQL la
+      guarda como `{public}` en `pg_policies`, no avisa nada, y al leer el
+      `.sql` la política parece acotada: tiene su `using` bien escrito. En
+      Supabase, `anon` es la llave publicable que viaja en el bundle del
+      navegador: la tiene cualquiera que abra la consola.
+  2 · **Un bucket `public = true` entrega el archivo a quien tenga la URL.** Lo
+      que decide si las URLs se pueden AVERIGUAR es la política de SELECT. Un
+      bucket público con la SELECT abierta no es «público»: es un índice de
+      todo lo que subió cada cliente.
+
+**Lo medido, ejecutando.** Las 27 sentencias de storage del repo contra un
+PostgreSQL de verdad, con la RLS de `storage.objects` encendida como la trae
+Supabase, y cuatro sillas: sin sesión, dos clientes distintos y el equipo.
+
+| | sin sesión (`anon`) | un cliente, de los de otro |
+|---|---|---|
+| `mensajes-archivos` (público) | **los 2 de 2** | **los 2 de 2** |
+| `creativos-assets` (público) | **los 2 de 2** | **los 2 de 2** |
+| `task-attachments` (privado) | 0 ✓ | 0 ✓ |
+
+`mensajes-archivos` es **lo que un cliente te MANDA en el chat de soporte**: la
+captura, el audio, el archivo. Con la llave del bundle se listaba entero, y
+con el nombre en la mano el archivo se descarga, porque el bucket es público.
+Y una cuarta: **un cliente podía SUBIR a la carpeta de otro cliente** en
+`creativos-assets`, o a cualquier carpeta inventada — su política solo
+preguntaba `auth.role() = 'authenticated'`, no de quién era la carpeta.
+
+Las tres del bucket privado miden bien hoy, y no por su rol: su condición
+pregunta por una fila de `profiles` con `auth.uid()`, que sin sesión es null.
+O sea cerradas por la condición y no por la puerta, que es la forma que se
+rompe sola el día que alguien toca la condición.
+
+**Lo que se cerró.** Diez políticas reescritas con su rol puesto y el dueño
+de la carpeta preguntado, en
+`supabase/migrations/20261118_los_archivos_eran_de_cualquiera.sql`. La app no
+se toca: nadie en el código LISTA esos dos buckets —el chat muestra el archivo
+por su URL pública, que no pasa por esta política— y las rutas siguen siendo
+las mismas. La rama del equipo no es de adorno: el Admin sube creativos con el
+id DEL CLIENTE, así que escribe en carpetas ajenas a propósito.
+
+**La lente nueva, y el agujero que su arnés le encontró al primer intento.**
+`scripts/prueba-los-archivos-son-de-su-dueno.sh` levanta la base, corre las
+políticas del repo —extraídas de los `.sql`, no transcritas— y después intenta
+leer, escribir y borrar en las tres carpetas desde las cuatro sillas: 35
+afirmaciones, mitad fugas y mitad **portazos** (que el cliente SÍ pueda subir
+su evidencia, que el equipo SÍ lea los adjuntos; un arreglo de seguridad que
+rompe la app es un arreglo que se revierte). Y el arnés
+—`probar-que-la-lente-de-los-archivos-ve-el-defecto.sh`, diez defectos
+puestos— encontró que **dos de los diez la dejaban verde**: tres de las
+catorce políticas están escritas DOS VECES —en su migración y otra vez dentro
+de `poner-al-dia-la-base.sql`, el archivo que pegas— y las dos copias nacen con
+guarda `if not exists`, así que **gana la primera que corra** y cuál manda
+depende del orden en que se pegaron los archivos. Un defecto puesto en la copia
+de la puesta al día no se veía. Por eso la lente mide además que las copias con
+guarda digan lo mismo. Es la misma forma que el contrato del puente el 16 y los
+cinco nombres del impreso el 16 a las 05:10: dos copias que nadie ataba.
+
+**En MCD la premisa es la buena.** Su cubeta `comprobantes` —la captura de la
+transferencia de un paciente— es privada, y sus dos políticas sí preguntan de
+quién es la carpeta, así que sin sesión no se lista nada. Están escritas sin
+`to <rol>` igual que las de TCD; lo que las cierra es la condición. Quedaron
+**ejercitadas** dentro de `scripts/prueba-el-esquema-real.py` (cuatro
+afirmaciones más su canario: una política abierta puesta a propósito, para que
+el verde diga algo), y el arnés de MCD pasó de 14 defectos a 17.
+
+**Lo que sigue siendo tuyo, y es un botón de dos.** Los dos buckets de TCD
+siguen siendo `public = true`, así que **un archivo cuya URL ya salió —un
+enlace reenviado, un historial de navegador— se sigue abriendo sin sesión**.
+Pasarlos a privados obliga a firmar cada URL (el código ya sabe hacerlo: la
+evidencia usa `createSignedUrl`) y cambia el comportamiento del chat de
+soporte y de la galería de creativos, así que no se toca solo:
+
+  · **Dejarlos públicos** (lo de hoy): el enlace viejo sigue andando, y lo que
+    se cerró es poder averiguar qué subió el otro.
+  · **Pasarlos a privados**: hay que cambiar `getPublicUrl` por
+    `createSignedUrl` en `src/lib/soporteDatos.ts` y
+    `src/lib/campanasStorage.ts`, y los enlaces ya guardados en la tabla de
+    mensajes dejan de abrir. Es media hora de trabajo medido, no un clic.
+
+**Y una de paso, que no es un agujero sino un muerto.** `mensaje-futuro/{uid}`
+—«el audio sellado del Día 1, que se abre en la graduación»— lo LEE
+`src/lib/graduacion.ts` y **no lo escribe nadie en todo el repo**: ninguna
+pantalla graba ese audio. Más: ninguna política deja al cliente leer esa
+carpeta (las suyas son solo para `evidencias/`), así que aunque el archivo
+existiera no lo podría abrir. La pantalla degrada en silencio a «todavía no
+grabado», para siempre. Es trabajo de producto —quién graba y cuándo—, no una
+cerradura, y queda anotado acá sin tocarse.
 
 ### El 18 de noviembre a las 04:15: el informe que nadie leía
 
@@ -694,8 +795,13 @@ sin romper nada—, en este orden, en Supabase → SQL Editor → Run:
    once guardas de la Sala de Mando)
 2. `supabase/migrations/20261118_las_funciones_no_preguntaban_quien_llama.sql`
    (los seis cierres a PUBLIC, la fila de créditos y las cinco de la ficha)
+3. `supabase/migrations/20261118_los_archivos_eran_de_cualquiera.sql`
+   (las diez políticas de los archivos: el chat de soporte y los creativos
+   dejan de listarse sin sesión, y la escritura de creativos vuelve a su
+   carpeta — medido el 18 de noviembre a las 07:45)
 
-**El orden importa:** el segundo usa las dos funciones que crea el primero.
+**El orden importa:** el segundo y el tercero usan las dos funciones que crea
+el primero.
 
 Y lo que no se puede hacer desde acá, igual que el 13 de noviembre: **una
 sesión dormida no puede mirar tu base ni tus apps en vivo** —el proxy contesta

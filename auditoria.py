@@ -4250,6 +4250,18 @@ for _sh, _loQuePrueba in [
     # sumaba crédito comprado SIN NINGUNA SESIÓN.
     ('scripts/prueba-las-funciones-preguntan-quien-llama.sh',
      'quién puede ejecutar lo que pasa por encima de la RLS'),
+    # LOS ARCHIVOS, medidos el 18 de noviembre. La RLS de `public` se midió el
+    # 17 a las 19:30 y la puerta de las funciones a las 23:25; `storage.objects`
+    # —donde viven los archivos— no lo nombraba NINGUNA de las 9xx miradas: la
+    # única que decía «bucket» pregunta que no se abra un segundo bucket, no
+    # quién lee el primero. Y una política sin `to <rol>` vale para TODOS los
+    # roles: `mensajes_archivos_read` y `creativos_assets_select` estaban así,
+    # con lo cual SIN NINGUNA SESIÓN se listaba lo que cada cliente le mandó a
+    # Javo en el chat de soporte —y los dos buckets son públicos, así que con
+    # el nombre en la mano el archivo se descarga—. Más la insert de creativos,
+    # que no preguntaba de quién era la carpeta.
+    ('scripts/prueba-los-archivos-son-de-su-dueno.sh',
+     'de quién es cada archivo que se subió'),
 ]:
     if not _os10.path.exists(_sh):
         continue
@@ -5989,6 +6001,47 @@ check('ninguna política vive sobre una tabla con la RLS apagada, y toda tabla '
       '; '.join(l.strip() for l in (_prls.stdout + _prls.stderr).splitlines()
                 if '✗' in l)[:500])
 
+# ── Y LA MISMA TRAMPA, UNA CAPA MÁS AFUERA: EL ROL SIN ESCRIBIR ────────
+#
+# `storage.objects` —los archivos— tiene la trampa de la RLS y una propia:
+# UNA POLÍTICA SIN `to <rol>` VALE PARA TODOS LOS ROLES. PostgreSQL la guarda
+# como `{public}` y no avisa, y en Supabase `anon` es la llave publicable que
+# viaja en el bundle: la tiene cualquiera que abra la consola.
+#
+# Medido el 18 de noviembre ejecutando las políticas del repo: sin ninguna
+# sesión se listaban los archivos de `mensajes-archivos` —lo que cada cliente
+# le manda a Javo en el chat de soporte— y de `creativos-assets`, los dos
+# buckets públicos. Esta mirada es la de texto, para la política que ENTRE
+# mañana; la ejecutada vive en `prueba-los-archivos-son-de-su-dueno.sh`.
+# Lo que se mira es la definición QUE MANDA, no cada línea de la historia:
+# una migración vieja guarda para siempre el texto con el que se escribió, y
+# `drop policy if exists … ; create policy …` en un archivo posterior la
+# reemplaza. Así que se recorre en el orden en que se aplican —los `.sql` de
+# la raíz, las migraciones por fecha y la puesta al día al final— y gana la
+# última, salvo las que nacen con guarda `if not exists`, que no reemplazan
+# nada: ahí gana la primera. Es la misma precedencia que ejercita de verdad
+# `prueba-los-archivos-son-de-su-dueno.sh`.
+_manda = {}
+for _fsql in (sorted(_g16.glob('*.sql'))
+              + sorted(_g16.glob('supabase/migrations/*.sql'))):
+    if _fsql.endswith('poner-al-dia-la-base.sql'):
+        continue
+    _tsql = rdc(str(_fsql))
+    for _m in re.finditer(r'create\s+policy\s+"?([a-z_]+)"?\s+on\s+storage\.objects'
+                          r'([\s\S]*?);', _tsql, re.I):
+        _nom, _cuerpo = _m.group(1), _m.group(2)
+        _antes = _tsql[:_m.start()].replace('"', "'")
+        _guardada = f"policyname='{_nom}'" in _antes
+        if _guardada and _nom in _manda:
+            continue
+        _manda[_nom] = (str(_fsql), _cuerpo[:220].lower())
+_pol_sin_rol = [f'{_f}:{_n}' for _n, (_f, _c) in sorted(_manda.items())
+                if not re.search(r'\bto\s+(authenticated|service_role|anon)\b', _c)]
+check(f'ninguna de las {len(_manda)} políticas de los archivos que manda hoy '
+      'se escribe sin su rol (sin `to`, vale también para quien no tiene '
+      'sesión)',
+      not _pol_sin_rol and len(_manda) >= 10, '; '.join(_pol_sin_rol[:6]))
+
 # Y su arnés. El arnés le encontró un agujero al primer intento, igual que el
 # de la lente del trabajo subido: apagar `pausas_globales` en su migración no
 # la apagaba —`poner-al-dia-la-base.sql` la vuelve a encender—, así que el
@@ -6051,6 +6104,22 @@ _aqll = subprocess.run(['bash',
 check('la lente de quién llama ve sus diez defectos, fugas y portazos',
       _aqll.returncode == 0,
       '; '.join(l.strip() for l in (_aqll.stdout + _aqll.stderr).splitlines()
+                if '✗' in l)[:400])
+
+# Y el arnés de la lente de los archivos. También le encontró un agujero al
+# primer intento, y es uno que no se ve ejecutando UNA corrida: tres de las
+# catorce políticas están escritas DOS VECES —en su migración y otra vez
+# dentro de `poner-al-dia-la-base.sql`, que es el archivo que Javo pega— y las
+# dos copias nacen con guarda `if not exists`, así que gana la PRIMERA que
+# corra. Un defecto puesto en la copia de la puesta al día dejaba la lente
+# verde, porque en esa corrida había ganado la otra. Por eso la lente mide
+# además que las copias con guarda digan lo mismo.
+_aarch = subprocess.run(['bash',
+                         'scripts/probar-que-la-lente-de-los-archivos-ve-el-defecto.sh'],
+                        capture_output=True, text=True)
+check('la lente de los archivos ve sus diez defectos, fugas y portazos',
+      _aarch.returncode == 0,
+      '; '.join(l.strip() for l in (_aarch.stdout + _aarch.stderr).splitlines()
                 if '✗' in l)[:400])
 
 
