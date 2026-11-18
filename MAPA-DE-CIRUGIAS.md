@@ -491,6 +491,30 @@ crea, revienta. Que el 17 a las 19:30 quedaran declaradas dos y hoy sean cinco
 es el mismo agujero por otro lado: **el día que alguien rearme el proyecto
 desde el repo, esas cinco tablas no llegan.**
 
+### Lo que esta despertada deja esperando tu clic: los dos archivos, pegados en Supabase
+
+El arreglo está en el repo y probado, pero **el SQL no se aplica solo**: hasta
+que lo pegues, los agujeros siguen abiertos en tu base de producción, y el de
+`devolver_credito` se puede usar con la llave que ya está publicada en el
+bundle. Son dos archivos, los dos idempotentes —se pueden correr más de una vez
+sin romper nada—, en este orden, en Supabase → SQL Editor → Run:
+
+1. `sala-de-mando.sql` (entero, como siempre: trae las dos funciones nuevas
+   `el_que_llama_es_del_equipo` y `solo_el_equipo`, que son la puerta, y las
+   once guardas de la Sala de Mando)
+2. `supabase/migrations/20261118_las_funciones_no_preguntaban_quien_llama.sql`
+   (los seis cierres a PUBLIC, la fila de créditos y las cinco de la ficha)
+
+**El orden importa:** el segundo usa las dos funciones que crea el primero.
+
+Y lo que no se puede hacer desde acá, igual que el 13 de noviembre: **una
+sesión dormida no puede mirar tu base ni tus apps en vivo** —el proxy contesta
+403 al CONNECT—, así que lo que quedó medido es el esquema del repo levantado
+contra un PostgreSQL de verdad, no tu base. Si tu base tiene algo que el repo
+no crea —y tiene: `diario_entradas`, `session_logs`, `tareas_usuario`,
+`metricas` y `ventas_registradas` nacieron en el panel—, lo de esas cinco solo
+queda cerrado después de correr el segundo archivo.
+
 ### El 17 de noviembre a las 19:30: la política que nadie enciende, y las once que nunca se ejercitaron
 
 **La pregunta.** Las seis despertadas anteriores fueron preguntando por cada
