@@ -371,9 +371,141 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 | **17 nov, 07:25** · `c87ba69` + `5980732` (MCD) | las dos colas seguían cerradas y cero commits de Javo (`7f1bdd5` en TCD, `062ff1f` en MCD), `node_modules` en cero en los dos, el `HEAD` suelto en los dos y el clon de TCD otra vez en shallow. Las cinco anteriores preguntaron por el defecto dentro de cada repo, por la costura, por los datos del seed y por el esquema; esta preguntó por **el entorno**, que es la lista de lo que hay que cargar en Vercel y nunca se había medido contra el código. Y volvió a ser **la puerta**: la lente que vigila que ninguna clave viaje en el bundle buscaba `import.meta.env.VITE_X` escrito de corrido, y cinco archivos leen el entorno con una variable en el medio, así que **diez variables no se veían — entre ellas las nueve por donde entra la plata**. Detrás, el agujero: el código leía **doce variables que `.env.example` no nombraba**, nueve de ellas los enlaces de cobro, y ninguna rompe nada porque todas caen al WhatsApp. En MCD, a la tabla que se titula «TODAS» le faltaban tres (abajo, en «El 17 de noviembre a las 07:25») |
 | **17 nov, 11:30** · `612f4b5` (MCD) + `96f8137` | las dos colas seguían cerradas y cero commits de Javo (`832f48c` en TCD, `5980732` en MCD), `node_modules` en cero en los dos, el `HEAD` suelto en los dos y el clon de TCD otra vez en shallow. La de las 23:40 levantó el esquema de MCD y la de las 03:25 el de TCD; esta preguntó por **la ausencia**: no si la columna que el código pide existe, sino **si la lente ve la TABLA que no está**. Y no la veía: el recorrido empezaba con `if tabla not in objetos: continue`, así que de las 14 tablas que el código de MCD nombra, **seis no estaban en el esquema y la lente daba verde**. Tres son de MCD y las tres fallaban en silencio en producción —el Guardar del Asistente, la nota del paciente y la campanita— (abajo, en «El 17 de noviembre a las 11:30») |
 
+| **18 nov, 04:15** · `2d22371` | las dos colas seguían cerradas y cero commits de Javo (`f9855f6` en TCD, `58664d8` en MCD, los dos al día contra `git ls-remote`), `node_modules` en cero en los dos. Las anteriores preguntaron por el esquema, por la tabla ausente, por la RLS y por quién ejecuta; esta preguntó por **el archivo que Javo pega en Supabase**, `poner-al-dia-la-base.sql`, que termina con su propio informe «QUÉ QUEDÓ». **Nadie lo leía:** su prueba miraba que no hubiera un `ERROR` y después comprobaba su PROPIA lista de 25 nombres, así que el informe imprimía **35 líneas de `FALTA` en una corrida verde**. Y sus dos listas estaban cortas: **44 tablas contra las 60 que crea el repo** —`sesiones` y `anuncios_fichas` entre las que faltaban, y **las crea ese mismo archivo**— y siete de sus propias funciones afuera. De paso, el otro lado del mismo hueco: de las 68 tablas que el repo CUIDA, **siete no las CREA ningún `.sql`**, y tres no estaban anotadas en ninguna parte (abajo, en «El 18 de noviembre a las 04:15») |
 | **17 nov, 23:25** · `3074dce` + `58664d8` (MCD) | las dos colas seguían cerradas y cero commits de Javo, `node_modules` en cero en los dos y el `HEAD` suelto en TCD. La de las 19:30 midió **la RLS** y la dio por bien —y lo está—; esta preguntó lo único que esa medición deja abierto: **quién puede EJECUTAR las funciones**. Y ahí estaba la puerta que la rodea entera: una `SECURITY DEFINER` corre con los permisos de SU DUEÑO, así que **no le aplica la RLS**, y el permiso de fábrica de PostgreSQL es `EXECUTE` para `PUBLIC`. De las **51 de `public`, 49 las podía ejecutar `authenticated` y 42 `anon`, y 25 no preguntaban quién llamaba**: sentado en la silla de un cliente, `carga_de_semana` entregaba la semana de otro cliente que la RLS acababa de negarle, y `devolver_credito` le sumaba crédito comprado a quien quisiera **sin ninguna sesión** —seis llamadas, saldo de 0 a 6—. Cerradas con UNA puerta y no 25 parches; en MCD la premisa es la buena y quedó medida (abajo, en «El 17 de noviembre a las 23:25») |
 | **17 nov, 19:30** · `7d4040e` + `3fefd97` (MCD) | las dos colas seguían cerradas y cero commits de Javo, `node_modules` en cero en los dos, el `HEAD` suelto en los dos y el clon de TCD en shallow. Las seis anteriores preguntaron por el defecto dentro de cada repo, por la costura, por el seed, por el esquema, por la tabla ausente, por el entorno y por si el trabajo salió; esta preguntó por **la RLS**, que es el único cuerpo que decide quién ve los datos de quién y el único que ninguna de las dos baterías nombraba. De las **921 miradas de TCD, ninguna**, salvo el aislamiento de `profiles`; de las 99 de MCD, solo las tres de la campanita: **las otras once tablas tenían su política escrita y nunca ejecutada**. Las tres premisas del lado malo se cayeron —las 60 de TCD y las 12 de MCD están encendidas y acotadas— y quedaron dos tablas como deuda anotada: `diario_entradas` y `session_logs`, que el navegador escribe y ningún `.sql` del repo enciende (abajo, en «El 17 de noviembre a las 19:30») |
 | **17 nov, 15:30** · `18a6672` + `d850db7` (MCD) | las dos colas seguían cerradas y cero commits de Javo, `node_modules` en cero en los dos y el `HEAD` suelto en los dos. Esta despertada **se equivocó primero y por eso encontró algo**: midió el estado de MCD con `git rev-parse origin/main`, lo vio tres commits atrás y dio por perdido el trabajo de las tres despertadas anteriores. Era falso — el remoto de verdad, por `git ls-remote`, estaba al día; lo viejo era **el ref en disco**, porque el `fetch` había salido rechazado. Y detrás estaba el agujero: de las **921 miradas de TCD y las 97 de MCD, ninguna medía que lo commiteado haya SALIDO del contenedor**, que es de usar y tirar. Lente nueva en los dos repos, que pregunta por la red y no le cree al disco, probada contra sus cinco defectos de estado de git — y el ejercicio del ref viejo le encontró un agujero al primer intento de la lente (abajo, en «El 17 de noviembre a las 15:30») |
+
+### El 18 de noviembre a las 04:15: el informe que nadie leía
+
+**La pregunta.** Las despertadas anteriores fueron preguntando por cada cuerpo
+que nadie había mirado: el esquema, la tabla que no está, la RLS, quién puede
+ejecutar las funciones. La que quedaba es la más chica y la más cerca de Javo:
+**`poner-al-dia-la-base.sql` es el archivo que él pega en Supabase**, y
+termina con un informe propio, «QUÉ QUEDÓ», que imprime una línea por cada
+cosa que no quedó:
+
+    FALTA FUNCIÓN · get_user_diary
+    FALTA TABLA   · session_logs
+
+La pregunta era si alguien lo lee. **No lo leía nadie.**
+
+**Los dos defectos, y son distintos.**
+
+  1 · **El informe era decorado.** `scripts/prueba-puesta-al-dia.sh` corre el
+      archivo, mira que no haya un `ERROR` y después comprueba **su propia**
+      lista de 25 nombres. El informe del archivo iba a un `.txt` y ahí moría:
+      medido ejecutándolo, en esa misma corrida verde imprimía **35 líneas de
+      FALTA** que nadie veía. Un informe que no puede poner nada rojo no es
+      una medición.
+
+  2 · **Las dos listas del informe estaban cortas.** La de tablas tenía **44
+      nombres y el repositorio crea 60**: veinte tablas no se verificaban
+      nunca —las diez `sala_*` de la Sala de Mando, `carga_semanal`,
+      `mercado_aprendido`, `transcripciones_recibidas`, `invitaciones`,
+      `clinica_artefactos`, `fallas_vistas`, `admin_tareas_checklist`,
+      `herencia_cohorte`, `herramientas_outputs`, y **`sesiones` y
+      `anuncios_fichas`, que las crea ESE MISMO ARCHIVO**—. Y de las 29
+      funciones que el archivo crea, **siete no estaban en su propia lista**.
+
+Es la forma de siempre en este repositorio: **una lista escrita a mano que
+nadie compara con la realidad** —los nueve nombres del 14 de noviembre, las
+tres copias del contrato del puente del 16, el PERDÓN de cinco líneas del
+17—.
+
+**Lo que se construyó.** Las dos listas quedaron completas (64 tablas y 71
+funciones) y, para que no vuelvan a podrirse, una lente con sus dos mitades,
+que no se pueden separar: `scripts/prueba-el-informe-de-la-puesta-al-dia.py`,
+**14 miradas**.
+
+  · **El texto**, que ata las listas a lo que el repo crea de verdad: toda
+    tabla que el repo crea está en la lista; todo nombre de la lista lo crea
+    el repo o es un hueco del panel declarado con su motivo; toda función que
+    **el archivo** crea está en su propia lista; y los cuatro huecos atados en
+    las dos direcciones, así que el día que el repo empiece a crear uno, la
+    excepción sobra y la lente lo dice.
+  · **La corrida**, que levanta la base —reusando el andamiaje de
+    `prueba-sql.sh` y el preámbulo de `prueba-puesta-al-dia.sh`, cortados por
+    su marcador, sin copiar ninguno— y **lee el informe**: cada `FALTA` que
+    imprime tiene que ser de un `.sql` que ese preámbulo no aplica, o uno de
+    los cuatro huecos. Cualquier otra es el archivo prometiendo algo que no
+    entrega.
+
+**Por qué las tablas se exigen completas y las funciones no**, que es una
+decisión y no un olvido: en este repositorio **ninguna tabla se borra**
+—medido: los únicos `drop table` viven en comentarios de rollback—, así que
+una tabla que el repo crea tiene que estar en la base de Javo y, si falta,
+falta. Una función se tira y se vuelve a crear con otra firma a cada rato, así
+que una lista completa sacada del texto avisaría de faltantes que están sanas
+— y una falsa alarma manda a arreglar lo que no está roto.
+
+**Probada contra sus propios defectos: ocho, puestos a propósito, ocho vistos**
+(`scripts/probar-que-la-lente-del-informe-ve-el-defecto.py`), y cada uno
+comprueba primero que **landeó**. Seis de lista —una tabla del repo fuera de
+la lista, un nombre inventado adentro, una función propia sin vigilar, un
+hueco fuera de la lista, un hueco que ya no es hueco— y **dos de la corrida**:
+la promesa incumplida (el informe imprimiendo la falta de una tabla que el
+preámbulo sí aplica) y el canario, con la puesta al día reventando y el
+informe sin imprimirse.
+
+**Y la lente se equivocó primero, del lado de suponer.** El primer intento dio
+por aplicadas «las migraciones desde 20261009», que es lo que aplica **otra**
+lente —la del esquema—, y ese preámbulo no aplica ninguna: dos tablas sanas
+—`fallas_vistas` y `transcripciones_recibidas`— salieron como promesa
+incumplida. Ahora **lee del preámbulo qué aplica** en vez de suponerlo, y si
+un marcador se mueve lo dice en vez de ponerse verde.
+
+### Y el otro lado del mismo hueco: siete tablas que el repo cuida y no sabe crear
+
+La deuda que dejó anotada la despertada de las 23:25 decía cinco tablas
+nacidas en el panel —`diario_entradas`, `session_logs`, `tareas_usuario`,
+`metricas` y `ventas_registradas`—. **Medido, el número y los nombres eran
+otros**, y es la décima vez de diez que la premisa del mapa no sobrevive a la
+medición: **`ventas_registradas` sí la crea el repo** (`v2-migration.sql`, y
+también la lista del informe la verifica), y en cambio hay tres que esa deuda
+no nombraba. De las
+**68 tablas que algún `.sql` del repo CUIDA** —le enciende la RLS o le escribe
+una política—, **siete no las CREA ningún `.sql` del repo**.
+
+De esas siete, **tres no estaban anotadas en ninguna parte**: `metricas`,
+`biblioteca_videos` y `biblioteca_recursos`. El motivo es el de siempre, la
+lente mirando un solo cuerpo: la otra lente de huecos
+—`prueba-el-esquema-de-la-bateria.py`, punto 5— solo mira **las tablas que el
+NAVEGADOR nombra** con `.from(...)`, y esas tres viven únicamente en el SQL
+del repo. Y de las dos que sí tenía declaradas, **el motivo escrito era
+falso**: decía «solo la nombra `test-db.mjs`» de `tareas_usuario` y
+`tareas_template`, cuando el propio repo les enciende la RLS, les escribe
+cuatro políticas a cada una y `get_user_tasks` lee la primera.
+
+**Lo que esto significa, y queda como deuda anotada y no como verde:**
+`20260505_rls_advisor_fixes.sql` escribe `ALTER TABLE public.metricas ENABLE
+ROW LEVEL SECURITY` **sin guarda**. Sobre la base de Javo corre bien —la tabla
+está—, pero **el día que alguien rearme el proyecto desde el repositorio, esa
+sentencia no encuentra la tabla y corta la migración ahí**. O sea que el repo
+no se puede levantar de cero, y hasta hoy no había dónde leerlo. Las siete
+quedaron declaradas con su motivo en la lente de la RLS (punto 4.5), atadas:
+el día que un `.sql` cree una, la línea sobra y la lente lo marca. Su arnés
+pasó de siete defectos a nueve.
+
+**Las dos baterías enteras en verde antes de subir:** TCD con `tsc` y
+`npm run build` limpios, las **145** `prueba-*.ts` dentro del bloque 10 y
+`auditoria.py` con **927 miradas, cero faltas** («el ZIP puede salir»); MCD con
+`tsc` limpio, `next build` limpio, sus tres pruebas por `npm run pruebas` y su
+`auditoria.py` en verde. Subido y verificado por `git ls-remote`: `2d22371`.
+
+**Un apunte de herramienta, para no volver a pagarlo:** las tres pruebas de
+MCD se corren con `npm run pruebas` —`node --experimental-transform-types`—.
+Corridas con `npx tsx` revientan con «Top-level await is currently not
+supported with the "cjs" output format», que es un rojo de la herramienta y no
+del repo.
+
+**Lo que queda abierto, y es trabajo medido para un turno próximo:** escribir
+esas siete tablas en un `.sql` del repositorio es lo único que cierra el
+agujero de verdad. No se hizo acá porque las columnas de `profiles` —unas cien,
+sumadas por migraciones— no se adivinan sin mirar la base de Javo, y un
+`create table` con la columna de menos es peor que el hueco. Con el conector
+de Supabase en pie (la decisión del 18 de noviembre, abajo), se leen y se
+escriben de verdad.
 
 ### El 17 de noviembre a las 23:25: la RLS estaba bien, y 25 funciones la rodeaban
 
