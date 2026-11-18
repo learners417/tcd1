@@ -4756,6 +4756,42 @@ check('cada columna que la app nombra existe en la base que la batería levanta'
       _esq.returncode == 0 and not _esq_rojas,
       '; '.join(_esq_rojas[:3]) or (_esq.stdout + _esq.stderr).strip().split('\n')[-1][:160])
 
+# Y cada VALOR, que es la otra mitad de lo mismo.
+#
+# Las dos lentes de arriba miran NOMBRES —columnas y parámetros—. Una columna
+# con `CHECK (col IN (...))` es una lista cerrada: el nombre está bien, la
+# columna existe, y la base rechaza la fila con un 23514 igual. Costó plata
+# dos veces: `devolucion` en `credit_transactions.source` (arreglado el 17 de
+# noviembre) y `yt_thumbnail` en `creativos.tipo` —la pestaña «Portada
+# YouTube»—, que desde el 10 de abril cobraba el crédito, generaba la imagen y
+# moría al guardar.
+#
+# El segundo NO lo ve una lente de literales: en el código no hay ninguna
+# comilla con `yt_thumbnail` al lado de un insert. El valor viaja en una
+# variable y lo admite el TIPO. Por eso esta lente mide las tres puertas —el
+# literal, el objeto tipado y la clave abreviada— y las listas las PREGUNTA al
+# catálogo, no las lee con una expresión regular: un paréntesis dentro de un
+# comentario del .sql cortaba la lista de `source` por la mitad.
+_val = subprocess.run([sys.executable, 'scripts/prueba-el-valor-que-la-base-rechaza.py'],
+                      capture_output=True, text=True)
+_val_rojas = [l.strip() for l in _val.stdout.split('\n') if l.strip().startswith('✗')]
+check('cada valor que la app escribe está en la lista que la base acepta',
+      _val.returncode == 0 and not _val_rojas,
+      '; '.join(_val_rojas[:3]) or (_val.stdout + _val.stderr).strip().split('\n')[-1][:160])
+
+# Y su arnés: ocho defectos que la tienen que poner roja y dos canarios al
+# revés que la tienen que dejar verde. El canario del tipo local existe porque
+# este repo tiene `estado: 'hecha' | 'hoy' | 'porVenir'` en una pantalla y
+# `estado` cerrado en cuatro tablas: una lente que empareje por nombre de campo
+# manda a arreglar lo que no está roto.
+_vala = subprocess.run([sys.executable,
+                        'scripts/probar-que-la-lente-del-valor-ve-el-defecto.py'],
+                       capture_output=True, text=True)
+check('la lente del valor ve sus ocho defectos y deja pasar sus dos canarios',
+      _vala.returncode == 0,
+      '; '.join(l.strip() for l in (_vala.stdout + _vala.stderr).splitlines()
+                if '✗' in l)[:400])
+
 # ── 6.72 · LO QUE SE LE OFRECE AL CLIENTE ES LO QUE SE VENDE HOY ───────
 #
 # EL NÚMERO ($27) abre hasta el día 5 y corta ahí, que es el mejor momento
