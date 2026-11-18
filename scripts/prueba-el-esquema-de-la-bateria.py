@@ -349,9 +349,18 @@ HUECO_CONOCIDO = {
     'mensajes': 'el soporte',
     'session_logs': 'el registro de sesiones',
     'diario_entradas': 'el Diario del fundador',
-    # solo las nombra test-db.mjs, un script de prueba suelto
-    'tareas_template': 'solo la nombra test-db.mjs',
-    'tareas_usuario': 'solo la nombra test-db.mjs',
+    # El motivo que estaba escrito acá era FALSO, medido el 18 de noviembre:
+    # decía «solo la nombra test-db.mjs» de las dos, y el propio repo les
+    # enciende la RLS y les escribe cuatro políticas a cada una en
+    # 20260505_rls_advisor_fixes.sql, y `get_user_tasks` lee `tareas_usuario`.
+    # Ese lado —el de las tablas que solo el SQL del repo nombra— lo mide
+    # `prueba-la-rls-esta-encendida.py` en su punto 4.5, que además encontró
+    # tres huecos que acá no estaban: `metricas`, `biblioteca_videos` y
+    # `biblioteca_recursos`. Este punto 5 sigue siendo el del NAVEGADOR.
+    'tareas_template': 'el catálogo de tareas del equipo; la cuida el SQL del '
+                       'repo y la nombra test-db.mjs',
+    'tareas_usuario': 'las tareas del cliente; get_user_tasks la lee y la '
+                      'cuida el SQL del repo',
 }
 nombradas = set()
 for base, subs, fs in os.walk(RAIZ):

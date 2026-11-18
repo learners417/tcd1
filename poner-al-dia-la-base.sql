@@ -3301,8 +3301,31 @@ comment on policy "el equipo lee cualquier ficha" on public.profiles is
 -- ───────────────────────────────────────────────────────────────────────────
 -- QUÉ QUEDÓ
 -- ───────────────────────────────────────────────────────────────────────────
-with fn as (select unnest(string_to_array('abrir_jornada,admin_adjust_credits,admin_change_client_email,admin_delete_cliente,admin_delete_team_member,admin_migrate_profile,admin_set_monthly_quota,admin_update_adn_field,carga_de_semana,cargar_sesion,cerrar_jornada,cerrar_mi_migracion,cerrar_tarea,cola_de_evidencias,consume_credit,crear_notificacion,crear_tarea_del_sistema,cuantos_esperan,decidir_evidencia,devolver_credito,ensure_user_credits_row,es_del_equipo,estado_de_acompanamiento,estado_de_migraciones,gasto_ia_acumulado,gasto_ia_por_cliente,get_admin_tareas_with_users,get_all_profiles,get_metricas_globales,get_tarea_adjuntos,get_tarea_comentarios,get_team_members,get_user_diary,get_user_metrics,get_user_tasks,get_user_ventas,grant_credits,guardar_campo,guardar_extra_celda,guardar_respuestas,guardar_semana_cliente,guardar_veredicto_ia,habilitar_migracion,handle_new_user,historial_avisos,jornadas_recientes,marcar_acceso,marcar_biblioteca,marcar_leidos,marcar_respondido,marcar_servicio,mi_lista_de_hoy,monthly_reset_all,panel_ia_fallas,panel_ia_por_modelo,panel_ia_total,promover_a_admin,registrar_uso_ia,respuestas_de,sumar_campo,tiene_acompanamiento,toggle_full_agent_access,update_brand_manual,update_client_status', ',')) as nombre),
-     tb as (select unnest(string_to_array('admin_notes,admin_tareas,admin_tareas_adjuntos,admin_tareas_comentarios,adn_audit_log,agent_conversations,agent_skill_progress,asistencia_grupales,campanas,canales_mensajes,cliente_preactivacion_check,coach_conversations,creativo_assets,creativos,credit_packs,credit_transactions,diario_entradas,diario_resumen,el_numero,evidencia_veredictos,gasto_ia,hitos_cinturon,hoja_de_ruta,jornadas,mensajes,metricas_v2,montaje_campana,notificaciones,pausas_globales,paypal_orders,pilar_satisfaction_ratings,profiles,programa_videos,reportes,sala_decisiones,sala_metricas_semana,sesion_respuestas,sesiones_asistentes,sesiones_grupales,session_logs,user_activity,user_credits,uso_ia,ventas_registradas', ',')) as nombre)
+--
+-- LAS DOS LISTAS SE MIDEN, Y NO SE ESCRIBEN A GUSTO. Medido el 18 de
+-- noviembre de 2026: la lista de tablas tenía 44 nombres y el repositorio
+-- crea 60, así que veinte tablas —`sesiones` y `anuncios_fichas` entre ellas,
+-- que las crea ESTE MISMO ARCHIVO— no se verificaban nunca. Y de las 29
+-- funciones que este archivo crea, siete no estaban en su propia lista.
+--
+--   · TABLAS: están las 60 que crea algún .sql del repositorio, más las
+--     cuatro que nacieron a mano en el panel de Supabase y el repositorio no
+--     sabe crear (`profiles`, `mensajes`, `diario_entradas`, `session_logs`).
+--     Ninguna tabla se borra en este repositorio —medido: los únicos
+--     `drop table` viven en comentarios de rollback—, así que una tabla que
+--     el repo crea tiene que estar en la base de Javo, y si falta, falta.
+--
+--   · FUNCIONES: están las 29 que crea este archivo y las que ya estaban
+--     curadas. La lista NO es todas las del repositorio a propósito: una
+--     función se tira y se vuelve a crear con otra firma a cada rato, así que
+--     una lista completa sacada del texto avisaría de faltantes que están
+--     sanas, y una falsa alarma manda a arreglar lo que no está roto.
+--
+-- `scripts/prueba-el-informe-de-la-puesta-al-dia.py` sostiene las dos reglas
+-- y además LEE este informe: hasta el 18 de noviembre lo imprimía y nadie lo
+-- miraba, y la batería quedaba verde con 35 líneas de FALTA en pantalla.
+with fn as (select unnest(string_to_array('abrir_jornada,admin_adjust_credits,admin_change_client_email,admin_delete_cliente,admin_delete_team_member,admin_migrate_profile,admin_set_monthly_quota,admin_update_adn_field,anuncios_fichas_marcar_fecha,canales_la_firma_es_de_quien_escribe,carga_de_semana,cargar_sesion,cerrar_jornada,cerrar_mi_migracion,cerrar_tarea,cola_de_evidencias,consume_credit,crear_notificacion,crear_tarea_del_sistema,cuantos_esperan,decidir_evidencia,devolver_credito,dias_sin_sesion,ensure_user_credits_row,es_del_equipo,estado_de_acompanamiento,estado_de_migraciones,gasto_ia_acumulado,gasto_ia_por_cliente,get_admin_tareas_with_users,get_all_profiles,get_metricas_globales,get_tarea_adjuntos,get_tarea_comentarios,get_team_members,get_user_diary,get_user_metrics,get_user_tasks,get_user_ventas,grant_credits,guardar_campo,guardar_extra_celda,guardar_respuestas,guardar_semana_cliente,guardar_veredicto_ia,habilitar_migracion,handle_new_user,historial_avisos,ids_del_equipo,jornadas_recientes,marcar_acceso,marcar_biblioteca,marcar_leidos,marcar_respondido,marcar_servicio,mi_lista_de_hoy,montaje_toca_fecha,monthly_reset_all,panel_ia_fallas,panel_ia_por_modelo,panel_ia_total,profiles_solo_el_equipo_cambia_lo_que_compro,promover_a_admin,registrar_uso_ia,reportes_el_plazo_lo_pone_la_base,respuestas_de,sumar_campo,tiene_acompanamiento,toggle_full_agent_access,update_brand_manual,update_client_status', ',')) as nombre),
+     tb as (select unnest(string_to_array('admin_notes,admin_tareas,admin_tareas_adjuntos,admin_tareas_checklist,admin_tareas_comentarios,adn_audit_log,agent_conversations,agent_skill_progress,anuncios_fichas,asistencia_grupales,campanas,canales_mensajes,carga_semanal,cliente_preactivacion_check,clinica_artefactos,coach_conversations,creativo_assets,creativos,credit_packs,credit_transactions,diario_entradas,diario_resumen,el_numero,evidencia_veredictos,fallas_vistas,gasto_ia,herencia_cohorte,herramientas_outputs,hitos_cinturon,hoja_de_ruta,invitaciones,jornadas,mensajes,mercado_aprendido,metricas_v2,montaje_campana,notificaciones,pausas_globales,paypal_orders,pilar_satisfaction_ratings,profiles,programa_videos,reportes,sala_alertas,sala_decisiones,sala_etapas,sala_hitos,sala_metricas_semana,sala_motor,sala_reuniones,sala_riesgos,sala_rituales,sala_roles,sala_traspaso,sesion_respuestas,sesiones,sesiones_asistentes,sesiones_grupales,session_logs,transcripciones_recibidas,user_activity,user_credits,uso_ia,ventas_registradas', ',')) as nombre)
 select 'FALTA FUNCIÓN · ' || nombre as estado from fn
 where not exists (select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
                   where n.nspname = 'public' and p.proname = fn.nombre)

@@ -6,7 +6,9 @@ Una lente verde no dice nada: dice que hoy no se cayó. Esto le pone cada
 defecto que dice cuidar y exige que se ponga ROJA. El repo de verdad no se
 toca: se copia a una carpeta temporal y el defecto se pone sobre la copia.
 
-LOS SIETE DEFECTOS, y por qué cada uno:
+LOS NUEVE DEFECTOS, y por qué cada uno (los dos últimos son del 18 de
+noviembre, cuando la lente aprendió a preguntar si la tabla que el repo CUIDA
+el repo la sabe CREAR):
 
   1 · la RLS apagada sobre una tabla que SÍ tiene política escrita. Es el
       defecto que esta lente nació midiendo: PostgreSQL acepta la política,
@@ -81,6 +83,18 @@ DEFECTOS = [
      'alter table public.diario_entradas enable row level security;',
      'el repo ya enciende una tabla declarada «solo en el panel»: la línea '
      'sobra y la deja fuera de la medición'),
+    # Los dos del 18 de noviembre, del punto 4.5: la tabla que el repo CUIDA
+    # y no sabe CREAR. Sobre la base de Javo una política así corre bien; de
+    # cero corta la migración ahí, y hasta el 18 no había dónde leerlo.
+    ('cuidada-y-sin-crear', 'sala-de-mando.sql',
+     'create table if not exists jornadas (',
+     'create table if not exists jornadas_renombrada_por_el_arnes (',
+     'una tabla con la RLS encendida y una política escrita que ningún .sql '
+     'del repo crea: el repo no se puede levantar de cero'),
+    ('hueco-de-crear-que-ya-no-es-hueco', 'scripts/prueba-la-rls-esta-encendida.py',
+     'NO_LAS_CREA_NINGUN_SQL = {\n',
+     "NO_LAS_CREA_NINGUN_SQL = {\n    'jornadas': 'puesta por el arnes',\n",
+     'una excepción de las de crear que sobra: el repo ya crea esa tabla'),
 ]
 
 # Las tablas que cada defecto DEJA APAGADAS, para comprobar que el defecto se

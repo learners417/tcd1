@@ -5998,9 +5998,43 @@ check('ninguna política vive sobre una tabla con la RLS apagada, y toda tabla '
 _arls = subprocess.run([sys.executable,
                         'scripts/probar-que-la-lente-de-la-rls-ve-el-defecto.py'],
                        capture_output=True, text=True)
-check('la lente de la RLS ve sus seis defectos y no da verde sin .sql que leer',
+check('la lente de la RLS ve sus ocho defectos y no da verde sin .sql que leer',
       _arls.returncode == 0,
       '; '.join(l.strip() for l in (_arls.stdout + _arls.stderr).splitlines()
+                if '✗' in l)[:400])
+
+# ── EL INFORME DE LA PUESTA AL DÍA, LEÍDO POR ALGUIEN ──────────────────
+#
+# `poner-al-dia-la-base.sql` —el archivo que Javo pega en Supabase— termina
+# con su propio informe: una línea `FALTA TABLA · x` por cada cosa que no
+# quedó. Medido el 18 de noviembre: NADIE lo leía. La prueba del archivo
+# miraba que no hubiera un `ERROR` y después comprobaba su PROPIA lista de 25
+# nombres; el informe iba a un `.txt` y ahí moría, imprimiendo 35 faltas en
+# una corrida verde. Y sus dos listas estaban cortas: 44 tablas contra las 60
+# que crea el repo —`sesiones` y `anuncios_fichas` entre las que faltaban, y
+# las crea ese mismo archivo— y siete de sus propias funciones afuera.
+_pinf = subprocess.run([sys.executable,
+                        'scripts/prueba-el-informe-de-la-puesta-al-dia.py'],
+                       capture_output=True, text=True)
+check('el informe de la puesta al día se lee, y sus listas cubren lo que el '
+      'repo crea',
+      _pinf.returncode == 0,
+      '; '.join(l.strip() for l in (_pinf.stdout + _pinf.stderr).splitlines()
+                if '✗' in l)[:400])
+
+# Y su arnés, con la mitad ejecutada adentro: el defecto que importa no es de
+# texto —el informe imprimiendo una falta de algo que el preámbulo SÍ aplica—
+# y sin correr la base no se ve. El primer intento de la lente dio por
+# aplicadas las migraciones desde 20261009, que es lo que aplica OTRA lente, y
+# dos tablas sanas salían como promesa incumplida: ahora lee del preámbulo qué
+# aplica en vez de suponerlo.
+_ainf = subprocess.run([sys.executable,
+                        'scripts/probar-que-la-lente-del-informe-ve-el-defecto.py'],
+                       capture_output=True, text=True)
+check('la lente del informe ve sus ocho defectos, y no da verde sin informe '
+      'que leer',
+      _ainf.returncode == 0,
+      '; '.join(l.strip() for l in (_ainf.stdout + _ainf.stderr).splitlines()
                 if '✗' in l)[:400])
 
 # Y el arnés de la lente de quién llama. También le encontró un agujero al

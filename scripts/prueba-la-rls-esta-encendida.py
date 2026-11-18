@@ -207,6 +207,70 @@ _sobran_supa = sorted(t for t in DE_SUPABASE if t in encendidas)
 ok('ninguna excepción de Supabase sigue escrita cuando el repo ya la enciende',
    not _sobran_supa, ', '.join(_sobran_supa))
 
+# ── 4.5 · LA TABLA QUE EL REPO CUIDA Y NO SABE CREAR ───────────────────────
+#
+# Medido el 18 de noviembre de 2026, y es el otro lado de la misma pregunta.
+# Las miradas de arriba preguntan si la tabla está ENCENDIDA. Esta pregunta si
+# la tabla EXISTE: de las 68 que algún `.sql` del repo cuida —le enciende la
+# RLS o le escribe una política—, **SIETE no las crea ningún `.sql` del
+# repo**. Nacieron a mano en el panel de Supabase.
+#
+# Y la mitad de eso no estaba anotada en ninguna parte. La otra lente que
+# mide huecos —`prueba-el-esquema-de-la-bateria.py`, punto 5— solo mira las
+# tablas que el NAVEGADOR nombra con `.from(...)`, así que las tres que solo
+# viven en el SQL del repo —`metricas`, `biblioteca_videos` y
+# `biblioteca_recursos`— no las veía nadie. Y de las otras dos que sí tenía
+# declaradas, el motivo escrito era falso: decía «solo la nombra test-db.mjs»
+# de `tareas_usuario` y `tareas_template`, cuando el propio repo les enciende
+# la RLS, les escribe cuatro políticas a cada una y una función SECURITY
+# DEFINER lee una de ellas.
+#
+# LO QUE ESTO SIGNIFICA, y por eso es una deuda anotada y no un olvido:
+# `20260505_rls_advisor_fixes.sql` escribe `ALTER TABLE public.metricas ENABLE
+# ROW LEVEL SECURITY` sin guarda. Sobre la base de Javo eso corre bien —la
+# tabla está—, pero el día que alguien rearme el proyecto DESDE EL REPO, esa
+# sentencia no encuentra la tabla y corta la migración ahí. O sea que el
+# repositorio no se puede levantar de cero, y hasta hoy no había dónde leerlo.
+#
+# Están atadas: el día que un `.sql` del repo cree una de estas siete, la
+# línea sobra y la lente lo dice.
+NO_LAS_CREA_NINGUN_SQL = {
+    'profiles': 'la ficha del cliente; el repo le escribe políticas en '
+                'fix-supabase.sql y en la puesta al día',
+    'mensajes': 'el soporte',
+    'metricas': 'los números del cliente; get_user_metrics la lee',
+    'tareas_usuario': 'las tareas del cliente; get_user_tasks la lee',
+    'tareas_template': 'el catálogo de tareas que el equipo edita',
+    'biblioteca_videos': 'el catálogo de videos de la Biblioteca',
+    'biblioteca_recursos': 'el catálogo de recursos de la Biblioteca',
+}
+_CREA_TABLA = re.compile(
+    r'create\s+table\s+(?:if\s+not\s+exists\s+)?(?:public\.)?"?([a-z_0-9]+)"?', re.I)
+crea_el_repo = set()
+for _f in sqls():
+    crea_el_repo |= {_m.group(1).lower() for _m in _CREA_TABLA.finditer(rdc(_f))}
+
+ok('el repo crea tablas que medir', len(crea_el_repo) > 20,
+   f'solo {len(crea_el_repo)}: la lente no midió nada')
+
+_cuidadas = encendidas | set(con_politica)
+_cuida_y_no_crea = sorted(t for t in _cuidadas
+                          if t not in crea_el_repo
+                          and t not in NO_LAS_CREA_NINGUN_SQL
+                          and t not in DE_SUPABASE)
+ok('toda tabla que el repo cuida, el repo la sabe crear',
+   not _cuida_y_no_crea,
+   ', '.join(_cuida_y_no_crea) + ' — un `alter table` o una política sobre '
+   'una tabla que ningún .sql crea: sobre la base de Javo corre, y de cero '
+   'corta la migración ahí. Si nació en el panel, se declara en '
+   'NO_LAS_CREA_NINGUN_SQL con su motivo')
+
+_sobran_crear = sorted(t for t in NO_LAS_CREA_NINGUN_SQL if t in crea_el_repo)
+ok('ninguna tabla declarada como hueco la crea ya un .sql del repo',
+   not _sobran_crear,
+   ', '.join(_sobran_crear) + ' — sacarla de NO_LAS_CREA_NINGUN_SQL: ya no es '
+   'un hueco')
+
 # ── 5 · EL ARRAY ESCRITO A MANO DE LA SALA, ATADO A SUS PROPIAS TABLAS ─────
 #
 # `sala-de-mando.sql` enciende once tablas por un array de nombres escrito a
@@ -237,5 +301,7 @@ print()
 print(f'  {len(encendidas)} tablas con la RLS encendida por un .sql; '
       f'{len(con_politica)} con política escrita; '
       f'{len(toca)} que el navegador toca; '
-      f'{len(SOLO_EN_EL_PANEL)} protegidas solo en el panel (deuda anotada)')
+      f'{len(SOLO_EN_EL_PANEL)} protegidas solo en el panel y '
+      f'{len(NO_LAS_CREA_NINGUN_SQL)} que el repo cuida y no sabe crear '
+      f'(las dos, deuda anotada)')
 sys.exit(1 if fallas else 0)
