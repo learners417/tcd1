@@ -371,6 +371,7 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 | **17 nov, 07:25** · `c87ba69` + `5980732` (MCD) | las dos colas seguían cerradas y cero commits de Javo (`7f1bdd5` en TCD, `062ff1f` en MCD), `node_modules` en cero en los dos, el `HEAD` suelto en los dos y el clon de TCD otra vez en shallow. Las cinco anteriores preguntaron por el defecto dentro de cada repo, por la costura, por los datos del seed y por el esquema; esta preguntó por **el entorno**, que es la lista de lo que hay que cargar en Vercel y nunca se había medido contra el código. Y volvió a ser **la puerta**: la lente que vigila que ninguna clave viaje en el bundle buscaba `import.meta.env.VITE_X` escrito de corrido, y cinco archivos leen el entorno con una variable en el medio, así que **diez variables no se veían — entre ellas las nueve por donde entra la plata**. Detrás, el agujero: el código leía **doce variables que `.env.example` no nombraba**, nueve de ellas los enlaces de cobro, y ninguna rompe nada porque todas caen al WhatsApp. En MCD, a la tabla que se titula «TODAS» le faltaban tres (abajo, en «El 17 de noviembre a las 07:25») |
 | **17 nov, 11:30** · `612f4b5` (MCD) + `96f8137` | las dos colas seguían cerradas y cero commits de Javo (`832f48c` en TCD, `5980732` en MCD), `node_modules` en cero en los dos, el `HEAD` suelto en los dos y el clon de TCD otra vez en shallow. La de las 23:40 levantó el esquema de MCD y la de las 03:25 el de TCD; esta preguntó por **la ausencia**: no si la columna que el código pide existe, sino **si la lente ve la TABLA que no está**. Y no la veía: el recorrido empezaba con `if tabla not in objetos: continue`, así que de las 14 tablas que el código de MCD nombra, **seis no estaban en el esquema y la lente daba verde**. Tres son de MCD y las tres fallaban en silencio en producción —el Guardar del Asistente, la nota del paciente y la campanita— (abajo, en «El 17 de noviembre a las 11:30») |
 
+| **18 nov, 19:30** · `PENDIENTE` | la cola seguía sin turnos nuevos —las 17 filas cerradas, cero commits de Javo (`c31d53d` en TCD y `b7ba810` en MCD, los dos al día contra `git ls-remote`)—, `node_modules` en cero en los dos y el `HEAD` suelto en los dos; el ref de `origin` en MCD era una foto vieja de ayer y la lente del trabajo subido lo cazó en su batería. Las anteriores preguntaron todas por **la escritura**: que la tabla exista, que la columna exista, que el campo que se lee exista, que el parámetro exista, que el valor entre en la lista. Esta preguntó por lo que pasa cuando una fila **se va**. Un `REFERENCES auth.users(id)` sin acción de borrado no molesta nunca al escribir, y el día que hay que borrar esa cuenta la base dice 23503 y el borrado entero se cae. De las 48 columnas que apuntan a una cuenta, **dos** no declaran acción: `admin_notes.author_id`, que las dos funciones de borrado limpian a mano desde el 19 de abril, y `adn_audit_log.edited_by`, que nació **el 29 de abril, diez días después de esa lista escrita a mano, y a la lista nadie volvió**. O sea que **justo los miembros del equipo que habían trabajado —los que editaron el ADN de algún cliente— eran los únicos que no se podían borrar**, con el error crudo de Postgres en la cara. Siete meses. Medido ejecutando el `delete from auth.users` contra las 82 migraciones puestas. Cerrado con el FK recreado `ON DELETE SET NULL` —la convención que el repo ya usa en sus otras cinco columnas de «quién lo hizo»—, la lente nueva de dos mitades (la regla del catálogo y el borrado EJECUTADO con una fila plantada en las 48 de 48 tablas) y su arnés de cinco defectos y dos canarios. En MCD la clase no existe y se midió: sus 17 FK declaran todos su acción, y una sola apunta a `auth.users` (abajo, en «El 18 de noviembre a las 19:30») |
 | **18 nov, 15:30** · `b9b3447` | la cola seguía sin turnos nuevos —las 17 filas cerradas, cero commits de Javo (`cb7cc45` en TCD y `b7ba810` en MCD, los dos al día contra `git ls-remote`)—, `node_modules` en cero y el `HEAD` suelto otra vez, con la `main` local **ocho** commits atrás y el ref de `origin` una foto vieja que la lente del trabajo subido cazó en la batería. Las anteriores preguntaron por la tabla, la columna, el campo que se lee, la RLS, quién ejecuta, el informe y los archivos: todas por NOMBRES. Esta preguntó por **el VALOR**, que es lo único que ninguna mira. De las 25 columnas con lista cerrada, los once literales del código están todos bien —una lente de literales cerraba el turno en verde—, y el defecto entraba por el TIPO: `creativos.tipo` acepta dos valores desde el 10 de abril y `TipoCreativo` admite tres. La pestaña «Portada YouTube» **cobraba el crédito, generaba la imagen y moría al guardar** con un 23514, medido ejecutando; siete meses así. Cerrado con el CHECK recreado, la lente nueva de tres puertas —literal, objeto tipado y clave abreviada— y su arnés de ocho defectos y dos canarios. De paso: leer las listas con una expresión regular daba cinco de los siete valores de `credit_transactions.source` por un paréntesis dentro de un comentario, y habría mandado a arreglar el `refund` que el turno del 17 dejó bien. En MCD la clase no existe: cero `CHECK IN`, sus valores viven en un comentario (abajo, en «El 18 de noviembre a las 15:30») |
 | **18 nov, 11:30** · `4943e1a` + `b7ba810` (MCD) | las dos colas seguían cerradas y cero commits de Javo (`8494650` en TCD, `d3b7c40` en MCD, los dos al día contra `git ls-remote`), `node_modules` en cero en los dos y **el `HEAD` suelto en los dos**, con la `main` local de MCD un commit atrás y la de TCD cuatro: el `push origin main` salió rechazado por «non-fast-forward» con el padre del commit siendo justo el remoto, que es la cara que tiene esa trampa; se sube con `push origin HEAD:main`. Las anteriores preguntaron por el esquema, por la tabla ausente, por la RLS, por quién ejecuta las funciones, por el informe y por los archivos; esta preguntó por **lo que trae la estrella**: el `select('*')`, que no nombra ninguna columna y por eso la lente del esquema lo saltea —y las VISTAS, que saltea también, escrito en su propia cabecera—. El código sí nombra esas columnas: las nombra al leer el resultado por propiedad. El Tablero de MCD leía **ocho** campos de `mis_numeros` y la vista tenía **siete**: `roi_mes` no estaba en ningún `.sql`, y era la condición del cartel «Tu inversión en MiClínica se pagó N×», que **no se dibujó nunca desde el 8 de julio**. Cerrado con la cuenta que el Tablero ya hacía a mano, más la lente nueva (36 miradas) y su arnés de ocho defectos y dos canarios. En TCD no hay vistas y sus 35 sitios de `select('*')` se revisaron a mano: sin campo fantasma (abajo, en «El 18 de noviembre a las 11:30») |
 | **18 nov, 07:45** · `d86096e` + `d3b7c40` (MCD) | las dos colas seguían cerradas y cero commits de Javo (`ff735ac` en TCD, `58664d8` en MCD, los dos al día contra `git ls-remote`), `node_modules` en cero en los dos. Las anteriores preguntaron por el esquema, por la tabla ausente, por la RLS de las tablas, por quién ejecuta las funciones y por el informe del archivo que Javo pega; esta preguntó por **los archivos**, que es el último cuerpo sin ejercitar: `storage.objects`. De las 930 miradas de TCD **ninguna lo nombraba** —la única que dice «bucket» pregunta que no se abra un segundo bucket, no quién lee el primero—. Y storage tiene una trampa propia: **una política sin `to <rol>` vale para TODOS los roles**, `anon` incluido, que es la llave publicable que viaja en el bundle. Dos estaban así y su condición no preguntaba de quién era la carpeta: **sin ninguna sesión se listaban los archivos que cada cliente le manda a Javo en el chat de soporte**, y el bucket es público, así que con el nombre en la mano el archivo se descarga. Más la escritura de creativos, abierta a cualquier carpeta. En MCD la premisa es la buena —su cubeta es privada y su política sí pregunta— y quedó ejercitada igual (abajo, en «El 18 de noviembre a las 07:45») |
@@ -378,6 +379,122 @@ reintentó el apagado. Lo que hicieron fue medir desde frío, que es lo único
 | **17 nov, 23:25** · `3074dce` + `58664d8` (MCD) | las dos colas seguían cerradas y cero commits de Javo, `node_modules` en cero en los dos y el `HEAD` suelto en TCD. La de las 19:30 midió **la RLS** y la dio por bien —y lo está—; esta preguntó lo único que esa medición deja abierto: **quién puede EJECUTAR las funciones**. Y ahí estaba la puerta que la rodea entera: una `SECURITY DEFINER` corre con los permisos de SU DUEÑO, así que **no le aplica la RLS**, y el permiso de fábrica de PostgreSQL es `EXECUTE` para `PUBLIC`. De las **51 de `public`, 49 las podía ejecutar `authenticated` y 42 `anon`, y 25 no preguntaban quién llamaba**: sentado en la silla de un cliente, `carga_de_semana` entregaba la semana de otro cliente que la RLS acababa de negarle, y `devolver_credito` le sumaba crédito comprado a quien quisiera **sin ninguna sesión** —seis llamadas, saldo de 0 a 6—. Cerradas con UNA puerta y no 25 parches; en MCD la premisa es la buena y quedó medida (abajo, en «El 17 de noviembre a las 23:25») |
 | **17 nov, 19:30** · `7d4040e` + `3fefd97` (MCD) | las dos colas seguían cerradas y cero commits de Javo, `node_modules` en cero en los dos, el `HEAD` suelto en los dos y el clon de TCD en shallow. Las seis anteriores preguntaron por el defecto dentro de cada repo, por la costura, por el seed, por el esquema, por la tabla ausente, por el entorno y por si el trabajo salió; esta preguntó por **la RLS**, que es el único cuerpo que decide quién ve los datos de quién y el único que ninguna de las dos baterías nombraba. De las **921 miradas de TCD, ninguna**, salvo el aislamiento de `profiles`; de las 99 de MCD, solo las tres de la campanita: **las otras once tablas tenían su política escrita y nunca ejecutada**. Las tres premisas del lado malo se cayeron —las 60 de TCD y las 12 de MCD están encendidas y acotadas— y quedaron dos tablas como deuda anotada: `diario_entradas` y `session_logs`, que el navegador escribe y ningún `.sql` del repo enciende (abajo, en «El 17 de noviembre a las 19:30») |
 | **17 nov, 15:30** · `18a6672` + `d850db7` (MCD) | las dos colas seguían cerradas y cero commits de Javo, `node_modules` en cero en los dos y el `HEAD` suelto en los dos. Esta despertada **se equivocó primero y por eso encontró algo**: midió el estado de MCD con `git rev-parse origin/main`, lo vio tres commits atrás y dio por perdido el trabajo de las tres despertadas anteriores. Era falso — el remoto de verdad, por `git ls-remote`, estaba al día; lo viejo era **el ref en disco**, porque el `fetch` había salido rechazado. Y detrás estaba el agujero: de las **921 miradas de TCD y las 97 de MCD, ninguna medía que lo commiteado haya SALIDO del contenedor**, que es de usar y tirar. Lente nueva en los dos repos, que pregunta por la red y no le cree al disco, probada contra sus cinco defectos de estado de git — y el ejercicio del ref viejo le encontró un agujero al primer intento de la lente (abajo, en «El 17 de noviembre a las 15:30») |
+
+### El 18 de noviembre a las 19:30: la lista de abril no siguió al esquema de mayo
+
+**La pregunta.** Todas las lentes del esquema miran **la escritura**: la del 17
+pregunta si la TABLA existe, la del 16 si la COLUMNA existe, la de las 11:30 si
+el CAMPO que se lee existe, `prueba-rpc-nombres.py` si el PARÁMETRO existe, y
+la de las 15:30 si el VALOR entra en la lista cerrada. Ninguna mira lo que pasa
+cuando una fila **se va**. Un `REFERENCES auth.users(id)` sin acción de borrado
+no molesta nunca al escribir —es la forma más silenciosa que hay— y el día que
+hay que borrar esa cuenta la base dice 23503 y el borrado entero se cae.
+
+**Lo medido, ejecutando.** De las **48 columnas** que apuntan a una cuenta
+(`auth.users(id)` o `profiles(id)`), 46 declaran su acción y **dos no**:
+
+    admin_notes.author_id      → NO ACTION, pero las DOS funciones de borrado
+                                 la limpian a mano desde el 19 de abril
+    adn_audit_log.edited_by    → NO ACTION, y NADIE la limpia
+
+`admin_delete_cliente` y `admin_delete_team_member` nacieron el 19 de abril, y
+tienen adentro una lista escrita a mano con un comentario que lo dice todo:
+
+    -- FKs sin CASCADE sobre profiles(id): limpiar manualmente.
+    DELETE FROM public.mensajes WHERE emisor_id = p_user_id OR receptor_id = p_user_id;
+    DELETE FROM public.admin_notes WHERE author_id = p_user_id;
+
+`adn_audit_log` nació **el 29 de abril, diez días después**, con `target_user_id`
+bien (CASCADE) y `edited_by` sin acción. A esa lista nadie volvió. Ejecutado
+contra un PostgreSQL 16 con las 82 migraciones puestas:
+
+    delete from auth.users where id = <el manager>;
+    ERROR:  update or delete on table "users" violates foreign key constraint
+            "adn_audit_log_edited_by_fkey" on table "adn_audit_log"
+
+Y lo que eso significa es peor que el error: **el único miembro del equipo que
+no se podía borrar era el que había trabajado**. Borrar a uno que nunca entró
+al ADN de un cliente salía bien; borrar al que lo editó una vez tiraba el error
+crudo de Postgres en la pantalla del Admin. Siete meses así, y es exactamente
+la clase de cosa que no se descubre hasta el día que alguien se va.
+
+Borrar al CLIENTE cuyo ADN se editó sí funcionaba: ahí la columna es
+`target_user_id`, que tiene CASCADE. Por eso nunca saltó.
+
+**La clase no es «falta un CASCADE».** Es **una lista escrita a mano dentro de
+una función de abril que tiene que seguir al esquema de noviembre**, y ninguna
+lente miraba ni la lista ni el esquema por ese lado. La lente nueva mide las
+dos mitades.
+
+**Lo que se cerró.**
+`supabase/migrations/20261118_el_borrado_del_equipo_se_trababa_en_el_log.sql`:
+el FK recreado con `ON DELETE SET NULL`. No se limpia a mano en la función
+—eso borraría el historial del ADN del cliente, que no tiene nada que ver con
+que un miembro del equipo se vaya— y no se afloja nada: se usa la convención
+que el propio repo ya tiene para las columnas de «quién lo hizo»
+(`admin_tareas_adjuntos.autor_id`, `evidencia_veredictos.decidido_por`,
+`transcripciones_recibidas.revisada_por`, `sesiones.quien_la_cargo`,
+`fallas_vistas.usuario_id`: las cinco en SET NULL). La fila del historial
+queda; lo que se pierde es el nombre de una cuenta que ya no existe. La
+pantalla del ADN ya lo resolvía sola desde antes —`{ultima.editor?.nombre ??
+'equipo'}`—, así que un editor borrado se lee «Editado por equipo». Ni una
+palabra de pantalla se tocó. El tipo de TypeScript pasó a `string | null`, que
+es lo que la columna ahora puede devolver.
+
+**La lente nueva, y por qué tiene dos mitades.**
+`scripts/prueba-el-borrado-del-usuario-no-se-traba.py`:
+
+  · **la regla**, preguntada al catálogo: cada FK que apunta a una cuenta, con
+    su `confdeltype`. Una que bloquea (NO ACTION o RESTRICT) sólo pasa si LAS
+    DOS funciones de borrado la limpian a mano — y eso también se pregunta al
+    catálogo, leyendo `pg_proc.prosrc` y no el `.sql`, porque la que vale es la
+    última definición que quedó puesta.
+  · **el borrado EJECUTADO**: se crean tres cuentas, se planta una fila en cada
+    tabla que las referencia —**48 de 48**, armando cada insert desde el
+    catálogo— y se corre el `delete from auth.users` de verdad. Tiene que salir.
+
+Plantar las 48 costó dos vueltas. La primera versión llenaba las columnas
+obligatorias con valores inventados y **siete tablas quedaban afuera** —las más
+entreveradas: `admin_tareas_comentarios`, `creativo_assets`,
+`sesiones_asistentes`— porque su `tarea_id` o su `sesion_id` apuntaba a un
+padre que no existía. Un borrado medido sin esas siete filas sale bien por no
+tener a quién chocar: **la lente habría dado verde con el agujero justo donde
+más FKs hay**. Ahora el armador es recursivo (crea el padre, hasta tres
+niveles) y toma de una tabla de catálogo con clave de texto la fila que ya
+exista —`paypal_orders.pack_id` → `credit_packs.id`, la octava—. Y la lente
+exige aparte que las tablas que BLOQUEAN tengan su fila: si justo esa no se
+plantó, el verde no vale.
+
+**El arnés: cinco defectos y dos canarios.**
+`probar-que-la-lente-del-borrado-ve-el-defecto.py` pone el de hoy de nuevo, un
+CASCADE que se pierde en `credit_transactions` (el log de la plata, que es como
+vuelve esto: alguien reescribe un `create table` y se come las tres palabras
+del final), **el mismo bloqueo escrito como `ON DELETE RESTRICT`** —una lente
+que buscara la AUSENCIA del texto «ON DELETE» daría verde, y RESTRICT bloquea
+igual; por eso la acción se le pregunta al catálogo—, la lista a mano que se
+queda corta (se le saca a UNA de las dos funciones la línea que limpia
+`admin_notes`, que es literalmente lo que pasó en abril y que la mitad
+ejecutada NO ve), y una tabla nueva que nace bloqueando con un nombre que la
+lente no vio nunca. Los dos canarios tienen que dejarla VERDE: un FK sin acción
+hacia una tabla que **no es una cuenta** (si eso la pone roja, está midiendo
+todos los FK del esquema y no los que importan), y el `edited_by` con CASCADE
+en vez de SET NULL, porque la regla es que no bloquee, no que use una acción en
+particular.
+
+**En MCD la clase no existe, y se midió de verdad la segunda vez.** El primer
+grep dijo «MCD no tiene ningún FK», y era mentira: el grep era sensible a
+mayúsculas y MCD escribe su SQL en minúsculas. Mirado bien, MCD tiene **17 FK y
+los 17 declaran su acción** (`on delete cascade` o `on delete set null`), una
+sola apunta a `auth.users` —`practitioners.id`, con cascade— y no hay ninguna
+función que borre usuarios. La clase está cerrada por construcción, así que
+portar la lente ahí hoy mediría cero. Queda anotado; es la cuarta vez que la
+medición estaba ciega y no la cosa medida.
+
+**Y una nota de método, para que nadie la vuelva a buscar:** las tres
+`prueba-*.ts` de MCD **no corren con `tsx`** —usan `await` de primer nivel y
+tsx las compila a CJS—. Corren con `npm run pruebas`, que es
+`node --experimental-transform-types`, y así están las tres en verde. No es un
+defecto: es el comando.
 
 ### El 18 de noviembre a las 15:30: el nombre estaba bien y el valor no entraba
 

@@ -4792,6 +4792,45 @@ check('la lente del valor ve sus ocho defectos y deja pasar sus dos canarios',
       '; '.join(l.strip() for l in (_vala.stdout + _vala.stderr).splitlines()
                 if '✗' in l)[:400])
 
+# Y lo que pasa cuando una fila se VA, que es la otra punta de lo mismo.
+#
+# Las tres lentes de arriba miran la ESCRITURA: que la columna exista, que el
+# parámetro exista, que el valor entre en la lista. Un `REFERENCES
+# auth.users(id)` sin acción de borrado no molesta nunca al escribir, y el día
+# que hay que borrar esa cuenta la base dice 23503 y el borrado entero se cae.
+# Medido el 18 de noviembre: `adn_audit_log.edited_by` nació el 29 de abril
+# sin acción, diez días después de las dos funciones que limpian a mano una
+# lista de tablas, y a esa lista nadie volvió. Justo los miembros del equipo
+# que habían editado el ADN de un cliente eran los únicos que no se podían
+# borrar. Siete meses.
+#
+# La lente mide las dos mitades: la regla (ninguna tabla bloquea sin que las
+# DOS funciones de borrado la limpien, preguntando `confdeltype` y
+# `pg_proc.prosrc` al catálogo) y el borrado EJECUTADO, con una fila plantada
+# en cada una de las tablas que referencian la cuenta.
+_borr = subprocess.run([sys.executable,
+                        'scripts/prueba-el-borrado-del-usuario-no-se-traba.py'],
+                       capture_output=True, text=True)
+_borr_rojas = [l.strip() for l in _borr.stdout.split('\n') if l.strip().startswith('✗')]
+check('borrar una cuenta no lo traba ninguna tabla que la referencia',
+      _borr.returncode == 0 and not _borr_rojas,
+      '; '.join(_borr_rojas[:3])
+      or (_borr.stdout + _borr.stderr).strip().split('\n')[-1][:160])
+
+# Y su arnés: cinco defectos que la tienen que poner roja y dos canarios al
+# revés. Uno de los cinco es `ON DELETE RESTRICT`, que bloquea igual que NO
+# ACTION y tiene el texto «ON DELETE» escrito: una lente que buscara la
+# ausencia de ese texto daría verde. Otro es una tabla nueva con un nombre que
+# la lente no vio nunca, para que no esté midiendo el defecto de hoy sino la
+# clase.
+_borra = subprocess.run([sys.executable,
+                         'scripts/probar-que-la-lente-del-borrado-ve-el-defecto.py'],
+                        capture_output=True, text=True)
+check('la lente del borrado ve sus cinco defectos y deja pasar sus dos canarios',
+      _borra.returncode == 0,
+      '; '.join(l.strip() for l in (_borra.stdout + _borra.stderr).splitlines()
+                if '✗' in l)[:400])
+
 # ── 6.72 · LO QUE SE LE OFRECE AL CLIENTE ES LO QUE SE VENDE HOY ───────
 #
 # EL NÚMERO ($27) abre hasta el día 5 y corta ahí, que es el mejor momento

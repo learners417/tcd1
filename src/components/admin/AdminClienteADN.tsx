@@ -56,7 +56,9 @@ interface AdminClienteADNProps {
 interface AuditEntry {
   id: string;
   target_user_id: string;
-  edited_by: string;
+  // Queda en NULL si la cuenta del editor se borra: desde el 18 de noviembre
+  // el FK es ON DELETE SET NULL, porque antes trababa el borrado del equipo.
+  edited_by: string | null;
   field_codigo: string;
   field_label?: string | null;
   field_key: string;
@@ -507,7 +509,9 @@ export default function AdminClienteADN({ clienteId, clienteNombre, adminRol }: 
 
       // Resolver nombre del editor en consulta separada (no dependemos del FK).
       const auditEntries = (auditRes.data ?? []) as AuditEntry[];
-      const editorIds = Array.from(new Set(auditEntries.map((e) => e.edited_by).filter(Boolean)));
+      const editorIds = Array.from(
+        new Set(auditEntries.map((e) => e.edited_by).filter((x): x is string => !!x)),
+      );
       const nameById = new Map<string, string>();
       if (editorIds.length > 0) {
         const { data: editors } = await supabase
@@ -520,7 +524,7 @@ export default function AdminClienteADN({ clienteId, clienteNombre, adminRol }: 
       }
       const auditWithNames = auditEntries.map((e) => ({
         ...e,
-        editor: { nombre: nameById.get(e.edited_by) || undefined },
+        editor: { nombre: (e.edited_by ? nameById.get(e.edited_by) : undefined) || undefined },
       }));
 
       const outputs: Record<string, string> = {};
