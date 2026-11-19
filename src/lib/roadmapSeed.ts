@@ -5,7 +5,7 @@
 // el JSON a mano.
 
 import seed from './roadmap.seed.json'
-import { esPasoDelCliente } from './diaPrograma'
+import { esPasoDelCliente } from './diaPrograma.js'
 
 // ── primitivas ──────────────────────────────────────────────────────────────
 
@@ -361,7 +361,7 @@ export const cargaTotal = (): number =>
 // agrupamiento sale de los códigos de pieza (P4.3 → pilar P4) y todo lo demás
 // se deriva de las jornadas. No hay datos nuevos.
 
-import { PILAR_ORDER, NIVEL_UMBRALES_V3, type PilarId } from './supabase'
+import { PILAR_ORDER, NIVEL_UMBRALES_V3, type PilarId } from './supabase.js'
 
 export interface RoadmapMeta {
   codigo: string
