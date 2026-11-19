@@ -80,13 +80,47 @@ if (JSON.stringify(abiertos) !== JSON.stringify(LOS_CINCO)) {
 if (DIAS_DE_ACCESO.blanco !== DIAS_DE_LA_VENTANA) {
   mal(`la entrada da ${DIAS_DE_ACCESO.blanco} días de ventana y la página promete ${DIAS_DE_LA_VENTANA}`);
 }
+/**
+ * ¿Este archivo llega a `laVentanaDeAcceso`, directo o por lo que importa?
+ *
+ * Se mira el IMPORT, no el nombre suelto: los tres archivos lo nombran en sus
+ * comentarios para explicar por qué existe, y con el nombre suelto esta
+ * comprobación se quedaba verde al sacar el import de verdad.
+ *
+ * Y se SIGUE LA CADENA, no sólo el import de arriba. El 18 de noviembre
+ * `ghl-webhook` dejó de importarlo directo: lo que abre cada oferta se mudó a
+ * `loQueAbreElPago` —para que `alta-numero` resolviera un cobro con la misma
+ * declaración en vez de una copia—, y es ese módulo el que lee la ventana.
+ * Esta comprobación se puso roja ahí, y tenía razón en mirar y motivo
+ * equivocado: el número seguía siendo uno solo, un salto más allá. Pedir el
+ * import directo obligaría a cada ruta a importar la ventana aunque no la
+ * use, que es justo la copia que la declaración única vino a evitar.
+ *
+ * Lo que no cambia es qué se prohíbe: un número de días escrito a mano. Eso
+ * se mira abajo, archivo por archivo, sin cadena.
+ */
+function llegaALaVentana(relativo: string, vistos = new Set<string>()): boolean {
+  if (vistos.has(relativo) || vistos.size > 20) return false;
+  vistos.add(relativo);
+  let t: string;
+  try { t = readFileSync(join(raiz, relativo), 'utf8'); } catch { return false; }
+  if (/from\s+'[^']*laVentanaDeAcceso(?:\.js)?'/.test(t)) return true;
+  // Los imports relativos de este archivo, resueltos contra su carpeta.
+  for (const m of t.matchAll(/from\s+'(\.[^']*)'/g)) {
+    const crudo = m[1].replace(/\.js$/, '');
+    const carpeta = relativo.split('/').slice(0, -1).join('/');
+    for (const ext of ['.ts', '.tsx']) {
+      const destino = join(carpeta, crudo + ext).replace(/\\/g, '/');
+      if (llegaALaVentana(destino, vistos)) return true;
+    }
+  }
+  return false;
+}
+
 for (const arch of ['api/alta-numero.ts', 'api/ghl-webhook.ts', 'src/pages/Admin.tsx'] as const) {
   const t = readFileSync(join(raiz, arch), 'utf8');
-  /* Se mira el IMPORT, no el nombre suelto: los tres archivos lo nombran en
-     sus comentarios para explicar por qué existe, y con el nombre suelto esta
-     comprobación se quedaba verde al sacar el import de verdad. */
-  if (!/from\s+'[^']*laVentanaDeAcceso(?:\.js)?'/.test(t)) {
-    mal(`${arch} no importa \`laVentanaDeAcceso\`: tiene su propio número`);
+  if (!llegaALaVentana(arch)) {
+    mal(`${arch} no llega a \`laVentanaDeAcceso\`, ni directo ni por lo que importa: tiene su propio número`);
   }
   /* Y que no quede uno escrito a mano al lado del que se importa. */
   const aMano = /(\b(?:7|14|21|30|45|60|90)\b)\s*\*\s*86400000/.exec(t);

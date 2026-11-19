@@ -11,6 +11,29 @@
  *   3. Si el usuario YA EXISTÍA de antes, no le pisa su plan: un cliente DWY
  *      que compra la entrada sigue siendo DWY.
  *
+ * ═══ Y DESDE EL 18 DE NOVIEMBRE, EL COBRO QUE NO ES LA ENTRADA ═══
+ *
+ * El cuerpo acepta un `plan` opcional:
+ *
+ *   { "email": "...", "nombre": "...", "plan": "ascenso" }
+ *     plan = base | ascenso | instalacion   ← las ofertas de hoy
+ *            blanco | amarillo | verde | negro   ← los planes de acceso
+ *
+ * Sin `plan`, esta ruta hace exactamente lo de antes: la entrada.
+ *
+ * Por qué hizo falta. Medido el 18 de noviembre por la API de GHL: los tres
+ * flujos que cobran La Base ($1.000), La Mentoría ($3.000) y La Instalación
+ * ($6.000) llaman a **esta ruta**, con `{email, nombre}`, y ninguno llama a
+ * `/api/ghl-webhook`. Así que el que pagaba 1.000, 3.000 o 6.000 quedaba con
+ * `plan = 'ELNUMERO'` y sin `plan_comercial`: `planDe` le devolvía 'blanco'
+ * —los cinco días de la entrada— y una ventana de 21 días. El día 22 la app
+ * se le apagaba, sin un error en ninguna pantalla. No le pasó a nadie todavía
+ * porque los clientes de El Ascenso se dieron de alta a mano.
+ *
+ * Lo que el `plan` abre NO está escrito acá: lo resuelve `loQueAbreElPago`,
+ * la misma declaración que lee `/api/ghl-webhook`. Dos copias de «qué abre
+ * cada oferta» se separan la primera vez que cambia un precio.
+ *
  * ═══ POR QUÉ EL PUNTO 3 MIRA SI EL USUARIO ES NUEVO, Y NO SU PLAN ═══
  *
  * Porque `on_auth_user_created` —el trigger de `fix-supabase.sql`— inserta el
@@ -46,6 +69,7 @@
  */
 import { createClient } from '@supabase/supabase-js';
 import { DIAS_DE_ACCESO } from '../src/lib/laVentanaDeAcceso.js';
+import { loQueSePago, cambiosDelPago, type FichaDelPago } from './_lib/loQueAbreElPago.js';
 
 type VercelRequest = {
   method?: string;
@@ -92,6 +116,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (!email || !email.includes('@')) return res.status(400).json({ error: 'EMAIL_REQUERIDO' });
 
+  /*
+   * EL COBRO QUE NO ES LA ENTRADA.
+   *
+   * `plan` es opcional: sin él, esta ruta es la de siempre. Con él, lo que se
+   * escribe lo decide `loQueAbreElPago`, la misma declaración del webhook.
+   *
+   * Un plan que no se vende se rechaza con 400 en vez de darse de alta como
+   * la entrada: si GHL manda un nombre de producto que acá no existe —un
+   * typo en el cuerpo del flujo, una oferta nueva sin agregar— el silencio
+   * sería que el que pagó 6.000 recibe los cinco días. Eso es justo lo que
+   * este turno vino a cerrar, y no se puede cerrar dejando la puerta de al
+   * lado abierta.
+   */
+  const planPedido = String(body?.plan ?? '').trim().toLowerCase();
+  const pagado = planPedido ? loQueSePago(planPedido) : null;
+  if (planPedido && !pagado) return res.status(400).json({ error: 'PLAN_INVALIDO' });
+
   const admin = createClient(supaUrl, serviceKey, { auth: { autoRefreshToken: false, persistSession: false } });
 
   try {
@@ -123,8 +164,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const recienCreado = estado === 'invitado';
 
     // 2) Perfil con plan ELNUMERO — sin pisar el plan de un cliente de antes
+    /*
+     * Las tres columnas del pago se leen también. Antes esta ruta leía cinco
+     * columnas y ninguna era del cobro, así que no tenía con qué comparar: es
+     * literalmente por qué no podía resolver un plan sin pisarle el acceso a
+     * quien ya había pagado más arriba.
+     */
+    const COLUMNAS = 'id, plan, nombre, fecha_inicio, email, plan_comercial, servicio_contratado, servicio_marcado_el';
     const { data: perfil } = await admin
-      .from('profiles').select('id, plan, nombre, fecha_inicio, email').eq('id', userId).maybeSingle();
+      .from('profiles').select(COLUMNAS).eq('id', userId).maybeSingle();
     /*
      * La fecha de inicio se sella acá, en el alta.
      *
@@ -137,6 +185,71 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const hoy = new Date().toISOString().slice(0, 10);
     const accesoHasta = new Date(Date.now() + DIAS_DE_LA_VENTANA * 86400000).toISOString();
     let planResultante = (perfil?.plan as string | null) ?? 'ELNUMERO';
+
+    if (pagado) {
+      /*
+       * ═══ EL CAMINO DEL COBRO: LO QUE SE PAGÓ, NO LA ENTRADA ═══
+       *
+       * Las columnas las decide `cambiosDelPago` —la misma declaración del
+       * webhook—, que ya trae la regla de que un cobro nunca baja lo que
+       * alguien pagó, la de no adivinar el servicio desde un color, y la del
+       * sello del escalón una sola vez.
+       *
+       * ═══ Y ACÁ NO SE ESCRIBE `plan = 'ELNUMERO'` ═══
+       *
+       * `plan` dice POR DÓNDE ENTRÓ, y `enElTramoDelNumero` lo lee crudo: con
+       * 'ELNUMERO' puesto, el que pagó El Ascenso recibía la bienvenida de los
+       * cinco días y el Tablero del tramo corto —`WelcomeWizard` y
+       * `Dashboard` preguntan por esa función, no por `plan_comercial`—. El
+       * acceso le habría quedado bien y las dos pantallas mal, que es el tipo
+       * de fallo que no tiene mensaje de error.
+       *
+       * Así que en este camino `plan` se deja como está. Lo que manda es
+       * `plan_comercial`, que es lo que `planDe` mira primero: lo que pagó le
+       * gana a por dónde entró.
+       */
+      const cambios: Record<string, unknown> = { ...cambiosDelPago(pagado, perfil as FichaDelPago | null) };
+      if (!perfil) {
+        /*
+         * `plan` va con 'DWY' —el valor del trigger—, no vacío y no
+         * 'ELNUMERO'.
+         *
+         * Vacío, porque `profiles.plan` no está declarada en ninguna
+         * migración del repo: la columna es anterior a `supabase/migrations`
+         * y se creó en el panel, así que desde acá NO se puede afirmar que
+         * acepte null. Insertar sin ella sería apostar a un default que no
+         * podemos leer, y el caso en que se ejecuta —un usuario viejo en auth
+         * sin fila en profiles— es justo el que nadie prueba a mano.
+         *
+         * Y no 'ELNUMERO' por lo de la lente 23: esa columna dice por dónde
+         * entró y `enElTramoDelNumero` la lee cruda. 'DWY' es exactamente lo
+         * que tendría la fila si el trigger la hubiera creado, que es el caso
+         * normal; lo que pagó lo dice `plan_comercial`, que es lo que `planDe`
+         * mira primero.
+         */
+        await admin.from('profiles').insert({
+          id: userId, email, nombre: nombre || email.split('@')[0],
+          plan: 'DWY', fecha_inicio: hoy, ...cambios,
+        });
+      } else {
+        // Igual que en la entrada: una fecha de inicio anterior no se pisa.
+        if (!perfil.fecha_inicio) cambios.fecha_inicio = hoy;
+        if (!perfil.email) cambios.email = email;
+        if (Object.keys(cambios).length > 0) {
+          await admin.from('profiles').update(cambios).eq('id', userId);
+        }
+      }
+      /*
+       * Y se relee: un `update ... where id = ...` sobre una fila que no está
+       * afecta cero filas y contesta bien. Sin esto, GHL registraba un cobro
+       * provisionado que no abrió nada. Es la misma relectura del webhook.
+       */
+      const { data: despues } = await admin.from('profiles').select(COLUMNAS).eq('id', userId).maybeSingle();
+      const quedo = (despues as { plan_comercial?: string | null } | null)?.plan_comercial ?? null;
+      return res.status(200).json({
+        ok: true, estado, plan: pagado.plan, servicio: pagado.ticket ?? null, acceso: quedo,
+      });
+    }
 
     if (!perfil) {
       /*

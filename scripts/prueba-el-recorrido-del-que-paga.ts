@@ -215,6 +215,24 @@ async function cobraLaEntrada(email: string, nombre = 'Dra. Prueba'): Promise<Re
   return r;
 }
 
+/**
+ * Lo que GHL manda HOY cuando alguien compra uno de los tres escalones: la
+ * misma ruta del alta, con `plan` en el cuerpo.
+ *
+ * Esto no es una hipótesis. Medido el 18 de noviembre por la API de GHL: los
+ * flujos «Entrega al pagar · La Base 1.000», «· Mentoría 3.000» e
+ * «· Instalación 6.000» llaman a `/api/alta-numero`, y ninguno llama a
+ * `/api/ghl-webhook`.
+ */
+async function cobraElEscalonPorElAlta(email: string, plan: string, nombre = 'Dra. Prueba'): Promise<Respuesta> {
+  const r: Respuesta = { code: 0, body: {} };
+  await alta(
+    { method: 'POST', query: {}, headers: { 'x-alta-key': CLAVE_ALTA }, body: { email, nombre, plan } } as never,
+    respuesta(r) as never,
+  );
+  return r;
+}
+
 /** Lo que GHL manda cuando alguien compra uno de los tres escalones. */
 async function cobra(email: string, plan: string): Promise<Respuesta> {
   const r: Respuesta = { code: 0, body: {} };
@@ -252,6 +270,35 @@ function altaComoEstaba(email: string) {
     perfil.plan = 'ELNUMERO';
     perfil.acceso_hasta = new Date(Date.now() + 21 * 86400000).toISOString();
   } // si ya tiene DWY/DFY/IMPLEMENTACION, no se toca
+}
+
+/**
+ * EL ALTA COMO ESTABA FRENTE A UN `plan` — el defecto de este turno.
+ *
+ * No lo rechazaba ni lo atendía: lo ignoraba. El cuerpo del flujo podía traer
+ * `plan: "instalacion"` y la ruta leía `email` y `nombre` nada más, escribía
+ * `plan = 'ELNUMERO'` y una ventana de 21 días. Para probar cada lente nueva
+ * contra su propio fallo, basta llamar a la ruta SIN el plan: es exactamente
+ * lo que hacía con él.
+ */
+async function altaIgnorandoElPlan(email: string): Promise<Respuesta> {
+  return cobraLaEntrada(email);
+}
+
+/**
+ * El alta atendiendo el plan pero SIN la regla de que un cobro no baja nada:
+ * escribe `plan_comercial` mirando sólo lo que le llegó. Es el fallo que la
+ * lente del cliente que ya tenía más acceso tiene que ver.
+ */
+function altaConElPlanPisando(email: string, plan: 'blanco' | 'amarillo' | 'verde' | 'negro', ticket?: string) {
+  const perfil = base.profiles.find((p) => String(p.email ?? '').toLowerCase() === email.toLowerCase());
+  if (!perfil) return;
+  perfil.plan_comercial = plan;
+  perfil.acceso_hasta = plan === 'blanco' ? new Date(Date.now() + 21 * 86400000).toISOString() : null;
+  if (ticket) {
+    perfil.servicio_contratado = ticket;
+    perfil.servicio_marcado_el = new Date().toISOString();
+  }
 }
 
 /** El webhook como estaba: pisa el acceso y nunca sella la fecha del escalón. */
@@ -757,6 +804,264 @@ const LENTES: Lente[] = [
       await cobraLaEntrada(EMAIL);
       const r = await cobra(EMAIL, 'base');   // uno que SÍ se vende
       return r.code === 400;
+    },
+  },
+
+  /* ════════════════════════════════════════════════════════════════════
+   * TURNO 18 · EL PAGO ABRE LO QUE SE PAGÓ
+   *
+   * Los tres flujos que cobran 1.000, 3.000 y 6.000 llaman a
+   * `/api/alta-numero`, no al webhook. Antes de este turno esa ruta ignoraba
+   * el plan: el que pagaba cualquiera de los tres recibía los cinco días de
+   * la entrada y una ventana de 21. Estas lentes miran la ruta del alta con
+   * `plan` en el cuerpo, y leen lo que quedó escrito con las funciones de la
+   * app.
+   * ════════════════════════════════════════════════════════════════════ */
+
+  /* ── 20 · La Base por la ruta del alta ── */
+  {
+    nombre: 'el que paga La Base por el alta queda en amarillo, con su escalón sellado',
+    mira: async () => {
+      desdeCero();
+      const r = await cobraElEscalonPorElAlta(EMAIL, 'base');
+      const f = fichaDe(EMAIL);
+      return r.code === 200
+        && planDe(f) === 'amarillo'
+        && planPermitePilar(planDe(f), 2)
+        && servicioDe(f.servicio_contratado) === 'base'
+        && Boolean(f.servicio_marcado_el)
+        && diasRestantes(f) === null;            // un plan pago no vence
+    },
+    // El defecto: la ruta ignorando el plan, que es lo que hacía.
+    conSuFallo: async () => {
+      desdeCero();
+      await altaIgnorandoElPlan(EMAIL);
+      const f = fichaDe(EMAIL);
+      return planDe(f) === 'amarillo' && Boolean(f.servicio_marcado_el);
+    },
+  },
+
+  /* ── 21 · El Ascenso: los noventa días, y el acceso que no vence ──
+   *
+   * Es el caso de los cinco clientes que faltan dar de alta (Martina, Pedro,
+   * Rosana, Roberto y María Laura). Con el defecto puesto, el día 22 se les
+   * apagaba la app.
+   */
+  {
+    nombre: 'el que paga El Ascenso abre los 90 días y su acceso no vence',
+    mira: async () => {
+      desdeCero();
+      const r = await cobraElEscalonPorElAlta(EMAIL, 'ascenso');
+      const f = fichaDe(EMAIL);
+      return r.code === 200
+        && planDe(f) === 'negro'
+        && planPermitePilar(planDe(f), PILAR_MAX.negro)
+        && servicioDe(f.servicio_contratado) === 'ascenso'
+        && diasRestantes(f) === null
+        && !accesoVencido(f);
+    },
+    conSuFallo: async () => {
+      desdeCero();
+      await altaIgnorandoElPlan(EMAIL);
+      const f = fichaDe(EMAIL);
+      return planDe(f) === 'negro' && diasRestantes(f) === null;
+    },
+  },
+
+  /* ── 22 · La Instalación: y al equipo le toca entregar ──
+   *
+   * `leTocanLasEntregas` pide el escalón Y la fecha. Sin la fecha, las
+   * entregas del equipo no se disparan nunca: el que pagó 6.000 no recibe lo
+   * que compró y nadie se enteraría, porque no hay error en ninguna pantalla.
+   */
+  {
+    nombre: 'el que paga La Instalación dispara las entregas del equipo',
+    mira: async () => {
+      desdeCero();
+      const r = await cobraElEscalonPorElAlta(EMAIL, 'instalacion');
+      const f = fichaDe(EMAIL);
+      return r.code === 200
+        && planDe(f) === 'negro'
+        && servicioDe(f.servicio_contratado) === 'instalacion'
+        && leTocanLasEntregas(f.servicio_contratado, f.servicio_marcado_el);
+    },
+    conSuFallo: async () => {
+      desdeCero();
+      await altaIgnorandoElPlan(EMAIL);
+      const f = fichaDe(EMAIL);
+      return leTocanLasEntregas(f.servicio_contratado, f.servicio_marcado_el);
+    },
+  },
+
+  /* ── 23 · Y NO LE DEJA PUESTO EL TRAMO DE LOS CINCO DÍAS ──
+   *
+   * `plan` dice por dónde entró y `enElTramoDelNumero` lo lee crudo: con
+   * 'ELNUMERO' escrito, el que pagó El Ascenso recibe la bienvenida de los
+   * cinco días (`WelcomeWizard`) y el Tablero del tramo corto
+   * (`Dashboard`) — las dos pantallas preguntan por esa función, no por
+   * `plan_comercial`. El acceso le quedaría bien y las dos pantallas mal.
+   */
+  {
+    nombre: 'el que paga un escalón no queda marcado como el de los cinco días',
+    mira: async () => {
+      desdeCero();
+      await cobraElEscalonPorElAlta(EMAIL, 'ascenso');
+      return !enElTramoDelNumero(fichaDe(EMAIL));
+    },
+    conSuFallo: async () => {
+      desdeCero();
+      await altaIgnorandoElPlan(EMAIL);
+      return !enElTramoDelNumero(fichaDe(EMAIL));
+    },
+  },
+
+  /* ── 24 · UN COBRO NO LE BAJA EL ACCESO A QUIEN YA PAGÓ MÁS ARRIBA ──
+   *
+   * El caso: el cliente de El Ascenso al que le entra un cobro de La Base por
+   * un order bump o un flujo mal apuntado. Si se le escribiera 'amarillo',
+   * pagó 3.000 y la app le cierra el Camino.
+   */
+  {
+    nombre: 'un cobro de La Base no le baja el acceso al que ya tenía El Ascenso',
+    mira: async () => {
+      desdeCero();
+      await cobraElEscalonPorElAlta(EMAIL, 'ascenso');
+      await cobraElEscalonPorElAlta(EMAIL, 'base');
+      const f = fichaDe(EMAIL);
+      return planDe(f) === 'negro'
+        && planPermitePilar(planDe(f), PILAR_MAX.negro)
+        && servicioDe(f.servicio_contratado) === 'ascenso';
+    },
+    conSuFallo: async () => {
+      desdeCero();
+      await cobraElEscalonPorElAlta(EMAIL, 'ascenso');
+      altaConElPlanPisando(EMAIL, 'amarillo', 'base');   // sin la regla de la baja
+      const f = fichaDe(EMAIL);
+      return planDe(f) === 'negro' && servicioDe(f.servicio_contratado) === 'ascenso';
+    },
+  },
+
+  /* ── 25 · Y el cliente de siempre tampoco se degrada ──
+   *
+   * 'completo' son los clientes de antes de la escalera. Un cobro de La Base
+   * que les entre no puede cortarles el Camino en el día 12, ni encenderles
+   * el tope del escalón: sellar `servicio_marcado_el` ENCIENDE ese tope, así
+   * que sellarlo de más les quita los días 13 al 90 que ya tenían.
+   *
+   * La ficha del cliente de siempre se arma como la guarda la base de verdad
+   * —`plan = 'DWY'` del trigger y `plan_comercial = 'completo'`— y no con la
+   * de la entrada encima: `planPagado` no acepta 'completo', así que un
+   * 'ELNUMERO' puesto al lado haría que `planDe` conteste 'blanco' y la lente
+   * mediría ese cruce en vez de lo que vino a mirar.
+   */
+  {
+    nombre: 'un cobro suelto no degrada al cliente de siempre',
+    mira: async () => {
+      desdeCero();
+      await cobraLaEntrada(EMAIL);
+      const f0 = fichaDe(EMAIL) as Fila;
+      f0.plan = 'DWY'; f0.plan_comercial = 'completo'; f0.acceso_hasta = null;
+      await cobraElEscalonPorElAlta(EMAIL, 'base');
+      const f = fichaDe(EMAIL);
+      return planDe(f) === 'completo'
+        && planPermitePilar(planDe(f), PILAR_MAX.negro)
+        && !f.servicio_marcado_el
+        && !leTocanLasEntregas(f.servicio_contratado, f.servicio_marcado_el)
+        && diasRestantes(f) === null;
+    },
+    conSuFallo: async () => {
+      desdeCero();
+      await cobraLaEntrada(EMAIL);
+      const f0 = fichaDe(EMAIL) as Fila;
+      f0.plan = 'DWY'; f0.plan_comercial = 'completo'; f0.acceso_hasta = null;
+      altaConElPlanPisando(EMAIL, 'amarillo', 'base');
+      const f = fichaDe(EMAIL);
+      return planDe(f) === 'completo' && !f.servicio_marcado_el && diasRestantes(f) === null;
+    },
+  },
+
+  /* ── 26 · SIN `plan`, LA RUTA ES LA DE SIEMPRE ──
+   *
+   * El flujo de la entrada no se toca. Es la mitad del encargo: que lo nuevo
+   * no rompa lo que ya andaba.
+   */
+  {
+    nombre: 'sin plan en el cuerpo, el alta sigue siendo la entrada de los 5 días',
+    mira: async () => {
+      desdeCero();
+      const r = await cobraLaEntrada(EMAIL);
+      const f = fichaDe(EMAIL);
+      const d = diasRestantes(f);
+      return r.code === 200
+        && esElTramoDeLosCincoDias(f)
+        && enElTramoDelNumero(f)
+        && !f.plan_comercial            // la entrada no escribe el plan pago
+        && d !== null && d > 0;         // y su ventana corre
+    },
+    // El defecto: que el camino del cobro se le aplicara también al que no manda plan.
+    conSuFallo: async () => {
+      desdeCero();
+      await cobraElEscalonPorElAlta(EMAIL, 'base');
+      const f = fichaDe(EMAIL);
+      const d = diasRestantes(f);
+      return esElTramoDeLosCincoDias(f) && !f.plan_comercial && d !== null && d > 0;
+    },
+  },
+
+  /* ── 27 · Y UN PLAN QUE NO SE VENDE NO DA DE ALTA NADA ──
+   *
+   * Un typo en el cuerpo del flujo de GHL, o una oferta nueva sin agregar
+   * acá, no puede terminar en «le abrimos los cinco días al que pagó 6.000»:
+   * ése es el fallo que este turno vino a cerrar.
+   */
+  {
+    nombre: 'un plan que no se vende se rechaza en vez de dar de alta la entrada',
+    mira: async () => {
+      desdeCero();
+      const r = await cobraElEscalonPorElAlta(EMAIL, 'la-oferta-que-no-existe');
+      return r.code === 400 && base.profiles.length === 0 && base.usuarios.length === 0;
+    },
+    conSuFallo: async () => {
+      desdeCero();
+      const r = await cobraElEscalonPorElAlta(EMAIL, 'ascenso');   // uno que SÍ se vende
+      return r.code === 400 && base.profiles.length === 0;
+    },
+  },
+
+  /* ── 28 · EL USUARIO VIEJO EN auth SIN FILA EN profiles ──
+   *
+   * El único camino en que esta ruta INSERTA en vez de actualizar: alguien que
+   * ya está en `auth.users` y no tiene perfil (una cuenta de antes del
+   * trigger). La fila que se arma ahí tiene que quedar completa, porque
+   * `profiles.plan` no está declarada en ninguna migración del repo —es
+   * anterior a `supabase/migrations`— y desde el código no se puede afirmar
+   * que acepte null.
+   *
+   * Se mide que la fila nazca con su `plan` puesto, con lo que pagó escrito y
+   * sin el tramo de los cinco días encima.
+   */
+  {
+    nombre: 'el usuario viejo sin perfil queda con su fila completa y su escalón',
+    mira: async () => {
+      desdeCero();
+      // En auth pero sin perfil: el trigger no corrió para él.
+      base.usuarios.push({ id: 'uuid-viejo', email: EMAIL });
+      const r = await cobraElEscalonPorElAlta(EMAIL, 'instalacion');
+      const f = fichaDe(EMAIL);
+      return r.code === 200
+        && Boolean(f.plan)                    // la columna no queda vacía
+        && !enElTramoDelNumero(f)
+        && planDe(f) === 'negro'
+        && servicioDe(f.servicio_contratado) === 'instalacion'
+        && leTocanLasEntregas(f.servicio_contratado, f.servicio_marcado_el);
+    },
+    // El defecto: la fila insertada sin `plan`, apostando a un default que no se puede leer.
+    conSuFallo: async () => {
+      desdeCero();
+      base.usuarios.push({ id: 'uuid-viejo', email: EMAIL });
+      base.profiles.push({ id: 'uuid-viejo', email: EMAIL, nombre: 'Usuario', fecha_inicio: HOY });
+      const f = fichaDe(EMAIL);
+      return Boolean(f.plan);
     },
   },
 ];

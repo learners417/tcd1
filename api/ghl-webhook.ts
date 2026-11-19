@@ -29,87 +29,21 @@
  * productos viejos en GHL que los mandan.
  */
 import { getAdminClient } from './_lib/credits-server.js';
-import { accesoHasta, type EscalonDeAcceso } from '../src/lib/laVentanaDeAcceso.js';
-
-const PLANES_VALIDOS = ['blanco', 'amarillo', 'verde', 'negro'] as const;
-type PlanComercial = (typeof PLANES_VALIDOS)[number];
-
-const TICKETS_VALIDOS = ['base', 'ascenso', 'instalacion'] as const;
-type Ticket = (typeof TICKETS_VALIDOS)[number];
-
-/**
- * QUÉ ABRE CADA OFERTA, Y QUÉ LE DEBE EL EQUIPO.
+/*
+ * QUÉ ABRE CADA OFERTA, QUÉ LE DEBE EL EQUIPO Y POR QUÉ UN COBRO NUNCA BAJA
+ * NADA: todo eso vivía acá, y el 18 de noviembre se mudó a
+ * `loQueAbreElPago` entero, sin cambiarle una línea de sentido.
  *
- * ═══ ESTO NO ES EL PUENTE PROHIBIDO ═══
- *
- * `cuadroTickets` quitó —y documentó— una tabla que **adivinaba** el servicio
- * contratado a partir del plan de acceso: `verde → $5.000`. Con eso, alguien
- * que había pagado $497 de acceso figuraba con la instalación completa
- * contratada, y el equipo que trabajara contra esa ficha instalaba gratis.
- *
- * Acá el sentido es el contrario y es el único lugar con autoridad para
- * decirlo: el webhook **sabe qué producto se pagó**, y de ese dato salen las
- * dos respuestas a la vez —qué pantallas ve y qué le debe el equipo— sin
- * deducir una de la otra. Si esto no lo escribiera el pago, lo tendría que
- * marcar una persona a mano en el Admin, y entonces la venta no es automática.
- *
- * El tope de acceso de cada oferta coincide con `topeDelEscalon`: La Base
- * llega al día 12, que es el pilar 2 ('amarillo'); El Ascenso y La Instalación
- * abren los 90 días ('negro') y se diferencian en quién monta, no en qué ve.
+ * El motivo: los tres flujos de GHL que cobran La Base, La Mentoría y La
+ * Instalación no llaman a esta ruta, llaman a `/api/alta-numero`. Para que esa
+ * ruta resuelva un cobro como lo resuelve esta, hay dos caminos: copiar esto
+ * allá, o declararlo una vez y que las dos lo lean. Dos copias de «qué abre
+ * cada oferta» se separan la primera vez que cambia un precio.
  */
-const LO_QUE_ABRE: Record<Ticket, PlanComercial> = {
-  base: 'amarillo',
-  ascenso: 'negro',
-  instalacion: 'negro',
-};
-
-/**
- * La Semana Blanca vence; los planes pagos no.
- *
- * El cuánto sale de `laVentanaDeAcceso`, que es la misma declaración que lee
- * el alta de la entrada y el botón del Admin. Escrito a mano en cada lado, el
- * número no coincidía en tres de los cinco escalones.
- */
-function accesoHastaDe(plan: PlanComercial): string | null {
-  return accesoHasta(plan as EscalonDeAcceso);
-}
-
-/**
- * UN COBRO NUNCA BAJA LO QUE ALGUIEN YA PAGÓ.
- *
- * ═══ QUÉ PASABA ═══
- *
- * `plan_comercial` y `acceso_hasta` se escribían sin mirar qué había. Gana el
- * último webhook, no el escalón más alto. Entonces un producto viejo de GHL
- * que manda `plan: "blanco"`, un workflow que se dispara doble sobre un order
- * bump, o un reenvío de un cobro de hace meses, dejaba al cliente de $3.000
- * con los cinco días abiertos **y un vencimiento a 21 días**. Pagó el Ascenso
- * y la app le cerró el Camino: el fallo más caro que puede tener esta ruta,
- * porque no hay ningún error en ninguna pantalla — simplemente ahí se le
- * termina lo que compró.
- *
- * ═══ LA REGLA ═══
- *
- * Un cobro sólo puede querer decir «pagó esto». Nunca «pagó menos»: para eso
- * no hay cobro que lo justifique. Así que esta ruta escribe el acceso cuando
- * es igual o más alto que el que la ficha ya tiene, y se abstiene cuando
- * sería más bajo. Bajarle el acceso a alguien es del Admin, donde lo hace una
- * persona que sabe por qué.
- *
- * `completo` son los clientes de siempre y está arriba de todo: un cobro no
- * los degrada tampoco.
- */
-const ALTURA_DEL_ACCESO: Record<string, number> = {
-  blanco: 1, amarillo: 2, verde: 3, negro: 4, completo: 4,
-};
-
-/** La misma regla para el escalón de servicio: el equipo no entrega de menos. */
-const ALTURA_DEL_SERVICIO: Record<string, number> = { base: 1, ascenso: 2, instalacion: 3 };
-
-/** ¿Lo que se pagó está igual o más arriba que lo que la ficha ya dice? */
-function noEsUnaBaja(altura: Record<string, number>, pagado: string, enLaFicha?: string | null): boolean {
-  return (altura[pagado] ?? 0) >= (altura[String(enLaFicha ?? '')] ?? 0);
-}
+import {
+  loQueSePago, cambiosDelPago, noEsUnaBaja, ALTURA_DEL_ACCESO,
+  type FichaDelPago,
+} from './_lib/loQueAbreElPago.js';
 
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'METHOD_NOT_ALLOWED' });
@@ -126,9 +60,9 @@ export default async function handler(req: any, res: any) {
   if (!email || !email.includes('@')) return res.status(400).json({ error: 'EMAIL_REQUIRED' });
 
   // El ticket pagado decide las dos columnas; un color, solo el acceso.
-  const ticket = (TICKETS_VALIDOS as readonly string[]).includes(pedido) ? (pedido as Ticket) : null;
-  const plan = (ticket ? LO_QUE_ABRE[ticket] : pedido) as PlanComercial;
-  if (!PLANES_VALIDOS.includes(plan)) return res.status(400).json({ error: 'PLAN_INVALIDO' });
+  const pagado = loQueSePago(pedido);
+  if (!pagado) return res.status(400).json({ error: 'PLAN_INVALIDO' });
+  const { plan, ticket } = pagado;
 
   try {
     const admin = getAdminClient();
@@ -141,12 +75,7 @@ export default async function handler(req: any, res: any) {
     // de nuevo: o fallaba, o le mandaba una segunda invitación a alguien que
     // ya tenía cuenta. Un error que no se ve hasta que el negocio crece, que
     // es exactamente cuando peor duele.
-    type Ficha = {
-      id: string;
-      plan_comercial?: string | null;
-      servicio_contratado?: string | null;
-      servicio_marcado_el?: string | null;
-    };
+    type Ficha = FichaDelPago & { id: string };
     const COLUMNAS = 'id, plan_comercial, servicio_contratado, servicio_marcado_el';
     const { data: perfilExistente } = await admin
       .from('profiles').select(COLUMNAS).eq('email', email).maybeSingle();
@@ -191,53 +120,15 @@ export default async function handler(req: any, res: any) {
     }
 
     // 3) Setear el plan y el acceso → los pilares se desbloquean solos.
-    //
-    // `servicio_contratado` se escribe SOLO si vino un ticket. Con un color
-    // no se toca: adivinarlo es el puente que hacía figurar a un cliente de
-    // $497 con la instalación completa contratada.
-    const cambios: Record<string, unknown> = {};
-    const leMueveElAcceso = noEsUnaBaja(ALTURA_DEL_ACCESO, plan, ficha?.plan_comercial);
-    if (leMueveElAcceso) {
-      cambios.plan_comercial = plan;
-      cambios.acceso_hasta = accesoHastaDe(plan);
-    }
-
     /*
-     * EL PAGO SELLA LA FECHA, NO SÓLO EL ESCALÓN.
-     *
-     * `servicio_contratado` es `not null default 'base'`, así que la columna
-     * sola no distingue «pagó La Base» de «nadie lo marcó nunca». Por eso
-     * `topeDelEscalon` pregunta por la FECHA —`estaMarcado`— y con la fecha
-     * vacía apaga el tope entero: sin ella, el de La Base abría los noventa
-     * días, la puerta de su primera etapa no aparecía nunca, y las entregas
-     * del equipo no se disparaban para el que pagó La Instalación.
-     *
-     * Esta ruta escribía el escalón y dejaba la fecha en null, o sea que la
-     * venta automática producía exactamente la ficha que el tope ignora. El
-     * pago ES el momento en que una persona lo habría marcado a mano.
-     *
-     * La fecha se escribe una sola vez: es cuándo se encendió el tope para
-     * esta ficha, y un cobro repetido no la mueve.
-     *
-     * ═══ Y SÓLO SI ESTE COBRO ES SU ESCALÓN ═══
-     *
-     * Sellar la fecha ENCIENDE el tope, así que sellarla de más quita días.
-     * El caso: un cliente de siempre —'completo'— al que le entra un cobro de
-     * La Base por un order bump o un workflow mal apuntado. Su acceso no se
-     * mueve (la regla de arriba lo protege), pero si acá se le sellara el
-     * escalón 'base' el Camino se le cortaría en el día 12: perdería los días
-     * 13 al 90 que ya tenía, y por una columna que nadie mira.
-     *
-     * De ahí la condición: el escalón se sella sólo cuando este cobro TAMBIÉN
-     * le movió el acceso, o sea cuando de verdad es el escalón que compró. Un
-     * cobro que no le abrió nada no puede cerrarle nada.
+     * Las columnas que este cobro escribe sobre esta ficha las decide
+     * `cambiosDelPago`, que es la misma declaración que lee `/api/alta-numero`.
+     * Ahí están escritos los tres motivos: que un cobro nunca baje el acceso,
+     * que `servicio_contratado` no se adivine de un color, y que la fecha del
+     * escalón se selle una sola vez y sólo cuando el cobro de verdad le abrió
+     * algo.
      */
-    const yaMarcado = Boolean(ficha?.servicio_marcado_el);
-    const sube = !yaMarcado || noEsUnaBaja(ALTURA_DEL_SERVICIO, ticket ?? '', ficha?.servicio_contratado);
-    if (ticket && leMueveElAcceso && sube) {
-      cambios.servicio_contratado = ticket;
-      if (!yaMarcado) cambios.servicio_marcado_el = new Date().toISOString();
-    }
+    const cambios = cambiosDelPago(pagado, ficha);
 
     if (Object.keys(cambios).length > 0) {
       const { error: upErr } = await admin.from('profiles').update(cambios).eq('id', userId);

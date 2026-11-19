@@ -4981,16 +4981,41 @@ check('y ninguna pantalla la vuelve a preguntar por su cuenta',
       not _repetido73, ', '.join(_os72.path.basename(f) for f in _repetido73))
 
 # El webhook de pago: si no acepta los tickets, el cliente paga y no se le abre nada.
+#
+# ═══ POR QUÉ ESTAS CINCO LENTES MIRAN DOS ARCHIVOS Y NO UNO ═══
+#
+# Mirabas sólo `api/ghl-webhook.ts`, y el 18 de noviembre las cuatro de acá y
+# la del sello se pusieron rojas de golpe sin que se rompiera nada: lo que
+# abre cada oferta se mudó a `api/_lib/loQueAbreElPago.ts` para que
+# `/api/alta-numero` resolviera un cobro con la MISMA declaración en vez de
+# una copia. Hacía falta porque los tres flujos de GHL que cobran 1.000, 3.000
+# y 6.000 llaman al alta, no al webhook.
+#
+# O sea: tenían razón en mirar y el lugar equivocado. Así que ahora se mira la
+# ruta MÁS el módulo que la ruta importa, y se exige primero que las dos
+# rutas lo importen. Si mañana la declaración se muda otra vez y nadie
+# arregla el import, la primera lente se pone roja y las otras no se quedan
+# mirando un archivo que ya no decide nada.
+_LIB_PAGO = 'api/_lib/loQueAbreElPago.ts'
 _wh73 = rd('api/ghl-webhook.ts')
+_alta73 = rd('api/alta-numero.ts')
+_lib73 = rd(_LIB_PAGO)
+check('las dos rutas de cobro leen la MISMA declaración de lo que abre el pago',
+      "from './_lib/loQueAbreElPago.js'" in cod(_wh73)
+      and "from './_lib/loQueAbreElPago.js'" in cod(_alta73),
+      'dos copias de «qué abre cada oferta» se separan la primera vez que '
+      'cambia un precio; y los tres flujos de GHL llaman al alta, no al webhook')
+# Lo que deciden las dos rutas junto con el módulo que las dos importan.
+_pago73 = _wh73 + '\n' + _lib73
 check('el webhook de pago acepta las ofertas que se venden',
-      "'base', 'ascenso', 'instalacion'" in _wh73,
+      "'base', 'ascenso', 'instalacion'" in _pago73,
       'con solo los colores, un producto que manda plan:"base" recibía '
       'PLAN_INVALIDO y el cliente pagaba sin que se le abriera nada')
 check('y el ticket pagado abre el tramo que le corresponde',
-      'LO_QUE_ABRE' in cod(_wh73) and "base: 'amarillo'" in _wh73,
+      'LO_QUE_ABRE' in cod(_pago73) and "base: 'amarillo'" in _pago73,
       'La Base llega al día 12, que es el pilar 2')
 check('el servicio contratado lo escribe el pago, no una persona',
-      'cambios.servicio_contratado = ticket' in cod(_wh73),
+      'cambios.servicio_contratado = ticket' in cod(_pago73),
       'si lo tiene que marcar alguien a mano, la venta no es automática')
 # La escritura del servicio vive detrás de `ticket &&`: un color de acceso no
 # tiene autoridad para escribirla. Adivinarlo es el puente que hacía figurar a
@@ -4998,7 +5023,7 @@ check('el servicio contratado lo escribe el pago, no una persona',
 # se cumpla al EJECUTAR la ruta lo mide la lente 18 de
 # scripts/prueba-el-recorrido-del-que-paga.ts; esto cuida que el guardia siga
 # en el código y nadie lo saque de un renglón.
-_tras_el_guardia73 = _wh73.split('cambios.servicio_contratado = ticket;')[0]
+_tras_el_guardia73 = _pago73.split('cambios.servicio_contratado = ticket;')[0]
 _guardia73 = _tras_el_guardia73.rstrip().endswith(') {') and 'if (ticket &&' in _tras_el_guardia73.split('\n')[-2]
 check('y NO se escribe cuando solo vino un color de acceso',
       bool(_guardia73),
@@ -5193,13 +5218,29 @@ check('el alta mira si el usuario es nuevo, no qué dice su columna plan',
 check('y el perfil que crea guarda su email',
       'id: userId, email,' in cod(_alta),
       'es la columna por la que el webhook del pago busca al cliente')
-_wh = rd('api/ghl-webhook.ts')
+# La ruta más la declaración que importa: el motivo está arriba, en el 6.73.
+_wh = rd('api/ghl-webhook.ts') + '\n' + rd('api/_lib/loQueAbreElPago.ts')
 check('un cobro no puede bajarle el acceso a quien pagó más arriba',
       'noEsUnaBaja' in cod(_wh) and 'ALTURA_DEL_ACCESO' in cod(_wh),
       'un webhook viejo con plan:"blanco" dejaba al de $3.000 con los 5 días')
 check('y el pago sella la fecha del escalón, que es la que enciende el tope',
       'cambios.servicio_marcado_el' in cod(_wh),
       'sin fecha, topeDelEscalon se apaga entero y el de La Base abre los 90 días')
+# Y EL ALTA TAMBIÉN RESUELVE UN COBRO, que es el turno 18.
+#
+# Medido el 18 de noviembre por la API de GHL: los flujos «Entrega al pagar ·
+# La Base 1.000», «· Mentoría 3.000» e «· Instalación 6.000» llaman a
+# `/api/alta-numero` con `{email, nombre}`. Esa ruta dejaba `plan = 'ELNUMERO'`
+# sin `plan_comercial`, así que `planDe` devolvía 'blanco': el que pagaba
+# cualquiera de los tres recibía los cinco días de la entrada y 21 días de
+# ventana, y el día 22 se le apagaba la app sin un error en ninguna pantalla.
+check('el alta resuelve el plan que le llega, no sólo la entrada',
+      'cambiosDelPago(pagado' in cod(_alta) and 'loQueSePago(planPedido)' in cod(_alta),
+      'los tres flujos que cobran 1.000, 3.000 y 6.000 llaman al alta: sin '
+      'esto, el que paga recibe los cinco días de la entrada')
+check('y un plan que no se vende no se da de alta como la entrada',
+      "res.status(400).json({ error: 'PLAN_INVALIDO' })" in cod(_alta),
+      'un typo en el cuerpo del flujo terminaría en «le abrimos 5 días al que pagó 6.000»')
 
 
 print('══ 16) LA PUERTA: cada ruta pide su llave, y corta ══')
@@ -6236,6 +6277,24 @@ else:
 _asub = subprocess.run([sys.executable,
                         'scripts/probar-que-la-lente-del-trabajo-subido-ve-el-defecto.py'],
                        capture_output=True, text=True)
+# ── Y EL ARNÉS DE LAS SIETE LENTES DEL COBRO ──────────────────────────
+#
+# El 18 de noviembre, cinco lentes del cobro se pusieron rojas de golpe sin
+# que se rompiera nada: la declaración de lo que abre cada oferta se mudó a
+# `api/_lib/loQueAbreElPago.ts` para que el alta resolviera un cobro con la
+# misma declaración en vez de una copia. Miraban el archivo, no el mecanismo.
+#
+# Arregladas para mirar la ruta MÁS el módulo que importa, hace falta algo que
+# confirme que siguen despiertas: el arnés les pone siete defectos, uno por
+# lente, y exige que cada una se ponga roja con el suyo.
+_lpago = subprocess.run([sys.executable,
+                         'scripts/probar-que-las-lentes-del-pago-ven-el-defecto.py'],
+                        capture_output=True, text=True)
+check('las siete lentes del cobro ven cada una su propio defecto',
+      _lpago.returncode == 0,
+      '; '.join(l.strip() for l in (_lpago.stdout + _lpago.stderr).splitlines()
+                if '✗' in l)[:400])
+
 check('la lente del trabajo subido ve sus cinco defectos del estado de git',
       _asub.returncode == 0,
       '; '.join(l.strip() for l in (_asub.stdout + _asub.stderr).splitlines()
