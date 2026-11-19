@@ -223,13 +223,63 @@ espera el clic.
 | 15 | Cirugía 4 · La app al lado de Claude | **cerrado** · `da9c71c` · 12 encargos, 1 lente, 60 miradas |
 | 16 | Cirugía 5 · Lo que la app mide por él | **cerrado** · `cf99bcc` · 1 lente, 45 miradas · el 300 de la cadena espera su clic |
 | 17 | **La radiografía en un solo tramo**: fundir los diez pasos, con el reloj y las cuatro preguntas nuevas (FODA, sus archivos, su audio, qué días le importan) | **cerrado** · `acc1f1a` · 1 lente nueva, 64 miradas · el premio se disolvió al medirlo |
-| 18 | **El pago abre lo que se pagó** (urgente; decidido por Javo el 18 nov, «sin ti: un turno de la app»): `alta-numero` acepta `plan` (`base · ascenso · instalacion`) | abierto |
+| 18 | **El pago abre lo que se pagó** (urgente; decidido por Javo el 18 nov, «sin ti: un turno de la app»): `alta-numero` acepta `plan` (`base · ascenso · instalacion`) | **cerrado** · `08657c9` · 8 lentes nuevas (28 en la cadena del pago) + 7 del cobro con su arnés · la premisa era cierta: la lógica no estaba |
 | 19 | **La entrega unida en la app**: los avisos nuevos hacia el Sistema, los cinco datos del cliente y, en Hoy, «Tu próximo encuentro», «Tu canal» y «Cuéntalo en Victorias» | abierto · después del 18 |
 
 **Turnos 18 y 19 · los abrió COMUNIDAD el 18 nov a las 19:40, con el clic de Javo** (plan completo en el proyecto, claude/ENTREGA-UNIDA.md; nota en claude/FRENTE-7-APP.md).
 
 *Turno 18 · el pago abre lo que se pagó.* Medido el 18 nov por la API de GHL: los flujos «Entrega al pagar · La Base 1.000», «· Mentoría 3.000» e «· Instalación 6.000» llaman a `/api/alta-numero` con `{email, nombre}` y `x-alta-key`. Esa ruta deja `plan = 'ELNUMERO'` sin `plan_comercial`, y `planDe` devuelve `'blanco'`: quien paga 1.000, 3.000 o 6.000 recibe los cinco días de la entrada y 21 días de acceso. Ningún flujo llama a `/api/ghl-webhook`. Todavía no le pasó a nadie (ninguna ficha con cliente-base, cliente-instalacion ni compro-97). Lo pedido: que `alta-numero` acepte un `plan` opcional y lo resuelva con la misma lógica de `ghl-webhook` (LO_QUE_ABRE, `plan_comercial`, `servicio_contratado`, `servicio_marcado_el`, nunca bajar a nadie); sin `plan`, igual que hoy. Una sola declaración, no dos copias. Con eso, COMUNIDAD agrega el plan en el cuerpo de los tres flujos y Javo no pega ninguna clave. Lente: los tres planes por la ruta, un cliente que ya existía con más acceso, y la ruta sin `plan`. Verificar la premisa primero: si la lógica ya estuviera, cerrarlo diciendo dónde.
 También queda resuelto así el alta de los cinco clientes que faltan (Martina, Pedro, Rosana, Roberto y María Laura, con El Ascenso): COMUNIDAD los pasa por un flujo con `plan: ascenso`, sin contraseña de Javo. Antes, revisar que el correo «Invite user» de Supabase esté en castellano y lleve a app.tuclinica.digital; si no se puede desde acá, dejarlo como paso de Javo.
+
+*Turno 18 · cerrado el 19 de noviembre, `08657c9`.* La premisa del turno era
+cierta —la primera vez en la cola que lo es—: `alta-numero` escribía
+`plan = 'ELNUMERO'` a secas y no leía ninguna columna del cobro. Lo que apareció
+al construirlo fueron **tres cosas que el plan no decía**:
+
+1. **El camino del cobro no puede escribir `plan = 'ELNUMERO'`.** Esa columna
+   dice por dónde entró y `enElTramoDelNumero` la lee cruda, sin mirar
+   `plan_comercial`. El que pagara El Ascenso habría recibido la bienvenida de
+   los cinco días (`WelcomeWizard`) y el Tablero del tramo corto (`Dashboard`),
+   con el acceso bien y las dos pantallas mal. Es la lente 23.
+2. **La declaración compartida no va en `src/lib/`.** Escrita ahí, la lente de
+   los módulos huérfanos del bloque 12 se puso roja y tenía razón: sus dos
+   lectores son rutas y ninguna pantalla la alcanza. Vive en
+   `api/_lib/loQueAbreElPago.ts`.
+3. **Cinco lentes de `auditoria.py` se pusieron rojas por la mudanza, sin que
+   se rompiera nada.** Miraban `api/ghl-webhook.ts` por el nombre del archivo,
+   no por el mecanismo: tenían razón en mirar y el lugar equivocado. Ahora
+   miran la ruta MÁS el módulo que importa, y exigen primero que las dos rutas
+   lo importen; si la declaración se muda otra vez y nadie arregla el import,
+   la primera se pone roja en vez de quedarse mirando un archivo que ya no
+   decide nada. Con su arnés:
+   `scripts/probar-que-las-lentes-del-pago-ven-el-defecto.py`, siete defectos,
+   uno por lente.
+
+Lo reversible quedó construido; **lo que espera tu clic son dos cosas que solo
+puedes hacer tú**, y ninguna es trabajo:
+
+— **Agregar `plan` en el cuerpo de los tres flujos de GHL** («Entrega al pagar ·
+  La Base 1.000» → `plan: "base"`, «· Mentoría 3.000» → `plan: "ascenso"`,
+  «· Instalación 6.000» → `plan: "instalacion"`). Lo hace COMUNIDAD por la API,
+  sin que pegues ninguna clave; hasta que esté, los tres flujos siguen dando
+  los cinco días, igual que antes de este turno. La ruta ya acepta las dos
+  formas, así que agregarlo no rompe nada en el medio.
+— **El correo «Invite user» de Supabase**: que esté en castellano y lleve a
+  app.tuclinica.digital. No se puede ver ni cambiar desde acá —es el panel de
+  Supabase— y es lo que recibe el cliente que paga, o sea que es texto de
+  venta: queda como tu paso. Con eso, el alta de los cinco que faltan (Martina,
+  Pedro, Rosana, Roberto y María Laura) sale por un flujo con `plan: ascenso`,
+  sin contraseña tuya.
+
+**Y un hallazgo de al lado, en su propio commit (`9532b6e`).** La lente
+`scripts/check-api-esm-imports.mjs` **ya estaba en rojo en el HEAD limpio**,
+antes de tocar nada: no la corre `tsc`, ni el build, ni `auditoria.py`, así que
+nadie la estaba corriendo. `src/lib/roadmapSeed.ts` importaba dos módulos sin
+`.js`, y lo importa `api/cron/alarmas-inactividad.ts`: en Vercel eso es
+`ERR_MODULE_NOT_FOUND` en cold start, o sea que **la alarma que te avisa que un
+cliente dejó de entrar no corría en producción**, y su silencio se parece a «no
+hay clientes inactivos». Dos caracteres. Vale como candidato para la cola
+meter esa lente en la batería, que es lo único que evita que vuelva a pasar.
 
 *Turno 19 · la entrega unida.* Sin tocar días ni nombres. (a) `avisar-a-ghl.ts` suma cinco datos en cada aviso (día del camino, paisaje, cinturón, último avance, ventas registradas) y los eventos `cambio_de_paisaje` (días 8, 15, 36 y 85), `venta_registrada`, `caso_dia_30`, `caso_dia_90` y `numeros_sin_cargar`; sigue sin mandar nada mientras falte `GHL_AVISOS_WEBHOOK`. (b) En Hoy: «Tu próximo encuentro» (martes, miércoles y jueves a las 13:00 de Argentina hasta el 10 dic, con el link de Meet o el evento de la comunidad), «Tu canal» (el link directo a su canal en la comunidad, guardado en su perfil; COMUNIDAD pasa los once) y, en los días con logro (día 5, primera venta, campaña lista), «Cuéntalo en Victorias». (c) El reenganche por dentro, el texto ya decidido. Los textos nuevos que el cliente lee esperan el clic de Javo.
 
@@ -238,10 +288,12 @@ precio de entrada (27 en la app, 97 en la oferta) y espera su clic. Las
 cirugías 0, 2, 3 y 7 quedaron cerradas por los turnos 1 al 8; las 8 y 9, por
 el flanco, y lo que queda en ellas es gusto suyo.
 
-**La cola quedó sin turnos abiertos el 12 de noviembre, con el turno 17.** Los
-diecisiete están cerrados; en cinco —5, 9, 10, 13 y 14— lo cerrado es el flanco
-y lo que queda adentro es tu clic, no trabajo. Así que la tarea programada
-sigue encendida y sin nada que tomar.
+**La cola volvió a tener turnos el 18 de noviembre, y el 18 quedó cerrado el
+19.** De los diecinueve, dieciocho están cerrados y **queda abierto el 19**
+—la entrega unida en la app—, que era el que iba después del 18. En cinco de
+los cerrados —5, 9, 10, 13 y 14— lo cerrado es el flanco y lo que queda adentro
+es tu clic, no trabajo. Así que la tarea programada tiene con qué seguir: el
+próximo turno toma el 19.
 
 **Tres premisas del encargo de la tarea ya no son ciertas.** Dice «los diez
 turnos» —son diecisiete— y dice que MCD «hoy NO tiene batería de ningún tipo:
