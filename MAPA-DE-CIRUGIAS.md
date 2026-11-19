@@ -224,7 +224,7 @@ espera el clic.
 | 16 | Cirugía 5 · Lo que la app mide por él | **cerrado** · `cf99bcc` · 1 lente, 45 miradas · el 300 de la cadena espera su clic |
 | 17 | **La radiografía en un solo tramo**: fundir los diez pasos, con el reloj y las cuatro preguntas nuevas (FODA, sus archivos, su audio, qué días le importan) | **cerrado** · `acc1f1a` · 1 lente nueva, 64 miradas · el premio se disolvió al medirlo |
 | 18 | **El pago abre lo que se pagó** (urgente; decidido por Javo el 18 nov, «sin ti: un turno de la app»): `alta-numero` acepta `plan` (`base · ascenso · instalacion`) | **cerrado** · `08657c9` · 8 lentes nuevas (28 en la cadena del pago) + 7 del cobro con su arnés · la premisa era cierta: la lógica no estaba |
-| 19 | **La entrega unida en la app**: los avisos nuevos hacia el Sistema, los cinco datos del cliente y, en Hoy, «Tu próximo encuentro», «Tu canal» y «Cuéntalo en Victorias» | abierto · después del 18 |
+| 19 | **La entrega unida en la app**: los avisos nuevos hacia el Sistema, los cinco datos del cliente y, en Hoy, «Tu próximo encuentro», «Tu canal» y «Cuéntalo en Victorias» | **cerrado** · `38f6084` · 15 lentes nuevas con su arnés · tres de las cuatro partes ya estaban escritas y nadie las llamaba |
 
 **Turnos 18 y 19 · los abrió COMUNIDAD el 18 nov a las 19:40, con el clic de Javo** (plan completo en el proyecto, claude/ENTREGA-UNIDA.md; nota en claude/FRENTE-7-APP.md).
 
@@ -283,17 +283,112 @@ meter esa lente en la batería, que es lo único que evita que vuelva a pasar.
 
 *Turno 19 · la entrega unida.* Sin tocar días ni nombres. (a) `avisar-a-ghl.ts` suma cinco datos en cada aviso (día del camino, paisaje, cinturón, último avance, ventas registradas) y los eventos `cambio_de_paisaje` (días 8, 15, 36 y 85), `venta_registrada`, `caso_dia_30`, `caso_dia_90` y `numeros_sin_cargar`; sigue sin mandar nada mientras falte `GHL_AVISOS_WEBHOOK`. (b) En Hoy: «Tu próximo encuentro» (martes, miércoles y jueves a las 13:00 de Argentina hasta el 10 dic, con el link de Meet o el evento de la comunidad), «Tu canal» (el link directo a su canal en la comunidad, guardado en su perfil; COMUNIDAD pasa los once) y, en los días con logro (día 5, primera venta, campaña lista), «Cuéntalo en Victorias». (c) El reenganche por dentro, el texto ya decidido. Los textos nuevos que el cliente lee esperan el clic de Javo.
 
+*Turno 19 · cerrado el 19 de noviembre, `38f6084`.* **La premisa era falsa en
+tres de sus cuatro partes, y en la dirección de siempre: lo que el plan daba
+por faltante ya estaba escrito y nadie lo llamaba.**
+
+1. **El texto de reenganche ya existía en el código.** `SI_SE_CORTA`, en
+   `src/lib/elJuegoDelSur.ts`, con la regla decidida palabra por palabra —y
+   NINGUNA pantalla la leía—. Es el cuarto módulo de este repo escrito y sin
+   llamar (`avisosCliente`, `pasoEsencialDe`, las entregas del equipo, este).
+   Ahora lo dice Hoy cuando la persona vuelve, desde los tres días hábiles de
+   atraso: el MISMO umbral con el que el equipo recibe su alarma, no dos
+   criterios.
+2. **La app ya sabía de los encuentros.** `sesiones_grupales` existe desde
+   julio, la carga el equipo desde el Admin, `proximasGrupales()` la lee y
+   Acompañamiento la muestra. Lo que faltaba no era el dato: era que Hoy lo
+   mirara. Así que «Tu próximo encuentro» mira primero lo cargado —que es la
+   verdad, y trae su propio link— y el calendario acordado (martes, miércoles
+   y jueves a las 13:00, la sala de siempre) quedó como respaldo, **con fecha
+   de corte el 10 de diciembre**: pasada esa fecha la tarjeta desaparece en vez
+   de citar al cliente a una reunión que ya no existe. Para que siga, se
+   renueva esa línea o se cargan las sesiones en el Admin, que es el camino
+   bueno.
+3. **Los días en que cambia el paisaje no hubo que escribirlos.** El plan decía
+   «días 8, 15, 36 y 85»; `tramoDelPaisaje` los deriva de los mismos cinco
+   paisajes que pinta la app. Escritos a mano, el día que el Camino mueva un
+   tramo el correo avisaría el cambio equivocado y nadie se enteraría.
+
+**Y una cuarta cosa: el plan, hecho tal como estaba escrito, habría vuelto a
+matar el cron.** Que el aviso lleve el paisaje obliga al cron a alcanzar
+`src/lib/losCincoPaisajes.ts`, y ese archivo importaba `./roadmapSeed` **sin
+`.js`**. En Vercel eso es `ERR_MODULE_NOT_FOUND` en cold start: exactamente el
+defecto que tuvo muerta la alarma de inactividad hasta `9532b6e`, con el
+silencio disfrazado de «no hay clientes inactivos». Arreglado, y la lente que
+lo ve —`scripts/check-api-esm-imports.mjs`, que **no corría ninguna batería**:
+ni `tsc`, ni el build, ni `auditoria.py`— **entró a `auditoria.py`**. Era el
+candidato que dejó el turno 18, y este turno agrandó la superficie que vigila.
+
+**Lo que sí hubo que construir, con los nombres reales medidos antes de tocar:**
+los cinco datos en cada aviso (`dia`, `paisaje` de `paisajeDelDia`, `cinturon`
+de la columna de `profiles`, `ultimo_avance` de `hoja_de_ruta.fecha_completada`
+y `ventas_registradas` contadas de su tabla, paginada), **declarados
+obligatorios** para que el compilador no deje avisar sin ellos; los cinco
+eventos nuevos (`cambio_de_paisaje`, `venta_registrada`, `caso_dia_30`,
+`caso_dia_90`, `numeros_sin_cargar`), con **sufijo en la llave** para los dos
+que ocurren más de una vez —sin eso el cliente recibiría el Lago y nunca el
+Río, y la segunda venta no avisaría—; las tres filas de Hoy; y el reenganche.
+
+**El paso ESENCIAL del día sigue sin existir en la app**, y no es un olvido:
+`paso_esencial` del seed es un CONTEO de pasos, no un índice, y `pasoEsencialDe`
+se sacó en noviembre justo porque devolvía siempre el último. El dato lo marca
+El Camino en papel, en negrita, y **lo tiene que pasar LIBROS**. Mientras no
+esté, el reenganche nombra el día, que es cierto.
+
+**Las lentes.** 15 nuevas, cada una probada contra su propio defecto con
+`scripts/probar-que-las-lentes-de-la-entrega-unida-ven-el-defecto.py`. **El
+arnés encontró dos de ellas ciegas al primer intento:** la del paisaje y la de
+la sección de Hoy se cumplían con la línea del `import`, así que daban verde
+con el mecanismo sacado. Y **tres lentes de otros archivos** pasaron de mirar
+la línea letra por letra a mirar el mecanismo: el objeto de opciones de
+`avisarUnaVez` las puso rojas sin que se rompiera nada, que es el mismo error
+que el 18 de noviembre puso rojas cinco lentes del cobro. Las tres quedaron
+también en el arnés. Batería: **940 lentes en verde** y **cero faltas de
+diseño** en las 93 vistas (el medidor marcó dos de las mías —«Contarlo» en
+40 px y la fecha larga desbordada en 360 px— y las dos quedaron corregidas).
+
+**Lo que espera tu clic, y ninguna es trabajo:**
+
+— **`GHL_AVISOS_WEBHOOK` en Vercel** (3 minutos, esa cuenta no está conectada
+  acá). Hasta que esté, **no sale ningún aviso**, igual que antes de este
+  turno. El flujo «App · avisos del camino» ahora recibe **ocho** eventos, no
+  tres, y cada uno llega con los cinco datos del cliente adentro.
+— **El link del canal de Victorias y los once canales de los clientes.**
+  `profiles.canal_comunidad` ya está (migración `20261119`), nace en null y la
+  fila de Hoy no se dibuja hasta que está cargado, así que cargarlos de a uno
+  no deja a nadie frente a un botón roto. Mientras falte el de Victorias, el
+  botón lleva a la puerta del grupo, que es un link verificado: el cliente
+  llega en un clic más.
+— **Los textos nuevos que el cliente lee.** Las tres filas salieron con su
+  título y un botón, sin una línea de adorno, justamente para no adelantarte
+  texto. Si quieres que digan algo más, es tu visto.
+
 La cirugía 1 —los cinco días que se venden solos— no entra en la cola: toca el
 precio de entrada (27 en la app, 97 en la oferta) y espera su clic. Las
 cirugías 0, 2, 3 y 7 quedaron cerradas por los turnos 1 al 8; las 8 y 9, por
 el flanco, y lo que queda en ellas es gusto suyo.
 
-**La cola volvió a tener turnos el 18 de noviembre, y el 18 quedó cerrado el
-19.** De los diecinueve, dieciocho están cerrados y **queda abierto el 19**
-—la entrega unida en la app—, que era el que iba después del 18. En cinco de
-los cerrados —5, 9, 10, 13 y 14— lo cerrado es el flanco y lo que queda adentro
-es tu clic, no trabajo. Así que la tarea programada tiene con qué seguir: el
-próximo turno toma el 19.
+**LA COLA QUEDÓ VACÍA el 19 de noviembre.** Los diecinueve turnos están
+cerrados: el 18 (el pago abre lo que se pagó) y el 19 (la entrega unida) ese
+mismo día. En cinco de ellos —5, 9, 10, 13 y 14— lo cerrado es el flanco y lo
+que queda adentro **es tu clic, no trabajo**. Como la tarea programada tenía
+escrito que al cerrarse la cola se apaga, **se apagó el 19 de noviembre**: sin
+turnos que tomar, cada corrida habría sido una lectura del mapa y nada más.
+
+**Y hay con qué volver a llenarla, cuando quieras.** Esto NO son turnos
+—ninguno se abrió solo—: son los candidatos que ya están medidos, con su
+dueño. Un «dale» tuyo los convierte en los turnos 20 y siguientes:
+
+| candidato | de dónde sale | de quién depende |
+|---|---|---|
+| El **paso esencial** de cada día (el dato que le falta al reenganche del turno 19) | turno 19 · `paso_esencial` del seed es un conteo, no un índice | **LIBROS**: lo marca El Camino en papel, en negrita. La app no lo puede deducir |
+| `manuales.ts`: «El Camino» → «La Campaña» | nota 12 de FRENTE-7, decidido el 12 nov | reversible, pero es texto que el cliente lee |
+| `roadmap.seed.json` día 5: el paso esencial apunta al paso equivocado | nota 12 de FRENTE-7 | reversible |
+| La sección de libros en los cinco días de Tu nuevo precio: **sin verificar** | nota 12 de FRENTE-7 | reversible; es un turno de medición antes que de arreglo |
+| `libroYPacientes.ts`: los 23 capítulos reales | nota 12 de FRENTE-7 | **LIBROS**: hay que pasarlos |
+
+Dos de los cinco esperan a LIBROS, no a la app. Los otros tres son chicos y
+reversibles.
 
 **Tres premisas del encargo de la tarea ya no son ciertas.** Dice «los diez
 turnos» —son diecisiete— y dice que MCD «hoy NO tiene batería de ningún tipo:
