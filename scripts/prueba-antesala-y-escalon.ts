@@ -193,7 +193,10 @@ ok(/leTocanLasEntregas\(cli\.servicio_contratado, cli\.servicio_marcado_el\)/.te
   'el cron lo pregunta antes de disparar: sin esta línea le montaba la instalación de $5.000 a quien pagó $1.000');
 // Se mira el select de clientes, no «antes de la primera aparición»: la primera
 // aparición de entregaPendiente es su import, arriba de todo.
-ok(/servicio_contratado, servicio_marcado_el'\)/.test(cron),
+/* El mecanismo es que el select TRAIGA las dos columnas, no que termine en
+   ellas: el turno 19 le sumó `cinturon` al final —uno de los cinco datos que
+   viajan en cada aviso— y esta lente se puso roja sin que se rompiera nada. */
+ok(/select\('[^']*\bservicio_contratado\b[^']*\bservicio_marcado_el\b[^']*'\)/.test(cron),
   'y la trae en el select, porque sin la columna la pregunta siempre dice lo mismo');
 
 const tope = codigoDe('src/lib/topeDelEscalon.ts');

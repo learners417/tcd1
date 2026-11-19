@@ -33,3 +33,13 @@ export const PUERTA_DE_LA_COMUNIDAD = {
   queEs: 'El grupo donde están los demás: preguntas, ves lo que resuelven los otros y te enteras de los encuentros.',
   boton: 'Entrar al grupo',
 } as const;
+
+/**
+ * DÓNDE SE CUENTAN LAS VICTORIAS.
+ *
+ * Victorias es un canal del grupo, y el link exacto de un canal lo da la
+ * comunidad: no se deduce del nombre. Hasta que COMUNIDAD lo pase, esto
+ * apunta a la puerta del grupo —que es cierta y está verificada— y el cliente
+ * llega en un clic más. Cuando llegue el link, se cambia esta línea.
+ */
+export const VICTORIAS: string = MI_COMUNIDAD;

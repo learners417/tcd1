@@ -105,6 +105,15 @@ export interface Profile {
    */
   biblioteca_abierta?: boolean;
   biblioteca_abierta_el?: string | null;
+  /**
+   * El link directo a SU canal privado en la comunidad.
+   *
+   * Un dato por persona que la comunidad da al crear el canal: no se deriva
+   * del nombre ni del grupo. Nace en null y Hoy no dibuja la fila hasta que
+   * está cargado, así que cargar los once de a uno no deja a nadie frente a
+   * un botón roto.
+   */
+  canal_comunidad?: string | null;
   plan_reservado?: string | null;  // el plan que eligió al reservar su cupo
   acceso_hasta?: string | null;    // fin del acceso de Tu nuevo precio (o del plan)
   agentes_activos?: string[];   // granular: ids ('bruno', 'vera'...) o 'todos'

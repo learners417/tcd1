@@ -29,6 +29,8 @@ import TableroDeLaSemana from '../components/TableroDeLaSemana';
 import { trabajoDeHoy } from '../lib/tablero';
 import TarjetaDeHoy from '../components/camino/TarjetaDeHoy';
 import SinSoporteEstosDias from '../components/SinSoporteEstosDias';
+import SiTeCaiste from '../components/SiTeCaiste';
+import LaComunidadEnHoy from '../components/LaComunidadEnHoy';
 import { soporteCerrado } from '../lib/ventanaSinSoporte';
 import { sumarDias } from '../lib/ventanaDeAcceso';
 import { claveDelDia } from '../lib/roadmapSeed';
@@ -502,6 +504,15 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
                style={{ borderColor: ritmo.tono === 'al_dia' ? 'var(--tilde, #3D6A4A)' : 'var(--oro, #B0822E)' }}>
               {ritmo.texto}{ritmo.tono === 'al_dia' ? ' ✓' : ''}
             </p>
+            {/* ── SI SE CAYÓ, LA REGLA ──
+                El ritmo dice qué paso toca; esto dice qué se hace con el
+                atraso, que es el momento en que una persona abandona. El atraso
+                se calcula con la misma función, no con una cuenta propia. */}
+            <SiTeCaiste
+              diaDelPaso={diaPaso}
+              atrasoHabil={diasHabilesDeAtraso(fechaInicio, diaPaso, diaProg)}
+              onAbrirCamino={() => setCurrentPage('roadmap')}
+            />
           </>
         );
       })()}
@@ -612,6 +623,30 @@ export default function Dashboard({ setCurrentPage, userId, perfil }: { setCurre
         userId={userId}
         servicio={(perfil as { servicio_contratado?: string | null } | undefined)?.servicio_contratado}
       />
+
+      {/* ─── LA COMUNIDAD, ACÁ ───
+          Los dos espacios del programa no se señalaban entre sí: el encuentro
+          que viene, su canal y dónde contarlo vivían a tres pantallas de
+          distancia. Victorias solo aparece el día que hay algo que contar:
+          cerró el día 5, registró una venta o su campaña ya está viva. */}
+      {!enAntesala && (() => {
+        let hechas = setDB;
+        if (!hechas) {
+          try {
+            const guardadas = localStorage.getItem('tcd_hoja_ruta_v2');
+            hechas = new Set<string>(guardadas ? JSON.parse(guardadas) : []);
+          } catch { hechas = new Set<string>(); }
+        }
+        const hayLogro = hechas.has(claveDelDia(5))
+          || ventasTotal.count > 0
+          || yaEncendio();
+        return (
+          <LaComunidadEnHoy
+            canal={(perfil as { canal_comunidad?: string | null } | undefined)?.canal_comunidad}
+            hayLogro={hayLogro}
+          />
+        );
+      })()}
 
       {/* ZIP E — El mapa de los 5 días: las palabras de la landing, adentro */}
       <MapaCincoDias />

@@ -25,7 +25,22 @@ import {
 import { leTocanLasEntregas } from '../../src/lib/topeDelEscalon.js';
 import { SEED_ROADMAP_V3 } from '../../src/lib/roadmapSeed.js';
 import { esPasoDelCliente } from '../../src/lib/diaPrograma.js';
-import { avisarAGHL, type EventoDeAviso } from '../_lib/avisar-a-ghl.js';
+import {
+  avisarAGHL, type EventoDeAviso, type ElDiaDelCliente,
+} from '../_lib/avisar-a-ghl.js';
+/*
+ * EL PAISAJE SALE DE DONDE SALE EN PANTALLA.
+ *
+ * `paisajeDelDia` es la misma que dibuja la cabecera de Hoy. Derivarlo acá
+ * con una tabla propia es cómo se desfasan dos verdades: el correo diría
+ * «empieza el Viento» un día distinto del que la app le pinta el Viento.
+ *
+ * Su import lleva `.js` —y el de `losCincoPaisajes` también— porque `api/`
+ * corre en Node ESM puro: sin la extensión es ERR_MODULE_NOT_FOUND en frío, y
+ * eso es exactamente lo que tuvo esta alarma callada en producción hasta el 19
+ * de noviembre.
+ */
+import { paisajeDelDia, tramoDelPaisaje } from '../../src/lib/losCincoPaisajes.js';
 
 /** La semana ISO, igual que en el resto de la app: '2026-W31'. */
 function semanaISOde(d: Date): string {
@@ -84,7 +99,7 @@ async function handler(req: any, res: any) {
     // 1) clientes activos con fecha de inicio
     const { data: clientes, error: e1 } = await admin
       .from('profiles')
-      .select('id, nombre, email, fecha_inicio, rol, status, servicio_contratado, servicio_marcado_el')
+      .select('id, nombre, email, fecha_inicio, rol, status, servicio_contratado, servicio_marcado_el, cinturon')
       .neq('rol', 'admin');
     if (e1) throw e1;
 
@@ -100,21 +115,54 @@ async function handler(req: any, res: any) {
      * cron veía su progreso truncado, en silencio, y lo daba por atrasado.
      * Nunca falla: solo trae de menos.
      */
-    const tareas: Array<{ usuario_id: string; meta_codigo: string; completada: boolean }> = [];
+    const tareas: Array<{
+      usuario_id: string; meta_codigo: string; completada: boolean;
+      fecha_completada: string | null;
+    }> = [];
     for (let desde = 0; ; desde += 1000) {
       const { data: pagina } = await admin
         .from('hoja_de_ruta')
-        .select('usuario_id, pilar_numero, meta_codigo, completada')
+        .select('usuario_id, pilar_numero, meta_codigo, completada, fecha_completada')
         .range(desde, desde + 999);
       if (!pagina || pagina.length === 0) break;
       tareas.push(...(pagina as typeof tareas));
       if (pagina.length < 1000) break;
     }
     const completadasPor = new Map<string, Set<string>>();
+    /*
+     * EL ÚLTIMO AVANCE, que es uno de los cinco datos que viajan en cada
+     * aviso. Sale de la misma lectura: el día que cerró su último paso. Se
+     * deriva de lo que ya está en la mano en vez de pedirle una columna nueva
+     * a `profiles`, que habría que mantener al día desde cada pantalla.
+     */
+    const ultimoAvancePor = new Map<string, string>();
     for (const t of tareas) {
       if (!t.completada) continue;
       if (!completadasPor.has(t.usuario_id)) completadasPor.set(t.usuario_id, new Set());
       completadasPor.get(t.usuario_id)!.add(t.meta_codigo);
+      const f = t.fecha_completada;
+      if (!f) continue;
+      const previo = ultimoAvancePor.get(t.usuario_id);
+      if (!previo || f > previo) ultimoAvancePor.set(t.usuario_id, f);
+    }
+
+    /*
+     * LAS VENTAS REGISTRADAS, el quinto dato. Paginada por el mismo motivo
+     * que las tareas: Supabase corta en mil filas y de la fila mil uno en
+     * adelante el cliente figuraría con menos ventas de las que tiene, en
+     * silencio, que es la forma en que este repo ya se equivocó una vez.
+     */
+    const ventasPor = new Map<string, number>();
+    for (let desde = 0; ; desde += 1000) {
+      const { data: pagina } = await admin
+        .from('ventas_registradas')
+        .select('usuario_id')
+        .range(desde, desde + 999);
+      if (!pagina || pagina.length === 0) break;
+      for (const v of pagina as Array<{ usuario_id: string }>) {
+        ventasPor.set(v.usuario_id, (ventasPor.get(v.usuario_id) ?? 0) + 1);
+      }
+      if (pagina.length < 1000) break;
     }
 
     // 4) idempotencia: alarmas ya enviadas hoy
@@ -162,21 +210,47 @@ async function handler(req: any, res: any) {
       sin_entrar_3_dias: 95,   // mientras siga atrasado, sigue valiendo
       dia_5_hecho: 12,         // una semana después del día 5
       camino_completo: 97,     // una semana después del final
+      /*
+       * El cambio de paisaje usa su propia ventana en cada llamada —siete
+       * días desde que empieza ese paisaje—, porque son cinco momentos y no
+       * uno. Esto es el tope de todo por si alguna vez se llama sin ella.
+       */
+      cambio_de_paisaje: 95,
+      /*
+       * Estos tres NO se acotan. Son los que conviene que salgan aunque el
+       * cliente venga atrasado: una venta hay que celebrarla cuando pasó, y
+       * un caso del día 30 hay que documentarlo igual si llegó al 30 en el
+       * día 50 del calendario. El que no se repitan lo resuelve la llave.
+       */
+      venta_registrada: 95,
+      caso_dia_30: 95,
+      caso_dia_90: 97,
+      numeros_sin_cargar: 95,
     };
+    /**
+     * Manda un aviso UNA sola vez.
+     *
+     * `sufijo` existe porque hay eventos que ocurren más de una vez en la
+     * vida de un cliente: el paisaje cambia cinco veces y las ventas son
+     * tantas como venda. Con la llave `ghl_<evento>` a secas, el primero tapa
+     * a todos los demás —el cliente recibiría el Lago y nunca el Río, y la
+     * segunda venta no avisaría—. El sufijo mete en la llave CUÁL de todos
+     * es: el paisaje, o cuántas ventas lleva.
+     */
     const avisarUnaVez = async (
       evento: EventoDeAviso,
       cli: { id: string; nombre?: string | null; email?: string | null },
-      dia: number,
-      cadaSemana = false,
+      datos: ElDiaDelCliente,
+      opciones: { cadaSemana?: boolean; sufijo?: string; ventana?: number } = {},
     ) => {
-      if (dia > VENTANA[evento]) return;
-      const clave = `ghl_${evento}`;
+      if (datos.dia > (opciones.ventana ?? VENTANA[evento])) return;
+      const clave = `ghl_${evento}${opciones.sufijo ?? ''}`;
       const cuando = yaAvisado.get(`${cli.id}|${clave}`);
-      if (cuando && (!cadaSemana || cuando > haceUnaSemana)) return;
+      if (cuando && (!opciones.cadaSemana || cuando > haceUnaSemana)) return;
       const salida = await avisarAGHL(evento, {
         email: cli.email ?? '',
         nombre: cli.nombre ?? 'Cliente',
-        dia,
+        ...datos,
       });
       if (salida !== 'enviado') return;
       await admin.from('notificaciones').insert({
@@ -193,11 +267,56 @@ async function handler(req: any, res: any) {
     const ULTIMO_DIA = Math.max(...CAMINO.map((m) => m.d));
     const DEL_ULTIMO = CAMINO.filter((m) => m.d === ULTIMO_DIA).map((m) => m.c);
 
+    /**
+     * LOS CINCO DATOS DEL CLIENTE, en un solo lugar.
+     *
+     * Armados acá y no en cada llamada: con cinco datos y ocho eventos, el
+     * primer olvido es inevitable, y un aviso que sale con el paisaje en null
+     * no se nota —el flujo manda el correo igual, con el renglón vacío—.
+     *
+     * El paisaje sale del día de TRABAJO (el paso que le toca) y no del
+     * calendario, igual que la cabecera de Hoy: si volvió después de una
+     * semana, el Camino lo espera donde lo dejó y el correo tiene que decir lo
+     * mismo que la pantalla.
+     */
+    const datosDel = (
+      cli: { id: string; cinturon?: string | null },
+      dia: number,
+      diaDeTrabajo: number,
+    ): ElDiaDelCliente => ({
+      dia,
+      paisaje: paisajeDelDia(diaDeTrabajo)?.nombre ?? null,
+      cinturon: cli.cinturon ?? null,
+      ultimo_avance: ultimoAvancePor.get(cli.id) ?? null,
+      ventas_registradas: ventasPor.get(cli.id) ?? 0,
+    });
+
+    /*
+     * EL DÍA DE CALENDARIO, en una sola declaración. Estaba escrito tres
+     * veces con el mismo `Math.max(1, Math.min(95, …))`, y el bloque de los
+     * números —que lo necesita ahora— habría sido la cuarta copia. Cuatro
+     * copias de un redondeo es cómo dos avisos del mismo día dicen días
+     * distintos.
+     */
+    const diaDeCalendario = (fechaInicio: string) => Math.max(1, Math.min(95,
+      Math.floor((Date.now() - new Date(fechaInicio).getTime()) / 86400000) + 1));
+
+    /** Los clientes por id: el bloque de los números solo tiene el id. */
+    type ClienteDelCron = (NonNullable<typeof clientes>)[number];
+    const clientePorId = new Map<string, ClienteDelCron>(
+      (clientes ?? []).map((c: ClienteDelCron) => [c.id, c]));
+
+    /*
+     * Sábado en UTC. El cron corre a las 12:00 UTC —9 de la mañana en
+     * Argentina—, así que el día UTC y el día de allá son el mismo.
+     */
+    const esSabado = new Date().getUTCDay() === 6;
+
     let alarmas = 0;
     for (const cli of clientes ?? []) {
       if (!cli.fecha_inicio) continue;
       if (cli.status && !['ACTIVE', 'activo', null].includes(cli.status)) continue;
-      const dia = Math.max(1, Math.min(95, Math.floor((Date.now() - new Date(cli.fecha_inicio).getTime()) / 86400000) + 1));
+      const dia = diaDeCalendario(cli.fecha_inicio);
       const done = completadasPor.get(cli.id) ?? new Set();
       const proxima = CAMINO.find((m) => !done.has(m.c));
       if (!proxima || proxima.d >= dia) continue;
@@ -220,13 +339,15 @@ async function handler(req: any, res: any) {
         ),
       );
       alarmas++;
-      try { await avisarUnaVez('sin_entrar_3_dias', cli, dia, true); }
-      catch (e) { Sentry.captureException(e); }
+      try {
+        await avisarUnaVez('sin_entrar_3_dias', cli, datosDel(cli, dia, proxima.d),
+          { cadaSemana: true });
+      } catch (e) { Sentry.captureException(e); }
     }
 
     /*
-     * Y los dos de buenas noticias, que no dependen del atraso: se miran
-     * aparte porque un cliente al día no entra nunca al bucle de arriba.
+     * Y LOS DE BUENAS NOTICIAS, que no dependen del atraso: se miran aparte
+     * porque un cliente al día no entra nunca al bucle de arriba.
      */
     /*
      * Con su propio catch: este bloque escribe en `notificaciones` y hace un
@@ -239,14 +360,60 @@ async function handler(req: any, res: any) {
       for (const cli of clientes ?? []) {
         if (!cli.fecha_inicio) continue;
         if (cli.status && !['ACTIVE', 'activo', null].includes(cli.status)) continue;
-        const dia = Math.max(1, Math.min(95, Math.floor((Date.now() - new Date(cli.fecha_inicio).getTime()) / 86400000) + 1));
+        const dia = diaDeCalendario(cli.fecha_inicio);
         const done = completadasPor.get(cli.id) ?? new Set<string>();
+        /* El día de trabajo: el paso que le toca, o el último si terminó. */
+        const proxima = CAMINO.find((m) => !done.has(m.c));
+        const diaDeTrabajo = proxima ? proxima.d : ULTIMO_DIA;
+        const datos = datosDel(cli, dia, diaDeTrabajo);
+
         if (DEL_DIA_5.length > 0 && DEL_DIA_5.every((c) => done.has(c))) {
-          await avisarUnaVez('dia_5_hecho', cli, dia);
+          await avisarUnaVez('dia_5_hecho', cli, datos);
         }
         if (DEL_ULTIMO.length > 0 && DEL_ULTIMO.every((c) => done.has(c))) {
-          await avisarUnaVez('camino_completo', cli, dia);
+          await avisarUnaVez('camino_completo', cli, datos);
         }
+
+        /*
+         * EL CAMBIO DE PAISAJE — uno por paisaje, con el paisaje en la llave.
+         *
+         * Los días en que cambia (1, 8, 15, 36 y 85) NO están escritos acá:
+         * salen de `tramoDelPaisaje`, que los deriva de los mismos cinco
+         * paisajes que pinta la app. Escritos a mano, el día que el Camino
+         * mueva un tramo el correo quedaría avisando el cambio equivocado, y
+         * nadie se enteraría.
+         *
+         * La ventana son siete días desde que empieza ese paisaje, y se mide
+         * contra el día del CALENDARIO: «empieza el Viento» es una noticia de
+         * esta semana. Al que entra al Viento con un mes de atraso no se le
+         * manda —recibiría una bienvenida a algo que ya está viviendo—, y lo
+         * que ese cliente sí recibe es el aviso de atraso, que es el que le
+         * sirve.
+         */
+        const paisajeAhora = paisajeDelDia(diaDeTrabajo);
+        if (paisajeAhora) {
+          const tramo = tramoDelPaisaje(paisajeAhora.id);
+          await avisarUnaVez('cambio_de_paisaje', cli, datos,
+            { sufijo: `_${paisajeAhora.id}`, ventana: tramo.desde + 7 });
+        }
+
+        /*
+         * LA VENTA — una por venta, con cuántas lleva en la llave. Así la
+         * tercera avisa igual que la primera, y el día que se prenda el
+         * webhook el que ya vendió tres veces recibe UN aviso, no tres.
+         */
+        if (datos.ventas_registradas > 0) {
+          await avisarUnaVez('venta_registrada', cli, datos,
+            { sufijo: `_${datos.ventas_registradas}` });
+        }
+
+        /*
+         * EL CASO, en los días 30 y 90. Por día de TRABAJO: el caso se
+         * documenta cuando el cliente llegó ahí, no cuando el calendario
+         * dice que debería haber llegado.
+         */
+        if (diaDeTrabajo >= 30) await avisarUnaVez('caso_dia_30', cli, datos);
+        if (diaDeTrabajo >= ULTIMO_DIA) await avisarUnaVez('caso_dia_90', cli, datos);
       }
     } catch (e) {
       Sentry.captureException(e);
@@ -362,6 +529,28 @@ async function handler(req: any, res: any) {
           quien: 'la app',
           enRiesgo: 0, semanasIgual: 0, yaSeIntento: false,
         });
+
+        /*
+         * Y SI CERRÓ LA SEMANA SIN CARGAR, EL SÁBADO SALE POR EL SISTEMA.
+         *
+         * La campanita de adentro ya se lo dice (es el aviso `no_cargo` de
+         * `avisosCliente`), y justo el que no carga sus números es el que no
+         * entra a la app: el recordatorio tiene que llegarle donde está.
+         *
+         * El sábado y no el viernes: el viernes todavía puede cargar. El cron
+         * corre a las 12:00 UTC, que son las 9 de la mañana de Argentina, así
+         * que esto es el sábado a la mañana. Uno por semana, con la semana en
+         * la llave.
+         */
+        const cli = clientePorId.get(id);
+        if (esSabado && cuello === 'no_cargo' && cli?.fecha_inicio) {
+          const dia = diaDeCalendario(cli.fecha_inicio);
+          const done = completadasPor.get(id) ?? new Set<string>();
+          const proxima = CAMINO.find((m) => !done.has(m.c));
+          await avisarUnaVez('numeros_sin_cargar', cli,
+            datosDel(cli, dia, proxima ? proxima.d : ULTIMO_DIA),
+            { sufijo: `_${semana}`, cadaSemana: true });
+        }
       }
 
       // ── LAS TRES REGLAS QUE FALTABAN ──

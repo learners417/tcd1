@@ -6295,6 +6295,47 @@ check('las siete lentes del cobro ven cada una su propio defecto',
       '; '.join(l.strip() for l in (_lpago.stdout + _lpago.stderr).splitlines()
                 if '✗' in l)[:400])
 
+# ── LA ENTREGA UNIDA (turno 19) Y SU ARNÉS ────────────────────────────
+#
+# Diez lentes sobre lo que une la app con la comunidad: los cinco datos que
+# viajan en cada aviso, los cinco eventos nuevos, las llaves que evitan que un
+# evento tape a otro, las tres filas de Hoy y el reenganche. Ninguna puede
+# fallar «a la vista»: si una se duerme, todo sigue verde y el cliente deja de
+# recibir. `scripts/prueba-la-entrega-unida.ts` ya la corre esta batería con
+# las demás `prueba-*.ts`; lo que falta es su arnés.
+#
+# Y el arnés ganó su lugar al primer intento: encontró DOS de esas lentes
+# ciegas —el paisaje y la sección de Hoy se cumplían con la línea del import—
+# antes de que nada se subiera.
+_aent = subprocess.run([sys.executable,
+                        'scripts/probar-que-las-lentes-de-la-entrega-unida-ven-el-defecto.py'],
+                       capture_output=True, text=True)
+check('las quince lentes de la entrega unida y las tres que arregló ven cada una su propio defecto',
+      _aent.returncode == 0,
+      '; '.join(l.strip() for l in (_aent.stdout + _aent.stderr).splitlines()
+                if '✗' in l)[:400])
+
+# ── LA EXTENSIÓN DE LOS IMPORTS DE `api/`, QUE NADIE CORRÍA ───────────
+#
+# `scripts/check-api-esm-imports.mjs` existía y NO ESTABA EN NINGUNA BATERÍA:
+# ni `tsc`, ni el build, ni esta auditoría la corrían. El 18 de noviembre se
+# la encontró en rojo sobre el HEAD limpio, y lo que marcaba era real:
+# `src/lib/roadmapSeed.ts` importaba dos módulos sin `.js`, y lo importa
+# `api/cron/alarmas-inactividad.ts`. En Vercel eso es ERR_MODULE_NOT_FOUND en
+# el primer arranque, o sea que la alarma que avisa que un cliente dejó de
+# entrar NO CORRÍA en producción — y su silencio se parece a «no hay clientes
+# inactivos», que es el peor disfraz que puede tener una falla.
+#
+# Dos caracteres de arreglo, y esta línea es lo único que evita que vuelva a
+# pasar: el turno 19 hizo que el cron alcance un módulo más, así que la
+# superficie creció.
+_esm = subprocess.run(['node', 'scripts/check-api-esm-imports.mjs'],
+                      capture_output=True, text=True)
+check('los imports relativos que api/ alcanza llevan `.js` (sin eso, el cron '
+      'muere en frío y su silencio parece calma)',
+      _esm.returncode == 0,
+      (_esm.stdout + _esm.stderr).strip().split('\n')[-1][:200])
+
 check('la lente del trabajo subido ve sus cinco defectos del estado de git',
       _asub.returncode == 0,
       '; '.join(l.strip() for l in (_asub.stdout + _asub.stderr).splitlines()

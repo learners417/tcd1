@@ -46,7 +46,18 @@ console.log('\n══ no se repiten ══');
 
 ok(/\.insert\(\{[\s\S]{0,200}clave/.test(cronCodigo),
   'cada aviso enviado se anota con su clave');
-ok(/if \(cuando && \(!cadaSemana \|\| cuando > haceUnaSemana\)\) return;/.test(cronCodigo),
+/*
+ * SE MIRA EL MECANISMO, NO CÓMO SE ESCRIBE.
+ *
+ * Esta lente y la de la ventana, más abajo, exigían la línea LETRA POR LETRA.
+ * El turno 19 le agregó a `avisarUnaVez` un objeto de opciones —hacía falta:
+ * hay eventos que ocurren cinco veces y necesitan sufijo en la llave— y las
+ * dos se pusieron rojas sin que se rompiera nada: `cadaSemana` pasó a ser
+ * `opciones.cadaSemana`. Es el mismo error que el 18 de noviembre puso rojas
+ * cinco lentes del cobro. Lo que importa es que la marca anterior frene el
+ * aviso, y que el semanal sea la única excepción.
+ */
+ok(/if \(cuando && \(![\w.]*cadaSemana \|\| cuando > haceUnaSemana\)\) return;/.test(cronCodigo),
   'y si ya salió no vuelve a salir (el atraso, una vez por semana)');
 ok(/if \(salida !== 'enviado'\) return;/.test(cronCodigo),
   'solo se anota lo que de verdad salió: si falla, se reintenta mañana');
@@ -117,7 +128,9 @@ ok(!delDia5.every((m) => hastaElCuatro.has(m.c)),
 console.log('\n══ un aviso viejo no sale de golpe ══');
 ok(/const VENTANA: Record<EventoDeAviso, number>/.test(cronCodigo),
   'cada aviso tiene su ventana en días de programa');
-ok(/if \(dia > VENTANA\[evento\]\) return;/.test(cronCodigo),
+/* Mismo motivo que arriba: el día se compara contra su ventana y se vuelve,
+   se llame `dia` o `datos.dia`, y admita o no un tope propio en la llamada. */
+ok(/if \([^;\n]*\bdia\b[^;\n]*>[^;\n]*VENTANA\[evento\][^;\n]*\) return;/.test(cronCodigo),
   'y fuera de su ventana no sale: el día que se prenda el webhook no se inunda a nadie');
 
 console.log('\n══ un aviso roto no se lleva puesto el cron ══');

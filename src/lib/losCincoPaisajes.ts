@@ -31,7 +31,7 @@
  * de mil quinientos años se lee como algo que ya era verdad antes de que
  * alguien la escribiera.
  */
-import { roadmap } from './roadmapSeed';
+import { roadmap } from './roadmapSeed.js';
 
 
 /* ══════════════════ LA PALETA DEL LIBRO ══════════════════ */
