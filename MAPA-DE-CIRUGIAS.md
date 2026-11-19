@@ -225,6 +225,9 @@ espera el clic.
 | 17 | **La radiografía en un solo tramo**: fundir los diez pasos, con el reloj y las cuatro preguntas nuevas (FODA, sus archivos, su audio, qué días le importan) | **cerrado** · `acc1f1a` · 1 lente nueva, 64 miradas · el premio se disolvió al medirlo |
 | 18 | **El pago abre lo que se pagó** (urgente; decidido por Javo el 18 nov, «sin ti: un turno de la app»): `alta-numero` acepta `plan` (`base · ascenso · instalacion`) | **cerrado** · `08657c9` · 8 lentes nuevas (28 en la cadena del pago) + 7 del cobro con su arnés · la premisa era cierta: la lógica no estaba |
 | 19 | **La entrega unida en la app**: los avisos nuevos hacia el Sistema, los cinco datos del cliente y, en Hoy, «Tu próximo encuentro», «Tu canal» y «Cuéntalo en Victorias» | **cerrado** · `38f6084` · 15 lentes nuevas con su arnés · tres de las cuatro partes ya estaban escritas y nadie las llamaba |
+| 20 | **Los números de la campaña llegan solos** (Meta y GHL, anuncio por anuncio, sin cargar nada a mano) | abierto |
+| 21 | **El embudo de la página en el mismo cuadro** (Clarity, y el video de Wistia si su API lo da) | abierto |
+| 22 | **El tablero de Javo con sus 3 recomendaciones del día**, en el teléfono | abierto |
 
 **Turnos 18 y 19 · los abrió COMUNIDAD el 18 nov a las 19:40, con el clic de Javo** (plan completo en el proyecto, claude/ENTREGA-UNIDA.md; nota en claude/FRENTE-7-APP.md).
 
@@ -368,16 +371,93 @@ precio de entrada (27 en la app, 97 en la oferta) y espera su clic. Las
 cirugías 0, 2, 3 y 7 quedaron cerradas por los turnos 1 al 8; las 8 y 9, por
 el flanco, y lo que queda en ellas es gusto suyo.
 
-**LA COLA QUEDÓ VACÍA el 19 de noviembre.** Los diecinueve turnos están
-cerrados: el 18 (el pago abre lo que se pagó) y el 19 (la entrega unida) ese
-mismo día. En cinco de ellos —5, 9, 10, 13 y 14— lo cerrado es el flanco y lo
-que queda adentro **es tu clic, no trabajo**. Como la tarea programada tenía
-escrito que al cerrarse la cola se apaga, **se apagó el 19 de noviembre**: sin
-turnos que tomar, cada corrida habría sido una lectura del mapa y nada más.
+**LA COLA SE VACIÓ Y SE VOLVIÓ A LLENAR, los dos el 19 de noviembre.** Los
+diecinueve primeros están cerrados: el 18 (el pago abre lo que se pagó) y el 19
+(la entrega unida) esa mañana. En cinco de ellos —5, 9, 10, 13 y 14— lo cerrado
+es el flanco y lo que queda adentro **es tu clic, no trabajo**. La tarea
+programada se apagó sola al quedar la cola vacía, como tenía escrito. Y a las
+15:30 entraron los turnos **20, 21 y 22**, el tablero de campañas (abajo): con
+tres turnos abiertos, la tarea se puede volver a prender.
+
+### Turnos 20 a 22 · el tablero de campañas en la app
+
+**Los abrió un chat suelto del proyecto el 19 nov a las 13:30, con tu clic**
+(«¿voy a tener un tablero con los datos de mis campañas y recomendaciones?» →
+botón «En tu app TCD»). El plan completo vive en el proyecto, en
+claude/MEDICION-EMBUDO.md, sección «APP»; ese chat no podía escribir en este
+repo, así que el texto llegó acá el 19 a las 15:30.
+
+*Lo que pediste:* un tablero en tu app, no en otro lado, con los números de tus
+campañas anuncio por anuncio y recomendaciones. Hoy te llegan como mensaje —el
+parte diario de las 8:31 y el Lunes de números— y la app solo tiene la carga a
+mano de `NumerosDeLaSemana.tsx`, once campos que escribe una persona. Va en **Mi
+Motor** (tu espacio en Admin, SALA-DE-MANDO.md §3.4) y queda armado para que en
+febrero cada cliente vea lo mismo de su cuenta en Campañas (§3.3). Dos reglas de
+la Sala que se respetan: **ningún dato que ya existe en un sistema lo escribe una
+persona**, y **los umbrales se importan de `src/lib/formulasAnuncios.ts`**, nunca
+se escriben otros al lado.
+
+*Turno 20 · los números llegan solos.* Un cron diario, antes de las 8:31 de
+Argentina, que guarda una fila por anuncio y por día:
+
+- **Meta** (Marketing API, solo lectura): gasto, impresiones, clics al link,
+  visitas a la página (`landing_page_view`) y Schedule, por anuncio, de la
+  campaña viva «TCD · Definitiva · Agenda · nov» (52696549558068). En el conector
+  aparecen dos cuentas publicitarias —«tdc 06/26» (858332333990895) y «Tu Clinica
+  Digital 1 (Read-Only)» (2420465698460492)—: **verificar cuál es la de esa
+  campaña antes de escribir una línea.** Cada anuncio se une por su
+  `utm_content`, con la tabla de claude/META-DEFINITIVA.md.
+- **GHL** (subcuenta Learners, SImzaMApYvtVV8UzvlgD): agendas del calendario
+  «Diagnóstico 1-1 con Javo» (FWSjxWxwv7BOYkd40xLA) con el `utm_content` de la
+  atribución del contacto —PÁGINAS lo dejó andando el 19 nov a las 00:18—, si la
+  persona vino (estado de la cita) y si compró (etiquetas `cliente-base`,
+  `cliente-mentoria`, `cliente-instalacion`, o la oportunidad ganada).
+- **Las dos premisas, antes de construir:** si el plan de Vercel no deja otro
+  cron, la lectura se suma al de las 12:00; y si GHL no devuelve la atribución
+  por la API, se dice y las agendas se cuentan sin anuncio, en vez de inventar
+  de dónde vinieron.
+
+*Turno 21 · el embudo de la página en el mismo cuadro.*
+
+- **Clarity** (proyecto «comunidad», z9r79a8723), por su API de exportación: trae
+  solo los últimos 1 a 3 días y pocas consultas por día —documentación oficial de
+  Microsoft—, así que se guarda cada día o se pierde. Visitas y, si la API los da,
+  los eventos `VSL50`, `CTA` y `AgendaWeb` que la página manda desde el 19 nov,
+  por la etiqueta «anuncio» o, si no está, por `utm_campaign`. Si la API no
+  separa por anuncio, se dice y se muestra por página.
+- **Wistia** (el video de /instala-tu-clinica, 6756q87ti6): la retención, si su
+  API la da con el plan que hay. Si no la da, no se dibuja nada.
+
+*Turno 22 · tu tablero con tus 3 recomendaciones del día.*
+
+- **Una pantalla en el teléfono**, letra grande, tú: arriba, lo que costó cada
+  agenda que califica y cuánto queda del tope de la campaña; abajo, una fila por
+  anuncio con gasto, visitas, vio el video, agendó, vino y compró.
+- **Tres recomendaciones por día, nunca más**, cada una con su número y su
+  porqué. **Las escriben las reglas, no la IA:** `veredictoAnuncio` y `UMBRALES`
+  de `formulasAnuncios`, el cuello de botella del Lunes de números y las reglas
+  con fecha de la campaña (claude/META-DEFINITIVA.md). Si una regla de la campaña
+  no está en `formulasAnuncios`, se propone sumarla con tu clic; no se escribe
+  aparte. Claude solo las pone en palabras simples.
+- **La app no toca Meta.** Recomienda; tú decides con tu clic y el cambio lo hace
+  el chat de VENTAS HIGH, como hoy.
+- Cuando el dato falta, la pantalla dice cuál falta y de quién es. Ningún campo
+  mudo.
+
+**Y lo que hay que decir de frente: los tres turnos terminan construidos y
+apagados hasta que entres a Vercel.** Son cinco variables —`META_ACCESS_TOKEN` y
+`META_AD_ACCOUNT_ID` (usuario del sistema del Business Manager, permiso
+`ads_read`), una clave de integración privada de GHL de la subcuenta Learners con
+lectura de contactos, citas y oportunidades, y `CLARITY_EXPORT_TOKEN`—, y se
+suman a las dos que ya esperan ahí: `VITE_LIBROS_URL` y `GHL_AVISOS_WEBHOOK`.
+Siete variables, cuatro funciones construidas, una sola puerta. El trabajo no se
+desperdicia —el día que pegues las claves arranca solo—, pero conviene saber que
+el tablero no se ve hasta ese día.
 
 **Y hay con qué volver a llenarla, cuando quieras.** Esto NO son turnos
 —ninguno se abrió solo—: son los candidatos que ya están medidos, con su
-dueño. Un «dale» tuyo los convierte en los turnos 20 y siguientes:
+dueño. Un «dale» tuyo los convierte en los turnos 23 y siguientes, detrás del
+tablero:
 
 | candidato | de dónde sale | de quién depende |
 |---|---|---|
