@@ -90,6 +90,45 @@ Estas reglas guiarán la experimentación para asegurar resultados fiables:
 
 - **Noviembre 2026 - Ajuste de Tracking (Landing Page):**
     - **Cambios Aplicados (Manuales):** Eliminación de `InitiateCheckout` en CTAs de agenda. Adición de `{value: 0, currency: 'USD'}` a los eventos `AgendaWeb`, `Contact` y `WhatsAppEnviado` en `instala-tu-clinica.html`.
+    - **Cambios Aplicados (Programático):** Eliminación de `fbq('track','InitiateCheckout');` de la línea del CTA en `E:\Dev\landings\site\instala-tu-clinica.html` (pendiente de push/deploy).
     - **Objetivo:** Reducir ruido en Meta Pixel y estandarizar el valor de las conversiones de agenda. 
+
+---
+
+## 5. Próximos Pasos y Plan de Acción (Noviembre 2026)
+
+### Diagnóstico GoHighLevel (GHL)
+
+1.  **Refinamiento de Pipelines:**
+    *   Revisar la configuración del pipeline `VSL DIRECTO` para asegurar que las oportunidades avancen más allá de la etapa `🗓 Nueva Agenda (Ads)`. Es posible que el problema no sea de tracking sino de automatización en GHL que no mueve el lead al siguiente paso después de la agenda.
+    *   Revisar el pipeline `INSTAGRAM` para resolver el estancamiento en `Mensaje Bienvenida Nuevo seguidor`. Esto podría implicar una revisión del flujo de chatbot o de las reglas de asignación de etapas.
+2.  **Validación de Atribución:**
+    *   Confirmar que `source`, `utm_source`, `utm_campaign` y `utm_content` se están capturando y asociando correctamente a las oportunidades y contactos en GHL.
+3.  **Monitoreo de `llamada_agendada`:**
+    *   Asegurar que el tag `llamada_agendada` se aplique consistentemente a todas las oportunidades que efectivamente agendan una llamada. Este tag es crucial para el seguimiento de conversiones.
+
+### Diagnóstico Meta Ads
+
+1.  **Corrección de Eventos:**
+    *   Asegurar que el evento `InitiateCheckout` *no* se dispare en CTAs que no son de compra. Esto se corrigió manualmente en `instala-tu-clinica.html`.
+    *   Eliminar el `value` y `currency` de los eventos `AgendaWeb`, `Contact` y `WhatsAppEnviado` en `instala-tu-clinica.html` para evitar la alerta de divisa en Meta Events Manager. Esto se corrigió manualmente.
+    *   Validar en Meta Events Manager que los eventos `Schedule` (`schedule_website`) se estén disparando correctamente y que su número sea coherente con la actividad en el sitio, sin alertas de divisa.
+2.  **Análisis de Frecuencia y CPMs:**
+    *   Continuar monitoreando la frecuencia de anuncios y los CPMs para identificar posibles fatigas de audiencia o aumentos de costos.
+
+### Diagnóstico Microsoft Clarity
+
+1.  **Mejora del Scroll Promedio:**
+    *   Investigar el bajo scroll promedio (30.02%) en `instala-tu-clinica.html`. Esto podría indicar que el contenido inicial no es lo suficientemente atractivo o que el VSL no está funcionando como se espera. Considerar:
+        *   Reubicar elementos importantes "above the fold".
+        *   Mejorar la intro del VSL.
+        *   Añadir elementos interactivos o llamados a la acción tempranos.
+2.  **Reducción de Clics Fallidos:**
+    *   Analizar los clics fallidos (6.08%) para identificar elementos en la landing page que parecen clicables pero no lo son. Esto puede generar frustración en el usuario. Realizar pruebas de usabilidad y ajustar el diseño.
+
+### Acciones de Integración
+
+1.  **Sincronización de Eventos GHL a Meta (API de Conversiones):**
+    *   Investigar la implementación de la API de Conversiones de Meta a través de GHL para enviar eventos `Schedule` y `Contact` directamente desde el servidor. Esto mejoraría la fiabilidad del tracking y reduciría la dependencia del Pixel de Facebook en el navegador.
 
 ---
