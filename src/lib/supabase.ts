@@ -276,6 +276,10 @@ export interface BibliotecaRecurso {
 // ─── Tipos v2.0 ──────────────────────────────────────────────────────────────
 
 export interface ProfileV2 extends Profile {
+  campaign_status?: 'installing' | 'launched' | null;
+  launched_at?: string | null; // ISO date string
+  agendas_count?: number;
+  processed_appointment_ids?: string[] | null;
   nivel_avatar: 1 | 2 | 3 | 4 | 5;
   nicho?: string;
   avatar_cliente?: string;
