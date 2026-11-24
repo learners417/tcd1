@@ -1,4 +1,4 @@
-import { getAdminClient } from './_lib/credits-server.js';
+import { createClient } from '@supabase/supabase-js';
 import { fetchProfileV2 } from '../src/lib/supabase';
 import { getClientDashboardData, getPartialDiagnosis } from '../src/lib/client-dashboard';
 
@@ -7,21 +7,39 @@ export default async function handler(req: any, res: any) {
     return res.status(405).json({ error: 'METHOD_NOT_ALLOWED' });
   }
 
-  // In a real application, userId would come from an authenticated session.
-  // For now, let's use a placeholder or assume it's passed as a query param for testing.
-  // const userId = req.headers['x-user-id'] || req.query.userId;
-  // For demonstration, let's assume a hardcoded admin client or a test user ID.
-  // THIS IS FOR DEMONSTRATION/TESTING PURPOSES. REAL AUTH IS REQUIRED.
-  const admin = getAdminClient(); // Using admin client to fetch profile, adjust for user-specific RLS if needed
-  const { data: usersData, error: usersError } = await admin.auth.admin.listUsers();
-  if (usersError || !usersData?.users || usersData.users.length === 0) {
-    return res.status(500).json({ error: 'Could not fetch users for demo' });
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'UNAUTHORIZED: Bearer token required.' });
   }
-  const userId = usersData.users[0].id; // Taking the first user for demo
 
-  if (!userId) {
-    return res.status(401).json({ error: 'UNAUTHORIZED: User ID required.' });
+  const token = authHeader.split(' ')[1];
+
+  // Initialize Supabase client
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error('Missing Supabase environment variables');
+    return res.status(500).json({ error: 'Internal Server Error: Supabase configuration missing.' });
   }
+
+  const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+  const { data: userData, error: authError } = await supabase.auth.getUser(token);
+
+  if (authError || !userData?.user) {
+    console.error('Supabase authentication error:', authError?.message);
+    return res.status(401).json({ error: 'UNAUTHORIZED: Invalid or expired token.' });
+  }
+
+  const authenticatedUserId = userData.user.id;
+
+  const requestedUserId = req.query.userId;
+  if (requestedUserId && requestedUserId !== authenticatedUserId) {
+    return res.status(403).json({ error: 'FORBIDDEN: You can only access your own dashboard.' });
+  }
+
+  const userIdToFetch = requestedUserId || authenticatedUserId;
 
   try {
     const profile = await fetchProfileV2(userId);

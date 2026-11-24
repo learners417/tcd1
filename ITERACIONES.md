@@ -132,3 +132,20 @@ Estas reglas guiarán la experimentación para asegurar resultados fiables:
     *   Investigar la implementación de la API de Conversiones de Meta a través de GHL para enviar eventos `Schedule` y `Contact` directamente desde el servidor. Esto mejoraría la fiabilidad del tracking y reduciría la dependencia del Pixel de Facebook en el navegador.
 
 ---
+
+## 6. Estado del Proyecto: 23 de Noviembre de 2026
+
+### Tu Clínica Digital (`tuclinica.digital/instala-tu-clinica`, píxel `1306012398373458`, subcuenta GHL `Learners`)
+
+1.  **GoHighLevel (GHL) - `VENTAS TCD - SEPTIEMBRE 2026`:**
+    *   Se verificó que las agendas nuevas ingresan al pipeline `Meta · Instalación` en la etapa `1 · Agendó`.
+    *   Se completaron los campos de valor (`1` en Schedule y `0` en acciones secundarias según corresponda) con moneda `USD` en los flujos de Meta Conversion API.
+2.  **GHL - Flujos de Ejecución:**
+    *   Se confirmó en el historial y registros de ejecución de GHL que el flujo `Meta · Agenda a Meta (Schedule + AgendaCalificada)` ejecuta correctamente los pasos de Meta Conversion API y calificación.
+3.  **Microsoft Clarity (`z9r79a8723`):**
+    *   Se verificó que las sesiones recientes con clics fallidos correspondían a revisiones desde Argentina y no a tráfico real proveniente de Ecuador.
+4.  **Próximas Acciones:**
+    *   Queda lista la activación de campaña limpia en Meta Ads enfocada en Ecuador.
+    *   Limpieza de contactos de prueba en GHL.
+
+---
