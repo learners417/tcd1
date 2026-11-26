@@ -25,7 +25,7 @@
 
 /** El grupo de los clientes de mentoría e instalación, en Comunidades de GHL. */
 export const MI_COMUNIDAD =
-  'https://simzamapyvtvv8uzvlgd.app.clientclub.net/communities/groups/mentoria-tcd/home';
+  'https://tuclinicadigital.app.clientclub.net/communities/groups/mentoria-tcd/home';
 
 /** Lo que dice la puerta. Corto: es un botón, no una explicación. */
 export const PUERTA_DE_LA_COMUNIDAD = {
