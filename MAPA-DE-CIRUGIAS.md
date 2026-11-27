@@ -225,6 +225,7 @@ espera el clic.
 | 17 | **La radiografía en un solo tramo**: fundir los diez pasos, con el reloj y las cuatro preguntas nuevas (FODA, sus archivos, su audio, qué días le importan) | **cerrado** · `acc1f1a` · 1 lente nueva, 64 miradas · el premio se disolvió al medirlo |
 | 18 | **El pago abre lo que se pagó** (urgente; decidido por Javo el 18 nov, «sin ti: un turno de la app»): `alta-numero` acepta `plan` (`base · ascenso · instalacion`) | **cerrado** · `08657c9` · 8 lentes nuevas (28 en la cadena del pago) + 7 del cobro con su arnés · la premisa era cierta: la lógica no estaba |
 | 19 | **La entrega unida en la app**: los avisos nuevos hacia el Sistema, los cinco datos del cliente y, en Hoy, «Tu próximo encuentro», «Tu canal» y «Cuéntalo en Victorias» | **cerrado** · `38f6084` · 15 lentes nuevas con su arnés · tres de las cuatro partes ya estaban escritas y nadie las llamaba |
+| — | **La rama `mejoras`, unificada en `main`** (lo pidió Javo el 27 nov con dos clics) | **cerrado** · `f419009` · 4 lentes nuevas sobre el webhook de la cita, con su arnés · el tablero del cliente ya existía: lo que venía era una segunda copia que nadie llamaba. Falta pasar producción a `main`, y eso espera la base (abajo) |
 | 20 | **Los números de la campaña llegan solos** (Meta y GHL, anuncio por anuncio, sin cargar nada a mano) | abierto |
 | 21 | **El embudo de la página en el mismo cuadro** (Clarity, y el video de Wistia si su API lo da) | abierto |
 | 22 | **El tablero de Javo con sus 3 recomendaciones del día**, en el teléfono | abierto |
@@ -378,6 +379,152 @@ es el flanco y lo que queda adentro **es tu clic, no trabajo**. La tarea
 programada se apagó sola al quedar la cola vacía, como tenía escrito. Y a las
 15:30 entraron los turnos **20, 21 y 22**, el tablero de campañas (abajo): con
 tres turnos abiertos, la tarea se puede volver a prender.
+
+### La rama `mejoras`, unificada en `main` — el 27 de noviembre
+
+Javo pidió dos cosas con dos clics: **«Leer tus 3 commits y unificar en main»** y,
+para el tablero del cliente, **«Que lea los números que la app ya tiene»**.
+
+**Lo primero que apareció, y cambió el turno entero: el tablero del cliente ya
+existía.** `src/components/TableroDeLaSemana.tsx`, que `Dashboard.tsx:465` ya le
+muestra, lee sus números de la base y le dice dónde se le cae la cadena, con los
+países del montaje. Lo que venía en `mejoras` era una **segunda** versión de eso,
+del lado del servidor (`api/client-dashboard.ts`), y **nadie la llamaba**: cero
+llamadas en todo el repo, ni una pantalla, ni una página, ni un flujo de GHL.
+
+La batería lo señaló sola: la auditoría se puso roja con «1 módulo de src/ que
+ninguna pantalla puede alcanzar». Era ese.
+
+Así que la ruta y su librería se borraron. Dos copias de «dónde se le cae la
+cadena a este cliente» es lo que el turno 18 enseñó a no hacer: la primera vez
+que cambia una referencia, las dos opinan distinto sobre los mismos números. Y
+antes de borrarla se midió lo que esa versión hacía, porque explica por qué
+nunca sirvió:
+
+1. **No arrancaba.** Llamaba a `fetchProfileV2(userId)`, una variable que no
+   existe en el archivo. Y sus imports no llevaban `.js`, que en Vercel es
+   ERR_MODULE_NOT_FOUND en el primer arranque en frío — el mismo defecto que
+   tenía muerta la alarma de inactividad (`9532b6e`).
+2. **Pedía dos variables que no están cargadas** (`SUPABASE_URL`,
+   `SUPABASE_ANON_KEY`), así que cada llamada devolvía 500. El resto del repo ya
+   cae a las `VITE_` (`api/_lib/credits-server.ts:25` y `:42`); esa ruta no.
+3. **Su diagnóstico decía lo mismo para todos, siempre.** Leía nueve columnas de
+   `profiles` que no existen —`budget`, `objective_budget`, `reach`, `comments`,
+   `conversations`, `calls_taken`, `offers`, `sales`, `collected_amount`—, así
+   que `data.budget === null` era siempre cierto y el cuello salía siempre
+   «Falta de Datos: Presupuesto». La cadena de abajo —setting, venta, cobro— no
+   se miraba nunca.
+4. Y repartía cada cuello entre Sofi, Ramiro, Mateo, Caro, Diego, Bruno y Dev.
+   Javo trabaja solo.
+
+**Lo que SÍ quedó de los commits del 22 y el 24, que es lo que vale:**
+
+| qué | dónde |
+| --- | --- |
+| El bloque `cita_agendada`: cada cita de GHL le suma una agenda al cliente, sin contar dos veces cuando GHL reenvía | `api/ghl-webhook.ts`, antes del camino del cobro y con su propio `return` |
+| Las cuatro columnas, con su migración en el repo | `supabase/migrations/20261127_las_cuatro_columnas_del_tablero.sql` |
+| Los cinco scripts de diagnóstico de GHL y Meta | `scripts/diagnostico_*.py`, `resumen_*.py`, `run_diagnostics.py` |
+| `CLAUDE.md`: GHL y Meta siempre por llamadas directas a su API con las claves del `.env`, nunca por los conectores OAuth | raíz del repo |
+
+Quedaron afuera a propósito dos `.pyc` y `Videos.code-workspace`.
+
+**Cuatro lentes nuevas sobre el webhook de la cita, que nadie medía.** Van dentro
+de `prueba-el-recorrido-del-que-paga.ts` —que ya levanta el Supabase falso y
+ejecuta los handlers de verdad— y no en un archivo aparte: una cita suma; el
+mismo id reenviado no cuenta dos veces; quien agenda sin ser cliente no abre
+ninguna ficha; y la cita no toca el acceso ni el cobro toca las agendas. Son 32
+lentes en esa cadena, cada una probada contra su propio fallo. La del reenvío se
+probó además rompiendo el webhook de verdad: se pone roja.
+
+**Lo que esas cuatro columnas NO tienen todavía es quién las lea.** Se escriben
+desde ya para que el día que las agendas lleguen solas haya historia y no un
+cero, y eso está dicho en la migración, en los comentarios de la base y en
+`ProfileV2`. La pantalla que las lee es el turno 20.
+
+#### Y lo que hay que resolver antes de pasar producción a `main`
+
+**Producción no corre esta rama.** Medido en Vercel el 27 de noviembre:
+
+| qué | valor |
+| --- | --- |
+| proyecto | `sanar-os` (`prj_pu143mUpDTl8KVRrYMspOC3VvmW6`), equipo `tuclinicadigital` |
+| dominio | `app.tuclinica.digital`, verificado, sin rama fija |
+| despliegue al que apunta | `dpl_AEpUjDgvpEBoN3sZq5NkeZNXE9He`, `target: production` |
+| de qué rama salió | **`mejoras`**, commit `7c23d445`, del 24 de noviembre |
+
+Por eso cada push a `main` construyó un Preview y nunca llegó a nadie.
+
+**El freno es la base, no el código. Once archivos de SQL están en `main` y no
+en `mejoras`** (del 4 al 19 de noviembre, más el de hoy). El primer
+`poner-al-dia-la-base.sql` llega hasta el 3 de noviembre, así que de estos once
+nadie sabe si están corridos. Si no lo están y la app pasa a servirse de `main`,
+PostgREST no dice «falta la columna»: rechaza el UPDATE entero. El cliente
+guarda, lee que guardó, y no se guardó nada.
+
+Y no se puede verificar desde acá: el conector de Supabase de esta sesión no
+alcanza la base de la app (lista NEXOS, staging y Rosana Dashboard), y el repo
+no tiene `.env`. Así que se contesta como ya se contestó una vez:
+**`poner-al-dia-la-base-2.sql`**, los once archivos uno detrás del otro en orden
+de fecha, idempotentes, con un prevuelo que corta en la primera línea si falta
+alguna de las cuatro tablas que tocan sin crear, y con una consulta al final que
+imprime `FALTA` por cada cosa que no quedó. Una pegada en el SQL Editor.
+
+**Y probado, no supuesto** — `scripts/prueba-puesta-al-dia-2.sh`, el gemelo de
+la prueba que ya tenía el primero: levanta un PostgreSQL de verdad, arma la base
+como la de Javo (el andamiaje, `sala-de-mando.sql`, las dos tablas de abril que
+estos once tocan sin crear, y encima el primer `poner-al-dia`), y mide cuatro
+cosas. Corre entero sin un error · corre **dos veces** sin error · su propia
+consulta final no dice `FALTA` ni una vez, sobre 28 objetos · y no hay un `drop
+table`, un `truncate`, un `delete` ni un `update` de datos que se corra. Las 14
+veces que aparece `drop` son `drop policy if exists` y `drop constraint if
+exists`, que es la única forma de reemplazar una regla.
+
+La primera corrida salió **roja**, y por algo real: `alter table
+public.adn_audit_log` sin `if exists` cortaba la pegada entera a la línea 477.
+En la base de Javo esa tabla está desde abril, así que a él no le habría pasado
+—pero eso no se sabía al escribirlo, y de ahí salieron el prevuelo y las dos
+tablas de abril en la base de partida de la prueba.
+
+**Y el paquete NO queda guardado en el repositorio.** Guardado como
+`poner-al-dia-la-base-2.sql`, la batería se puso roja con cinco fallos y
+ninguno era del SQL: los cinco eran de los **arneses**. Un arnés mete un defecto
+a propósito en una migración y espera que la lente se ponga roja; con el paquete
+al lado, su copia curaba el defecto —«fallas_vistas sigue encendida por
+poner-al-dia-la-base-2.sql», dijo la batería— y tres lentes se volvieron ciegas
+de golpe.
+
+Es la trampa que `prueba-los-archivos-son-de-su-dueno.sh` ya tiene escrita para
+el primer paquete: con dos copias de la misma regla, cuál manda depende del
+orden en que se pegaron los archivos, y nada lo avisa. El primer paquete está en
+el repo y cada lente que lo necesita lo nombra a mano; sumar un segundo era
+pedirle lo mismo a cuatro o cinco mediciones más, o sea editar las mediciones
+para que toleren una copia.
+
+Así que el paquete se **deriva**: `scripts/armar-puesta-al-dia-2.py` lo arma en
+un temporal —y se niega a escribirlo en la raíz del repositorio—, la prueba lo
+arma para medirlo, y a Javo se le manda el archivo hecho. Una sola copia de cada
+migración vive en el repositorio. Lo mismo que pasó con el tablero del cliente,
+dos veces en el mismo turno, en dos lenguajes distintos.
+
+**Las variables de entorno no frenan nada.** Vercel tiene 17 cargadas; el código
+nombra 42. Las dos de Supabase ya caen a las `VITE_`, y lo demás que falta deja
+cosas apagadas, no rotas:
+
+- `GHL_AVISOS_WEBHOOK` y `FATHOM_WEBHOOK_SECRET` son de dos rutas que **no
+  existen en `mejoras`**: llegan con `main` y llegan apagadas. Y apagadas del
+  lado correcto, medido: sin la dirección, `avisar-a-ghl.ts:110` no manda ningún
+  pedido y devuelve `'sin-webhook'`; sin el secreto,
+  `fathom-webhook.ts:70` contesta 401 a todo. Ninguna de las dos queda abierta.
+- `PAYPAL_CLIENT_ID` · `PAYPAL_CLIENT_SECRET` · `PAYPAL_WEBHOOK_ID` ·
+  `VITE_PAYPAL_CLIENT_ID` (comprar créditos), `ALTA_REDIRECT_URL`, `MCD_BASE_URL`
+  y `VITE_LIBROS_URL` son de archivos que `mejoras` también tiene: lo que no
+  anda hoy, no va a andar menos.
+
+**El cambio sí es reversible.** El dominio es un alias puesto a mano sobre un
+despliegue: si algo sale mal, se vuelve a apuntar a `dpl_AEpUjDgvpEBoN3sZq5NkeZNXE9He`
+y queda exactamente lo que hay hoy. Lo que no se revierte es lo que los clientes
+escriban (o no escriban) en el rato en que el código le pida a la base algo que
+no existe. De ahí el orden: **primero la base, después el cambio.**
 
 ### Turnos 20 a 22 · el tablero de campañas en la app
 

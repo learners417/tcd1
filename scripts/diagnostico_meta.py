@@ -4,15 +4,19 @@ import requests
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
-# Cargar variables de entorno desde E:\Dev\tcd1\.env
-dotenv_path = os.path.join('E:', os.sep, 'Dev', 'tcd1', '.env')
+# El `.env` del proyecto, encontrado desde este archivo. Antes esta línea era
+# `os.path.join('E:', os.sep, 'Dev', 'tcd1', '.env')`: esa ruta existe en una
+# sola computadora, y en cualquier otra el script no encontraba la clave y
+# decía que faltaba en el `.env` — cuando el `.env` estaba ahí.
+RAIZ_DEL_PROYECTO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+dotenv_path = os.path.join(RAIZ_DEL_PROYECTO, '.env')
 load_dotenv(dotenv_path=dotenv_path)
 
 def diagnostico_meta():
     print("--- Diagnóstico Meta ---")
     access_token = os.getenv("FACEBOOK_ACCESS_TOKEN")
     if not access_token:
-        print("Error: FACEBOOK_ACCESS_TOKEN no encontrado en E:\\Dev\\tcd1\\.env")
+        print(f"Error: FACEBOOK_ACCESS_TOKEN no encontrado en {dotenv_path}")
         return
 
     ad_account_id = "act_858332333990895"

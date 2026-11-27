@@ -4,8 +4,12 @@ import requests
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
-# Cargar variables de entorno desde E:\Dev\tcd1\.env
-dotenv_path = os.path.join('E:', os.sep, 'Dev', 'tcd1', '.env')
+# El `.env` del proyecto, encontrado desde este archivo. Antes esta línea era
+# `os.path.join('E:', os.sep, 'Dev', 'tcd1', '.env')`: esa ruta existe en una
+# sola computadora, y en cualquier otra el script no encontraba la clave y
+# decía que faltaba en el `.env` — cuando el `.env` estaba ahí.
+RAIZ_DEL_PROYECTO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+dotenv_path = os.path.join(RAIZ_DEL_PROYECTO, '.env')
 load_dotenv(dotenv_path=dotenv_path)
 
 def diagnostico_ghl():
@@ -13,7 +17,7 @@ def diagnostico_ghl():
     print("\n--- Diagnóstico GoHighLevel ---")
     api_key = os.getenv("GOHIGHLEVEL_API_KEY")
     if not api_key:
-        print("Error: GOHIGHLEVEL_API_KEY no encontrado en E:\\Dev\\tcd1\\.env")
+        print(f"Error: GOHIGHLEVEL_API_KEY no encontrado en {dotenv_path}")
         return
 
     base_url = "https://services.leadconnectorhq.com/"
