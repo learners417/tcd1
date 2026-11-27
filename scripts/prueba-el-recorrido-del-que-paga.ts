@@ -243,6 +243,28 @@ async function cobra(email: string, plan: string): Promise<Respuesta> {
   return r;
 }
 
+/** Lo que GHL manda cuando alguien agenda una cita (rama `mejoras`, 24 nov). */
+async function agenda(email: string, appointment_id: string): Promise<Respuesta> {
+  const r: Respuesta = { code: 0, body: {} };
+  await webhook(
+    {
+      method: 'POST',
+      headers: { 'x-ghl-secret': CLAVE_GHL },
+      body: { email, event: 'cita_agendada', appointment_id },
+    } as never,
+    respuesta(r) as never,
+  );
+  return r;
+}
+
+/**
+ * La fila cruda, sin pasarla por `Profile`. Las cuatro columnas del tablero
+ * —`agendas_count` entre ellas— viven en `ProfileV2`, y acá hace falta leer
+ * exactamente lo que quedó escrito en la base falsa, no una vista de ello.
+ */
+const filaDe = (email: string): Fila | undefined =>
+  base.profiles.find((p) => String(p.email ?? '').toLowerCase() === email.toLowerCase());
+
 const fichaDe = (email: string): Partial<Profile> =>
   (base.profiles.find((p) => String(p.email ?? '').toLowerCase() === email.toLowerCase()) ?? {}) as Partial<Profile>;
 
@@ -1062,6 +1084,112 @@ const LENTES: Lente[] = [
       base.profiles.push({ id: 'uuid-viejo', email: EMAIL, nombre: 'Usuario', fecha_inicio: HOY });
       const f = fichaDe(EMAIL);
       return Boolean(f.plan);
+    },
+  },
+
+  /* ══════════════════════════════════════════════════════════════════════
+   * LA CITA AGENDADA — el otro evento que entra por esta misma ruta
+   *
+   * Lo escribió Javo en la rama `mejoras` el 24 de noviembre y está vivo:
+   * cada vez que alguien agenda en GHL, el webhook le suma una agenda a la
+   * ficha del cliente. Nadie lo medía. Entra acá y no en una lente nueva
+   * porque el Supabase falso que hace falta ya está armado arriba, y porque
+   * lo que más importa de este bloque es que NO se lleve puesto el camino
+   * del cobro, que es la venta.
+   * ══════════════════════════════════════════════════════════════════════ */
+  {
+    nombre: 'una cita agendada le suma una agenda a la ficha del cliente',
+    mira: async () => {
+      desdeCero();
+      await cobraLaEntrada(EMAIL);
+      const r = await agenda(EMAIL, 'cita-1');
+      const f = filaDe(EMAIL);
+      return r.code === 200 && r.body.ok === true
+        && f?.agendas_count === 1
+        && (f?.processed_appointment_ids as string[]).includes('cita-1');
+    },
+    // El defecto: que `cita_agendada` no tenga camino propio y caiga en el
+    // del cobro. Ahí no suma ninguna agenda y, sin `plan`, contesta 400.
+    conSuFallo: async () => {
+      desdeCero();
+      await cobraLaEntrada(EMAIL);
+      await cobra(EMAIL, '');                 // el cuerpo de una cita, por el camino del pago
+      const f = filaDe(EMAIL);
+      return f?.agendas_count === 1;
+    },
+  },
+
+  {
+    nombre: 'el mismo webhook reenviado no cuenta la cita dos veces',
+    mira: async () => {
+      desdeCero();
+      await cobraLaEntrada(EMAIL);
+      await agenda(EMAIL, 'cita-1');
+      await agenda(EMAIL, 'cita-1');          // GHL reenvía: es lo que hace de verdad
+      await agenda(EMAIL, 'cita-2');          // y una distinta sí suma
+      const f = filaDe(EMAIL);
+      return f?.agendas_count === 2
+        && (f?.processed_appointment_ids as string[]).length === 2;
+    },
+    // El defecto: sumar sin mirar los ids ya contados.
+    conSuFallo: async () => {
+      desdeCero();
+      await cobraLaEntrada(EMAIL);
+      const f = filaDe(EMAIL)!;
+      f.agendas_count = 0;
+      for (const id of ['cita-1', 'cita-1', 'cita-2']) {
+        void id;
+        f.agendas_count = (f.agendas_count as number) + 1;   // como si no dedupeara
+      }
+      f.processed_appointment_ids = ['cita-1', 'cita-2'];
+      return f.agendas_count === 2;
+    },
+  },
+
+  {
+    nombre: 'quien agenda sin ser cliente no abre ninguna ficha',
+    mira: async () => {
+      desdeCero();
+      const r = await agenda('desconocida@ejemplo.com', 'cita-9');
+      // Contesta ok —no es un error que agende alguien que todavía no compró—
+      // y no deja nada escrito. Lo segundo es lo que se mide.
+      return r.code === 200 && r.body.ok === true && base.profiles.length === 0;
+    },
+    // El defecto: darle de alta a cualquiera que agende.
+    conSuFallo: async () => {
+      desdeCero();
+      base.profiles.push({ id: 'uuid-x', email: 'desconocida@ejemplo.com', agendas_count: 1 });
+      return base.profiles.length === 0;
+    },
+  },
+
+  {
+    nombre: 'la cita no toca el acceso, y un cobro no toca las agendas',
+    mira: async () => {
+      desdeCero();
+      await cobraLaEntrada(EMAIL);
+      await cobra(EMAIL, 'base');                       // paga La Base
+      const despuesDelPago = { ...filaDe(EMAIL) };
+      await agenda(EMAIL, 'cita-1');                    // y después agenda
+      const f = filaDe(EMAIL);
+      const accesoIntacto = f?.plan_comercial === despuesDelPago.plan_comercial
+        && f?.servicio_contratado === despuesDelPago.servicio_contratado
+        && f?.acceso_hasta === despuesDelPago.acceso_hasta;
+      // Y al revés: el cobro de un escalón no le regala agendas a nadie.
+      await cobra(EMAIL, 'ascenso');
+      return accesoIntacto && filaDe(EMAIL)?.agendas_count === 1;
+    },
+    // El defecto: que el bloque de la cita escriba también las columnas del
+    // acceso, o que el cobro pise la cuenta de agendas.
+    conSuFallo: async () => {
+      desdeCero();
+      await cobraLaEntrada(EMAIL);
+      await cobra(EMAIL, 'base');
+      const antes = { ...filaDe(EMAIL) };
+      const f = filaDe(EMAIL)!;
+      f.plan_comercial = 'blanco';                      // como si la cita lo bajara
+      f.agendas_count = 1;
+      return f.plan_comercial === antes.plan_comercial;
     },
   },
 ];

@@ -285,6 +285,19 @@ export interface BibliotecaRecurso {
 // ─── Tipos v2.0 ──────────────────────────────────────────────────────────────
 
 export interface ProfileV2 extends Profile {
+  /* Las cuatro columnas que Javo creó a mano en la base (rama `mejoras`, 22 y
+     24 nov). Entraron al repo con su migración el 27 nov:
+     `supabase/migrations/20261127_las_cuatro_columnas_del_tablero.sql`.
+
+     Hoy las ESCRIBE `api/ghl-webhook.ts` con el evento `cita_agendada`, y
+     todavía no las lee ninguna pantalla: el cliente ve su cuello de botella en
+     `TableroDeLaSemana`, que trabaja con los números que él carga. Estas
+     cuatro son para cuando las agendas lleguen solas desde GHL — turno 20—, y
+     se escriben desde ya para que ese día exista historia y no un cero. */
+  campaign_status?: 'installing' | 'launched' | null;
+  launched_at?: string | null;
+  agendas_count?: number;
+  processed_appointment_ids?: string[] | null;
   nivel_avatar: 1 | 2 | 3 | 4 | 5;
   nicho?: string;
   avatar_cliente?: string;

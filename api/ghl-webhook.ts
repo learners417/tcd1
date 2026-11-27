@@ -57,6 +57,66 @@ export default async function handler(req: any, res: any) {
     .trim()
     .toLowerCase();
   const pedido = String(req.body?.plan ?? '').trim().toLowerCase();
+
+  /*
+   * ─── LA CUENTA DE AGENDAS, ANTES DEL COBRO ──────────────────────────────
+   *
+   * Vino de la rama `mejoras` (Javo, 24 nov) y entra tal cual: es un evento
+   * distinto del pago y sale por su propio return, así que el camino del
+   * cobro de abajo queda intacto.
+   *
+   * Cuenta sin contar dos veces: guarda el id de cada cita en
+   * `processed_appointment_ids` y solo suma cuando el id es nuevo. Así un
+   * reenvío del mismo webhook —que GHL hace— no infla el número.
+   *
+   * Si el correo no tiene ficha, no cuenta nada y contesta ok: quien agenda
+   * sin ser cliente todavía no tiene dónde sumarse. Es a propósito.
+   */
+  const event = String(req.body?.event ?? '').trim();
+  const appointment_id = String(req.body?.appointment_id ?? '').trim();
+
+  if (event === 'cita_agendada') {
+    if (!email || !email.includes('@')) return res.status(400).json({ ok: false, motivo: 'EMAIL_REQUIRED' });
+    if (!appointment_id) return res.status(400).json({ ok: false, motivo: 'APPOINTMENT_ID_REQUIRED' });
+
+    try {
+      const admin = getAdminClient();
+      const { data: perfilExistente, error: fetchError } = await admin
+        .from('profiles')
+        .select('id, agendas_count, processed_appointment_ids')
+        .eq('email', email)
+        .maybeSingle();
+
+      if (fetchError) {
+        return res.status(200).json({ ok: false, motivo: fetchError.message });
+      }
+
+      if (perfilExistente) {
+        const processedAppointments: string[] = perfilExistente.processed_appointment_ids || [];
+        if (!processedAppointments.includes(appointment_id)) {
+          const newAgendasCount = (perfilExistente.agendas_count || 0) + 1;
+          processedAppointments.push(appointment_id);
+
+          const { error: updateError } = await admin
+            .from('profiles')
+            .update({
+              agendas_count: newAgendasCount,
+              processed_appointment_ids: processedAppointments,
+            })
+            .eq('id', perfilExistente.id);
+
+          if (updateError) {
+            return res.status(200).json({ ok: false, motivo: updateError.message });
+          }
+        }
+      }
+      return res.status(200).json({ ok: true, event: 'cita_agendada', appointment_id });
+    } catch (e: any) {
+      return res.status(200).json({ ok: false, motivo: e?.message ?? 'error' });
+    }
+  }
+
+  // ─── Desde acá, el camino del cobro, igual que antes ─────────────────────
   if (!email || !email.includes('@')) return res.status(400).json({ error: 'EMAIL_REQUIRED' });
 
   // El ticket pagado decide las dos columnas; un color, solo el acceso.
