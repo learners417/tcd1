@@ -177,6 +177,12 @@ export interface VeredictoMotor {
  * agenda no es mala suerte, es que el anuncio no funciona. Seguir gastando
  * ahí es la forma más cara de averiguar lo mismo.
  */
+/*
+ * Los importes van con `es-AR` y no con el idioma que traiga el navegador.
+ * Sin eso, el mismo número salía escrito de dos formas en la misma tarjeta
+ * —«$30,000» del titular y «$30.000» del resto de la pantalla—, que es como
+ * se ve que dos partes no se hablan. Se vio al medir Mi Motor el 27 nov.
+ */
 export function veredictoMotor(e: EstadoMotor): VeredictoMotor {
   const falta = Math.max(0, e.objetivo - e.cobrado);
   const reinversion = Math.min(e.cerradas * REINVERSION_POR_VENTA, TOPE_REINVERSION);
@@ -199,7 +205,7 @@ export function veredictoMotor(e: EstadoMotor): VeredictoMotor {
   // El cuello se busca en el mismo orden que la cadena: de arriba hacia abajo.
   if (e.conversaciones === 0) {
     return {
-      titular: `Faltan $${falta.toLocaleString()} y todavía no hay conversaciones.`,
+      titular: `Faltan $${falta.toLocaleString('es-AR')} y todavía no hay conversaciones.`,
       accion: 'Nada más importa hasta que entren conversaciones. Publica y prospecta.',
       cortar: false, faltaParaObjetivo: falta, reinversionDisponible: reinversion,
     };
@@ -227,9 +233,9 @@ export function veredictoMotor(e: EstadoMotor): VeredictoMotor {
   }
 
   return {
-    titular: `Faltan $${falta.toLocaleString()} para el objetivo.`,
+    titular: `Faltan $${falta.toLocaleString('es-AR')} para el objetivo.`,
     accion: e.cerradas > 0
-      ? `Puedes reinvertir hasta $${reinversion.toLocaleString()} en pauta.`
+      ? `Puedes reinvertir hasta $${reinversion.toLocaleString('es-AR')} en pauta.`
       : 'Sigue el ritmo: la cadena está entera.',
     cortar: false, faltaParaObjetivo: falta, reinversionDisponible: reinversion,
   };

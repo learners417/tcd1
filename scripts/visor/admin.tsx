@@ -10,8 +10,19 @@ import '@fontsource-variable/fraunces/soft-italic.css';
 import '../../src/index.css';
 import Admin from '../../src/pages/Admin';
 
-const tab = new URLSearchParams(location.search).get('tab') ?? 'clientes';
+const pedido = new URLSearchParams(location.search).get('tab') ?? 'clientes';
 localStorage.clear();
+
+/*
+ * La Sala de Mando tiene cuatro vistas adentro y el visor solo sabía abrir la
+ * pestaña, así que siempre se medía el Marcador: las otras tres no pasaron
+ * nunca por una lente de pantalla. Con `?tab=sala-motor` se abre la Sala en
+ * Mi Motor, por la misma clave que usa la pantalla para recordar dónde estaba.
+ */
+const tab = pedido.startsWith('sala-') ? 'sala' : pedido;
+if (pedido.startsWith('sala-')) {
+  localStorage.setItem('tcd_sala_vista', pedido.slice('sala-'.length));
+}
 localStorage.setItem('tcd_admin_main_tab', JSON.stringify(tab));
 localStorage.setItem('sanar_admin_theme', 'light');
 if (new URLSearchParams(location.search).get('pausa')) {

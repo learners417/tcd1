@@ -228,7 +228,7 @@ espera el clic.
 | — | **La rama `mejoras`, unificada en `main`** (lo pidió Javo el 27 nov con dos clics) | **cerrado** · `f419009` · 4 lentes nuevas sobre el webhook de la cita, con su arnés · el tablero del cliente ya existía: lo que venía era una segunda copia que nadie llamaba. Falta pasar producción a `main`, y eso espera la base (abajo) |
 | 20 | **Los números de la campaña llegan solos** (Meta y GHL, anuncio por anuncio, sin cargar nada a mano) | abierto |
 | 21 | **El embudo de la página en el mismo cuadro** (Clarity, y el video de Wistia si su API lo da) | abierto |
-| 22 | **El tablero de Javo con sus 3 recomendaciones del día**, en el teléfono | abierto |
+| 22 | **El tablero de Javo con sus 3 recomendaciones del día**, en el teléfono | **cerrado** · 8 lentes nuevas con su arnés · dos premisas eran falsas: Mi Motor y el tablero por anuncio ya existían. Y la pantalla nunca había pasado por una lente: el visor abría siempre la primera de las cuatro vistas de la Sala |
 
 **Turnos 18 y 19 · los abrió COMUNIDAD el 18 nov a las 19:40, con el clic de Javo** (plan completo en el proyecto, claude/ENTREGA-UNIDA.md; nota en claude/FRENTE-7-APP.md).
 
@@ -525,6 +525,81 @@ despliegue: si algo sale mal, se vuelve a apuntar a `dpl_AEpUjDgvpEBoN3sZq5NkeZN
 y queda exactamente lo que hay hoy. Lo que no se revierte es lo que los clientes
 escriban (o no escriban) en el rato en que el código le pida a la base algo que
 no existe. De ahí el orden: **primero la base, después el cambio.**
+
+### Turno 22 · las tres del día, en Mi Motor — el 27 de noviembre
+
+Javo eligió seguir por acá mientras corre el SQL de la base. Antes de escribir
+una línea se midieron las premisas del encargo, y **dos no eran ciertas**.
+
+**Mi Motor ya existía** (`SalaDeMando.tsx`, vista «Mi Motor»): nueve números
+que él carga a mano y un veredicto, `veredictoMotor`, con el freno de los siete
+días y la regla de reinversión. **Y el tablero por anuncio también**:
+`TableroCupos.tsx`, 604 líneas, con gasto, visitas, conversaciones, agendas y
+ventas por pieza, y la decisión escrita con `veredictoAnuncio` y `UMBRALES`.
+Los dos guardan en el navegador.
+
+Y la columna `anuncio` de `sala_metricas_semana` existe desde el primer día con
+su comentario puesto —«el puente hasta que la API de Meta traiga esto solo»— y
+**nadie la escribe nunca**: `subirNumerosDelCliente` suma los tres anuncios y
+guarda el total de la semana. Ése es el hueco que llena el turno 20.
+
+**Lo que se construyó: `src/lib/recomendacionesDelDia.ts`.** Hasta tres cosas
+para hacer hoy, cada una con su número y la regla que la dictó.
+
+Lo que NO hace es el punto del archivo: **acá no escribe la IA.** Ya hay un
+diagnóstico de campaña con IA —`DiagnosticoView.tsx`, que le habla al modelo y
+devuelve markdown— y sirve para pensar en voz alta, no para decidir: una
+recomendación que cambia de texto cada vez que se la pide no se puede discutir
+ni reclamar, y nadie puede saber si el modelo leyó bien el número. Cada línea
+sale de una función que ya estaba medida: `veredictoMotor`, `veredictoAnuncio`
+con sus `UMBRALES`, y `encontrarDomino` sobre la cadena. No se definió ni un
+umbral nuevo: dos listas de umbrales se separan la primera vez que cambia un
+precio.
+
+El orden es por lo que cuesta no hacerlo: primero lo que quema plata ahora
+—cortar la pauta, apagar un anuncio en rojo—, después el cuello, y al final la
+oportunidad de reinvertir, que puede esperar a mañana sin que nadie pierda
+nada. Y se corta en tres: una lista de nueve cosas para hoy es una lista de
+cero cosas hechas.
+
+**Nada por omisión.** `objetivoCampana` admite `null` y no trae valor por
+defecto: con un `'mensajes'` puesto de oficio, un anuncio de ticket alto a
+$2,20 saldría rojo y se apagaría uno sano —su banda llega a $3,00—. Sin ese
+dato no se opina de ningún anuncio: se dice que falta. Lo mismo con los
+países: sin ellos `calcularCadena` juzga el CPM contra la banda de México en
+silencio, así que tampoco se opina.
+
+**Ocho lentes nuevas** (`prueba-las-tres-del-dia.ts`), cada una contra su
+propio fallo, y además la función se rompió de verdad cuatro veces para
+confirmar que se ponen rojas: si deja de cortar en tres, si ordena por lo
+cómodo, si reescribe el texto de la regla y si opina sin los países.
+
+#### Y la pantalla nunca había pasado por una lente
+
+El visor del Admin monta cada pestaña por su nombre, pero **la Sala de Mando
+tiene cuatro vistas adentro y siempre se medía la primera**: Mi Motor, el
+Recorrido y las Decisiones nunca fueron miradas por ningún medidor de pantalla.
+
+Mi Motor entró a la lista (`medir-app.py`, `admin:sala-motor`), y al medirla
+aparecieron dos cosas:
+
+- **Una falsa:** la lente de tildes marcaba «Publica y prospecta» como palabra
+  sin tilde — confunde el imperativo del verbo con el adjetivo «pública». La
+  app dice «publica» diez veces y todas están bien. Se arregló la lente, no el
+  copy: ahora `publico`/`publica` piden un determinante adelante. Probado
+  contra los dos lados: sigue viendo «el publico», «la conversacion» y «tu
+  metodo», y deja pasar el imperativo.
+- **Una real:** el mismo importe salía escrito de dos formas en la misma
+  tarjeta, «$30,000» en el titular y «$30.000» abajo. Era `toLocaleString()`
+  sin idioma, que toma el del navegador. Los tres importes de `veredictoMotor`
+  van ahora en `es-AR`.
+
+El Recorrido y las Decisiones quedan **sin medir a propósito**: medirlas es un
+turno propio, porque lo que aparezca hay que arreglarlo. Van a los candidatos.
+
+Con 0 faltas en las 22 lentes de pantalla y la composición dentro de los topes
+(escala 4 de 5, pesos 3 de 3, superficies 2 de 5, esquinas 1 de 4).
+
 
 ### Turnos 20 a 22 · el tablero de campañas en la app
 

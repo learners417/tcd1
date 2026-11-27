@@ -10,6 +10,7 @@ import {
 import type { Decision } from '../../lib/salaDeMando';
 import { comparativaSemana } from '../../lib/mesaPlataStorage';
 import { mensajeDeFalla } from '../../lib/conexion';
+import { recomendacionesDelDia } from '../../lib/recomendacionesDelDia';
 
 /**
  * LA SALA DE MANDO.
@@ -47,8 +48,30 @@ const MOTOR_VACIO: EstadoMotor = {
   agendas: 0, llamadasTomadas: 0, cerradas: 0, gastoPauta: 0, diasSinAgenda: 0,
 };
 
+/*
+ * Cuál de las cuatro vistas se abre.
+ *
+ * Vive en el navegador por dos razones. La chica: volver a la Sala te deja
+ * donde estabas. La que importa: **así se puede medir.** El visor del Admin
+ * monta cada pestaña poniendo su nombre en una clave de localStorage
+ * (`scripts/visor/admin.tsx`), y hasta hoy las cuatro vistas de la Sala eran
+ * una sola para la medición —siempre el Marcador—, así que Mi Motor, el
+ * Recorrido y las Decisiones nunca pasaron por ninguna lente de pantalla.
+ */
+const VISTA_KEY = 'tcd_sala_vista';
+const vistaGuardada = (): Vista => {
+  try {
+    const v = localStorage.getItem(VISTA_KEY);
+    return VISTAS.some((x) => x.id === v) ? (v as Vista) : 'marcador';
+  } catch { return 'marcador'; }
+};
+
 export default function SalaDeMando({ clientes }: { clientes: Cliente[] }) {
-  const [vista, setVista] = useState<Vista>('marcador');
+  const [vista, setVistaCruda] = useState<Vista>(vistaGuardada);
+  const setVista = (v: Vista) => {
+    setVistaCruda(v);
+    try { localStorage.setItem(VISTA_KEY, v); } catch { /* noop */ }
+  };
   const [problema, setProblema] = useState<string | null>(null);
 
   const recorrido = useMemo(() => armarRecorrido(clientes), [clientes]);
@@ -377,6 +400,29 @@ function MiMotor() {
   const v = veredictoMotor(e);
   const pct = e.objetivo > 0 ? Math.min(100, Math.round((e.cobrado / e.objetivo) * 100)) : 0;
 
+  /*
+   * ── LAS TRES DE HOY ───────────────────────────────────────────────────
+   *
+   * Lo que hay que hacer hoy, en tres líneas como máximo, cada una con su
+   * número y la regla que la dictó. Las escribe `recomendacionesDelDia`
+   * desde las reglas que ya existen; acá no se decide nada.
+   *
+   * Hoy entra con una sola fuente —su motor, que él carga— y las otras tres
+   * se declaran faltantes con su dueño, que es justamente lo pedido: ningún
+   * campo mudo. Los números por anuncio los trae el turno 20 desde Meta y
+   * GHL, y ese día esta misma llamada los recibe sin tocar la pantalla.
+   *
+   * Nada se pasa por omisión: `objetivoCampana` en `null` hace que no se
+   * opine de ningún anuncio en vez de medirlos contra el tope equivocado.
+   */
+  const parte = useMemo(() => recomendacionesDelDia({
+    motor: e,
+    numeros: null,
+    paises: [],
+    objetivoCampana: null,
+    anuncios: [],
+  }), [e]);
+
   const CAMPOS: Array<[keyof EstadoMotor, string]> = [
     ['cobrado', 'Cobrado'], ['objetivo', 'Objetivo'],
     ['conversaciones', 'Conversaciones'], ['calificados', 'Calificados'],
@@ -387,6 +433,53 @@ function MiMotor() {
 
   return (
     <div className="space-y-4">
+      <div className="space-y-3">
+        <p className="text-[15px] font-bold uppercase tracking-[0.25em] text-gold/80">
+          Hoy
+        </p>
+
+        {parte.recomendaciones.length === 0 ? (
+          <div className="rounded-2xl border border-cream/12 p-5">
+            <p className="text-lg text-cream/85 leading-snug">
+              Con lo que está cargado no hay nada urgente para hacer hoy.
+            </p>
+          </div>
+        ) : parte.recomendaciones.map((r, i) => (
+          <div key={`${r.regla}-${i}`}
+            className={`rounded-2xl border p-5 ${
+              i === 0 ? 'border-gold/35 bg-gold/[0.05]' : 'border-cream/12'}`}>
+            <p className="text-xl text-cream leading-snug"
+              style={{ fontFamily: 'var(--font-display)' }}>
+              {r.titulo}
+            </p>
+            <p className="mt-2 text-lg text-gold"
+              style={{ fontVariantNumeric: 'tabular-nums' }}>
+              {r.numero}
+            </p>
+            {r.porque && (
+              <p className="mt-2 text-base text-cream/75 leading-relaxed">{r.porque}</p>
+            )}
+            <p className="mt-3 text-[15px] text-cream/45">Lo dice {r.regla}</p>
+          </div>
+        ))}
+      </div>
+
+      {parte.faltan.length > 0 && (
+        <div className="rounded-2xl border border-cream/12 p-5">
+          <p className="text-[15px] font-bold uppercase tracking-[0.25em] text-cream/50 mb-3">
+            Para ver más falta
+          </p>
+          <ul className="space-y-3">
+            {parte.faltan.map((f) => (
+              <li key={f.que}>
+                <p className="text-base text-cream/85 leading-relaxed">{f.que}</p>
+                <p className="text-[15px] text-cream/50 mt-1">{f.deQuien}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <div className={`rounded-2xl border p-5 ${
         v.cortar ? 'border-danger/45 bg-danger/[0.07]'
         : v.faltaParaObjetivo === 0 ? 'border-success/30 bg-success/[0.05]'

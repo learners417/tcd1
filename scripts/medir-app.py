@@ -158,7 +158,13 @@ def fijar_reloj(ctx, iso):
 MODALES = ['freno', 'freno>campana', 'certificado', 'foto90', 'pilar', 'graduacion', 'material']
 
 ADMIN = ['clientes', 'pipeline', 'mensajes', 'metricas', 'videos', 'equipo', 'campanas', 'creativos',
-         'tareas', 'motor', 'hoy', 'supervision', 'sala', 'mirol', 'sesiones', 'semana', 'casa']
+         'tareas', 'motor', 'hoy', 'supervision', 'sala', 'mirol', 'sesiones', 'semana', 'casa',
+         # La Sala tiene cuatro vistas adentro y el visor abria siempre el
+         # Marcador: las otras tres nunca pasaron por una lente de pantalla.
+         # Entra la de Mi Motor, que es donde viven las tres del dia (turno
+         # 22). El Recorrido y las Decisiones quedan como candidatos: medirlas
+         # es un turno propio, porque lo que aparezca hay que arreglarlo.
+         'sala-motor']
 # Desde el 16 sep, TODAS las pantallas del cliente.
 # Las que el cliente pisa el primer día. Las de campañas quedan fuera: el día
 # 1 están cerradas por plan y lo que se ve es la puerta, que ya se mide en
@@ -357,7 +363,19 @@ MEDIR = r"""
     // esdrújulas y llanas frecuentes que sin tilde no existen
     `|metodo|metodos|pais|paises|linea|lineas|numero|numeros|telefono|telefonos` +
     `|analisis|practica|practicas|metrica|metricas|clinica|clinicas|medico|medicos` +
-    `|rapido|rapida|facil|dificil|ultimo|ultima|proximo|proxima|unico|unica|publico|publica` +
+    `|rapido|rapida|facil|dificil|ultimo|ultima|proximo|proxima|unico|unica` +
+    /*
+     * `publico` y `publica` salieron de la lista general y volvieron con su
+     * determinante adelante. El motivo lo encontro la pantalla de Mi Motor el
+     * 27 de noviembre: «Publica y prospecta» es el imperativo del verbo
+     * publicar y NO lleva tilde, y la lente lo daba por falta. Lo mismo
+     * «donde publica», «se publica», «no publica»: la app los dice diez veces
+     * y todos estan bien escritos.
+     *
+     * Con un determinante adelante ya no hay verbo posible —«la publica»,
+     * «el publico», «mucho publico»— y ahi la tilde si falta de verdad.
+     */
+    `|(?<=\\b(el|la|un|una|este|esta|ese|esa|al|del|mucho|poco|todo|toda|su|mi|tu)\\s)(publico|publica)` +
     `|tambien|despues|ademas|aqui|alli|asi|mas|quizas|jamas|atras|detras|segun|aun` +
     `|dia|dias|mia|mio|tia|tio|via|guia|guias|energia|energias|economia|categoria` +
     `|sintoma|sintomas|higado|musculo|musculos|organico|organica` +
